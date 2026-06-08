@@ -9,13 +9,11 @@ Tác giả: Sinh viên HCMUTE
 """
 
 import sys
-import os
 
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtGui import QFont
-from PyQt6.QtCore import Qt
 
-from ui.main_window import MainWindow
+from ui.welcome_screen import WelcomeScreen
 
 
 def main():
@@ -30,8 +28,8 @@ def main():
     # Cấu hình High DPI
     app.setStyle("Fusion")
     
-    # Tạo và hiển thị cửa sổ chính
-    window = MainWindow()
+    # Hiển thị màn hình welcome trước, sau đó WelcomeScreen sẽ tự mở MainWindow.
+    window = WelcomeScreen()
     window.show()
     
     # Chạy event loop

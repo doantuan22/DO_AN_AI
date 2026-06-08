@@ -15,7 +15,7 @@ from PyQt6.QtWidgets import (
     QLabel, QMessageBox, QApplication, QFrame
 )
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
-from PyQt6.QtGui import QFont, QColor, QIcon
+from PyQt6.QtGui import QFont, QColor, QIcon, QPixmap
 
 from core.graph import Graph
 from core.algorithms import get_algorithm, needs_heuristic, ALGORITHM_MAP
@@ -44,11 +44,8 @@ MAIN_WINDOW_STYLE = """
         border-right: 1px solid #E6EDF7;
     }
     QLabel#railLogo {
-        background-color: #1473E6;
-        color: white;
-        font-family: 'Segoe UI';
-        font-size: 16px;
-        font-weight: 800;
+        background-color: #FFFFFF;
+        border: 1px solid #DDE6F2;
         border-radius: 14px;
     }
     
@@ -171,10 +168,21 @@ class MainWindow(QMainWindow):
         side_layout.setContentsMargins(14, 20, 14, 14)
         side_layout.setSpacing(0)
         
-        rail_logo = QLabel("KTL")
+        rail_logo = QLabel()
         rail_logo.setObjectName("railLogo")
         rail_logo.setAlignment(Qt.AlignmentFlag.AlignCenter)
         rail_logo.setFixedSize(54, 54)
+        logo_path = os.path.join(self._base_dir, "assets", "logo.png")
+        if os.path.exists(logo_path):
+            logo_pixmap = QPixmap(logo_path).scaled(
+                42,
+                42,
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation,
+            )
+            rail_logo.setPixmap(logo_pixmap)
+        else:
+            rail_logo.setText("KTL")
         side_layout.addWidget(rail_logo, 0, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)
         side_layout.addStretch()
         root_layout.addWidget(side_rail)
@@ -235,6 +243,7 @@ class MainWindow(QMainWindow):
         self._map_widget.node_clicked.connect(self._on_node_clicked)
         self._map_widget.graph_edit_clicked.connect(self._on_edit_graph)
         self._map_widget.sample_walk_clicked.connect(self._on_sample_walk)
+        self._map_widget.algorithm_speed_changed.connect(self._on_algorithm_speed_changed)
         
         # Nút điều khiển Panel
         self._control_panel.start_clicked.connect(self._on_start)
@@ -678,6 +687,18 @@ class MainWindow(QMainWindow):
             return
         self._map_widget.animate_avatar_along_path(self._final_path, self._avatar_path)
         self._control_panel.add_log("▶ Đi mẫu theo lộ trình đã tìm được")
+
+    def _on_algorithm_speed_changed(self, speed_name: str):
+        """Cập nhật tốc độ mô phỏng thuật toán từ nút nổi trên bản đồ."""
+        speed_delays = {
+            "Nhanh": 140,
+            "Trung bình": 400,
+            "Chậm": 750,
+        }
+        self._step_delay = speed_delays.get(speed_name, 400)
+        if self._timer.isActive():
+            self._timer.setInterval(self._step_delay)
+        self._control_panel.add_log(f"⏱ Tốc độ xử lý: {speed_name}")
         
     def _update_status(self, text: str, color: str):
         """Cập nhật trạng thái hiển thị trên header."""

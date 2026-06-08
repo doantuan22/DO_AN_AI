@@ -19,13 +19,13 @@ from PyQt6.QtWidgets import (
     QGraphicsView, QGraphicsScene, QGraphicsEllipseItem,
     QGraphicsLineItem, QGraphicsTextItem, QGraphicsPixmapItem,
     QGraphicsPathItem, QGraphicsRectItem, QWidget, QFrame,
-    QHBoxLayout, QVBoxLayout, QPushButton, QLabel
+    QHBoxLayout, QVBoxLayout, QPushButton, QLabel, QMenu
 )
 from PyQt6.QtCore import Qt, QPointF, QRectF, pyqtSignal, QTimer
 from PyQt6.QtGui import (
     QPixmap, QPen, QBrush, QColor, QFont, QPainter,
     QPainterPath, QRadialGradient, QLinearGradient, QFontMetrics,
-    QMouseEvent, QWheelEvent, QResizeEvent
+    QMouseEvent, QWheelEvent, QResizeEvent, QAction
 )
 
 from core.graph import Graph
@@ -283,6 +283,7 @@ class MapWidget(QGraphicsView):
     node_clicked = pyqtSignal(str)
     graph_edit_clicked = pyqtSignal()
     sample_walk_clicked = pyqtSignal()
+    algorithm_speed_changed = pyqtSignal(str)
     
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -360,6 +361,8 @@ class MapWidget(QGraphicsView):
         self._graph_edit_button: Optional[QPushButton] = None
         self._graph_toggle_button: Optional[QPushButton] = None
         self._sample_walk_button: Optional[QPushButton] = None
+        self._speed_button: Optional[QPushButton] = None
+        self._speed_name = "Trung bình"
         
         # Khởi tạo các widget nổi
         self._setup_floating_controls()
@@ -499,6 +502,30 @@ class MapWidget(QGraphicsView):
         """)
         self._sample_walk_button.show()
 
+        self._speed_button = QPushButton(self)
+        self._speed_button.setObjectName("speedButton")
+        self._speed_button.setText("⏱")
+        self._speed_button.setToolTip("Tốc độ xử lý: Trung bình")
+        self._speed_button.clicked.connect(self._show_speed_menu)
+        self._speed_button.setStyleSheet("""
+            QPushButton#speedButton {
+                background-color: rgba(255, 255, 255, 0.95);
+                border: 1px solid rgba(215, 227, 244, 0.95);
+                border-radius: 12px;
+                color: #0B74FF;
+                font-family: 'Segoe UI';
+                font-size: 20px;
+                font-weight: 900;
+                min-height: 48px;
+                min-width: 48px;
+            }
+            QPushButton#speedButton:hover {
+                background-color: #EEF5FF;
+                border-color: #0B74FF;
+            }
+        """)
+        self._speed_button.show()
+
         self._graph_edit_button = QPushButton(self)
         self._graph_edit_button.setObjectName("graphEditButton")
         self._graph_edit_button.setText("⚙")
@@ -537,6 +564,50 @@ class MapWidget(QGraphicsView):
         """Bật nút đi mẫu khi đã có đường đi hợp lệ."""
         if self._sample_walk_button:
             self._sample_walk_button.setEnabled(enabled)
+
+    def _show_speed_menu(self):
+        """Hiển thị menu chọn tốc độ mô phỏng thuật toán."""
+        if self._speed_button is None:
+            return
+
+        menu = QMenu(self)
+        menu.setStyleSheet("""
+            QMenu {
+                background-color: #FFFFFF;
+                border: 1px solid #DDE6F2;
+                border-radius: 8px;
+                padding: 6px;
+                font-family: 'Segoe UI';
+                font-size: 13px;
+                color: #0F172A;
+            }
+            QMenu::item {
+                padding: 8px 26px 8px 12px;
+                border-radius: 6px;
+            }
+            QMenu::item:selected {
+                background-color: #EEF5FF;
+                color: #0B74FF;
+            }
+        """)
+
+        for speed_name in ("Nhanh", "Trung bình", "Chậm"):
+            action = QAction(speed_name, menu)
+            action.setCheckable(True)
+            action.setChecked(speed_name == self._speed_name)
+            action.triggered.connect(lambda checked=False, name=speed_name: self.set_algorithm_speed(name))
+            menu.addAction(action)
+
+        menu.exec(self._speed_button.mapToGlobal(self._speed_button.rect().bottomLeft()))
+
+    def set_algorithm_speed(self, speed_name: str):
+        """Cập nhật tốc độ được chọn và phát signal cho MainWindow."""
+        if speed_name not in {"Nhanh", "Trung bình", "Chậm"}:
+            return
+        self._speed_name = speed_name
+        if self._speed_button:
+            self._speed_button.setToolTip(f"Tốc độ xử lý: {speed_name}")
+        self.algorithm_speed_changed.emit(speed_name)
 
     def toggle_graph_overlay(self):
         """Tạm ẩn/hiện node, cạnh, nhãn và route trên bản đồ."""
@@ -1326,6 +1397,14 @@ class MapWidget(QGraphicsView):
             if self._graph_toggle_button:
                 x += self._graph_toggle_button.width() + 10
             self._sample_walk_button.move(x, bottom_y)
+        if self._speed_button:
+            self._speed_button.adjustSize()
+            x = 16
+            if self._graph_toggle_button:
+                x += self._graph_toggle_button.width() + 10
+            if self._sample_walk_button:
+                x += self._sample_walk_button.width() + 10
+            self._speed_button.move(x, bottom_y)
         if self._graph_edit_button:
             self._graph_edit_button.adjustSize()
             x = 16
@@ -1333,4 +1412,6 @@ class MapWidget(QGraphicsView):
                 x += self._graph_toggle_button.width() + 10
             if self._sample_walk_button:
                 x += self._sample_walk_button.width() + 10
+            if self._speed_button:
+                x += self._speed_button.width() + 10
             self._graph_edit_button.move(x, bottom_y)
