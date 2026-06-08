@@ -1,0 +1,12 @@
+{
+    "pythonVersion": "3.11",
+    "pythonPlatform": "Windows",
+    "reportMissingModuleSource": false,
+    "reportMissingImports": "warning",
+    "executionEnvironments": [
+        {
+            "root": ".",
+            "pythonVersion": "3.11"
+        }
+    ]
+}
