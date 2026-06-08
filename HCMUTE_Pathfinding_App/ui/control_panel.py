@@ -13,10 +13,10 @@ Hiển thị đầy đủ, không sử dụng thanh cuộn, không đè nút lê
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox,
-    QPushButton, QTextEdit, QFrame, QSizePolicy, QGridLayout, QScrollArea, QStyle
+    QPushButton, QTextEdit, QFrame, QSizePolicy, QGridLayout, QScrollArea, QStyle, QApplication
 )
 from PyQt6.QtCore import Qt, QSize, pyqtSignal
-from PyQt6.QtGui import QFont, QTextCursor
+from PyQt6.QtGui import QFont, QTextCursor, QIcon
 from typing import Optional
 
 from core.utils import format_time_ms, get_timestamp
@@ -493,7 +493,16 @@ class ControlPanel(QWidget):
         pixmap = getattr(QStyle.StandardPixmap, preferred, None)
         if pixmap is None:
             pixmap = getattr(QStyle.StandardPixmap, fallback, QStyle.StandardPixmap.SP_FileIcon)
-        return self.style().standardIcon(pixmap)
+        style = self.style()
+        if style is None:
+            app = QApplication.instance()
+            if app is not None:
+                style = app.style()
+                
+        if style is not None:
+            return style.standardIcon(pixmap)
+            
+        return QIcon()
     
     def _set_pause_button(self, paused: bool):
         if paused:

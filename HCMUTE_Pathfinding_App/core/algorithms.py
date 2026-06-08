@@ -17,7 +17,7 @@ Mỗi bước yield một dict chứa trạng thái hiện tại của thuật t
 import heapq
 import time
 from collections import deque
-from typing import List, Dict, Tuple, Optional, Generator, Callable, Any
+from typing import List, Dict, Tuple, Optional, Generator, Callable, Any, Deque
 
 from core.graph import Graph
 from core.heuristic import euclidean_distance, manhattan_distance
@@ -86,11 +86,11 @@ def bfs(graph: Graph, start: str, goal: str) -> Generator:
         return
     
     # Khởi tạo
-    queue = deque()          # Hàng đợi FIFO
+    queue: Deque[Tuple[str, List[str]]] = deque()          # Hàng đợi FIFO
     queue.append((start, [start]))  # (node_id, path_to_node)
-    visited = set()          # Tập các node đã thăm
+    visited: set[str] = set()       # Tập các node đã thăm
     visited.add(start)
-    visited_order = [start]  # Thứ tự duyệt
+    visited_order: List[str] = [start]  # Thứ tự duyệt
     
     yield _make_step(start, visited_order, [start], [start], 0,
                     f"🔵 BFS: Khởi tạo - Thêm {graph.get_node_name(start)} vào queue")
@@ -165,7 +165,7 @@ def dfs(graph: Graph, start: str, goal: str) -> Generator:
     # Khởi tạo ngăn xếp
     stack = [(start, [start])]  # (node_id, path_to_node)
     visited = set()
-    visited_order = []
+    visited_order: List[str] = []
     
     yield _make_step(start, visited_order, [start], [start], 0,
                     f"🟣 DFS: Khởi tạo - Thêm {graph.get_node_name(start)} vào stack")
@@ -244,7 +244,7 @@ def ucs(graph: Graph, start: str, goal: str) -> Generator:
     counter = 0
     pq: list[tuple[float, int, str, list[str]]] = [(0.0, counter, start, [start])]
     visited = set()
-    visited_order = []
+    visited_order: List[str] = []
     
     yield _make_step(start, visited_order, [start], [start], 0,
                     f"🟠 UCS: Khởi tạo - g({graph.get_node_name(start)}) = 0")
@@ -326,15 +326,15 @@ def greedy_search(graph: Graph, start: str, goal: str,
                         f"✅ Điểm bắt đầu trùng điểm đích: {graph.get_node_name(start)}")
         return
     
-    goal_pos = graph.get_node_position(goal)
+    goal_pos = graph.get_node_position(goal) or (0, 0)
     
     # Priority queue: (h(n), counter, node_id, path, g_cost)
     counter = 0
-    start_pos = graph.get_node_position(start)
+    start_pos = graph.get_node_position(start) or (0, 0)
     h_start = heuristic_func(start_pos, goal_pos)
     pq: list[tuple[float, int, str, list[str], float]] = [(h_start, counter, start, [start], 0.0)]
     visited = set()
-    visited_order = []
+    visited_order: List[str] = []
     
     yield _make_step(start, visited_order, [start], [start], 0,
                     f"🟢 Greedy: Khởi tạo - h({graph.get_node_name(start)}) = {h_start:.1f}")
@@ -365,7 +365,7 @@ def greedy_search(graph: Graph, start: str, goal: str,
         # Mở rộng
         for neighbor, weight in graph.get_neighbors(current):
             if neighbor not in visited:
-                n_pos = graph.get_node_position(neighbor)
+                n_pos = graph.get_node_position(neighbor) or (0, 0)
                 h_n = heuristic_func(n_pos, goal_pos)
                 counter += 1
                 new_g = g_cost + weight
@@ -419,11 +419,11 @@ def astar(graph: Graph, start: str, goal: str,
                         f"✅ Điểm bắt đầu trùng điểm đích: {graph.get_node_name(start)}")
         return
     
-    goal_pos = graph.get_node_position(goal)
+    goal_pos = graph.get_node_position(goal) or (0, 0)
     
     # Priority queue: (f(n), counter, node_id, path, g_cost)
     counter = 0
-    start_pos = graph.get_node_position(start)
+    start_pos = graph.get_node_position(start) or (0, 0)
     h_start = heuristic_func(start_pos, goal_pos)
     f_start = h_start  # g(start) = 0
     pq: list[tuple[float, int, str, list[str], float]] = [(f_start, counter, start, [start], 0.0)]
@@ -432,7 +432,7 @@ def astar(graph: Graph, start: str, goal: str,
     best_g: Dict[str, float] = {start: 0.0}
     
     visited = set()
-    visited_order = []
+    visited_order: List[str] = []
     
     yield _make_step(start, visited_order, [start], [start], 0,
                     f"⭐ A*: Khởi tạo - f({graph.get_node_name(start)}) = "
@@ -447,7 +447,7 @@ def astar(graph: Graph, start: str, goal: str,
         visited.add(current)
         visited_order.append(current)
         
-        cur_pos = graph.get_node_position(current)
+        cur_pos = graph.get_node_position(current) or (0, 0)
         h_cur = heuristic_func(cur_pos, goal_pos)
         
         frontier_nodes = [item[2] for item in pq if item[2] not in visited]
@@ -471,7 +471,7 @@ def astar(graph: Graph, start: str, goal: str,
             # Chỉ mở rộng nếu tìm được đường tốt hơn đến neighbor
             if neighbor not in visited and (neighbor not in best_g or new_g < best_g[neighbor]):
                 best_g[neighbor] = new_g
-                n_pos = graph.get_node_position(neighbor)
+                n_pos = graph.get_node_position(neighbor) or (0, 0)
                 h_n = heuristic_func(n_pos, goal_pos)
                 f_n = new_g + h_n
                 counter += 1

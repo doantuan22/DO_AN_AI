@@ -68,8 +68,11 @@ class EditableMapWidget(MapWidget):
     def mouseMoveEvent(self, event):
         if self._is_panning and event is not None and self._last_pan_pos is not None:
             delta = event.pos() - self._last_pan_pos
-            self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() - delta.x())
-            self.verticalScrollBar().setValue(self.verticalScrollBar().value() - delta.y())
+            h_bar = self.horizontalScrollBar()
+            v_bar = self.verticalScrollBar()
+            if h_bar and v_bar:
+                h_bar.setValue(h_bar.value() - delta.x())
+                v_bar.setValue(v_bar.value() - delta.y())
             self._last_pan_pos = event.pos()
             return
         super().mouseMoveEvent(event)
@@ -234,7 +237,9 @@ class GraphEditorDialog(QDialog):
         self.node_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.node_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.node_table.itemSelectionChanged.connect(self._on_node_selected)
-        self.node_table.horizontalHeader().setStretchLastSection(True)
+        header = self.node_table.horizontalHeader()
+        if header is not None:
+            header.setStretchLastSection(True)
 
         form_box = QGroupBox("Thong tin node")
         form_layout = QVBoxLayout(form_box)
@@ -291,7 +296,9 @@ class GraphEditorDialog(QDialog):
         self.edge_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.edge_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.edge_table.itemSelectionChanged.connect(self._on_edge_selected)
-        self.edge_table.horizontalHeader().setStretchLastSection(True)
+        header_edge = self.edge_table.horizontalHeader()
+        if header_edge is not None:
+            header_edge.setStretchLastSection(True)
 
         form_box = QGroupBox("Thong tin canh")
         form_layout = QVBoxLayout(form_box)
@@ -418,7 +425,10 @@ class GraphEditorDialog(QDialog):
         row = self.node_table.currentRow()
         if row < 0:
             return
-        node_id = self.node_table.item(row, 0).text()
+        item = self.node_table.item(row, 0)
+        if item is None:
+            return
+        node_id = item.text()
         node = self._graph.get_node(node_id)
         if node is None:
             return
@@ -440,9 +450,16 @@ class GraphEditorDialog(QDialog):
         row = self.edge_table.currentRow()
         if row < 0:
             return
-        source = self.edge_table.item(row, 0).text()
-        target = self.edge_table.item(row, 1).text()
-        weight = float(self.edge_table.item(row, 2).text())
+        
+        item0 = self.edge_table.item(row, 0)
+        item1 = self.edge_table.item(row, 1)
+        item2 = self.edge_table.item(row, 2)
+        if not (item0 and item1 and item2):
+            return
+            
+        source = item0.text()
+        target = item1.text()
+        weight = float(item2.text())
         self._selected_edge = (source, target)
         self._set_combo_data(self.edge_source_combo, source)
         self._set_combo_data(self.edge_target_combo, target)
@@ -772,7 +789,7 @@ class GraphEditorDialog(QDialog):
     def _show_error(self, exc: Exception):
         QMessageBox.warning(self, "Loi chinh sua", str(exc))
 
-    def closeEvent(self, event):
+    def closeEvent(self, a0):
         if self._modified:
             answer = QMessageBox.question(
                 self,
@@ -780,6 +797,7 @@ class GraphEditorDialog(QDialog):
                 "Ban do da thay doi nhung chua luu JSON. Dong cua so?",
             )
             if answer != QMessageBox.StandardButton.Yes:
-                event.ignore()
+                if a0 is not None:
+                    a0.ignore()
                 return
-        super().closeEvent(event)
+        super().closeEvent(a0)
