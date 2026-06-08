@@ -358,13 +358,12 @@ class ControlPanel(QWidget):
         main_layout.addWidget(lbl_points)
         main_layout.addWidget(points_widget)
         
-        # ── 3. Điều khiển ──
+        # ── 3. Điều khiển ── (1 hàng 4 nút theo UI Demo)
         lbl_ctrl = QLabel("3. Điều khiển")
         lbl_ctrl.setProperty("class", "sectionHeader")
         
-        ctrl_layout = QGridLayout()
-        ctrl_layout.setHorizontalSpacing(8)
-        ctrl_layout.setVerticalSpacing(8)
+        ctrl_layout = QHBoxLayout()
+        ctrl_layout.setSpacing(6)
         
         self.btn_start = QPushButton("Bắt đầu")
         self.btn_start.setObjectName("btnStart")
@@ -384,10 +383,10 @@ class ControlPanel(QWidget):
         self.btn_reset.setObjectName("btnReset")
         self.btn_reset.clicked.connect(self.reset_clicked.emit)
         
-        ctrl_layout.addWidget(self.btn_start, 0, 0)
-        ctrl_layout.addWidget(self.btn_pause, 0, 1)
-        ctrl_layout.addWidget(self.btn_stop, 1, 0)
-        ctrl_layout.addWidget(self.btn_reset, 1, 1)
+        ctrl_layout.addWidget(self.btn_start)
+        ctrl_layout.addWidget(self.btn_pause)
+        ctrl_layout.addWidget(self.btn_stop)
+        ctrl_layout.addWidget(self.btn_reset)
         
         main_layout.addWidget(lbl_ctrl)
         main_layout.addLayout(ctrl_layout)
@@ -418,9 +417,9 @@ class ControlPanel(QWidget):
         stat_layout = QHBoxLayout()
         stat_layout.setSpacing(5)
         
-        self.stat_distance = self._create_stat_card("Quãng đường", "— m", "m")
-        self.stat_nodes = self._create_stat_card("Số node duyệt", "—", "#")
-        self.stat_time = self._create_stat_card("Thời gian", "— ms", "ms")
+        self.stat_distance = self._create_stat_card("Quãng đường", "— m", "🛣️")
+        self.stat_nodes = self._create_stat_card("Số node duyệt", "—", "🔍")
+        self.stat_time = self._create_stat_card("Thời gian xử lý", "— ms", "⏱️")
         
         stat_layout.addWidget(self.stat_distance["frame"])
         stat_layout.addWidget(self.stat_nodes["frame"])
@@ -536,10 +535,10 @@ class ControlPanel(QWidget):
         self.goal_label.setText(name)
     
     def add_log(self, message: str):
-        """Thêm một bản ghi log có định dạng HTML."""
+        """Thêm một bản ghi log có định dạng HTML theo style UI Demo."""
         timestamp = get_timestamp()
         
-        icon = "●"
+        icon = "<span style='color:#1A73E8;'>●</span>"
         if "✅" in message:
             icon = "<span style='color:#34A853;'>✔</span>"
             message = message.replace("✅", "")
@@ -555,12 +554,38 @@ class ControlPanel(QWidget):
         elif "🔍" in message:
             icon = "<span style='color:#1A73E8;'>🔍</span>"
             message = message.replace("🔍", "")
+        elif "📍" in message:
+            icon = "<span style='color:#34A853;'>📍</span>"
+            message = message.replace("📍", "")
+        elif "🚀" in message:
+            icon = "<span style='color:#1A73E8;'>🚀</span>"
+            message = message.replace("🚀", "")
+        elif "📐" in message:
+            icon = "<span style='color:#1A73E8;'>📐</span>"
+            message = message.replace("📐", "")
+        elif "🛣️" in message:
+            icon = "<span style='color:#1A73E8;'>⊙</span>"
+            message = message.replace("🛣️", "")
+        elif "⏱️" in message:
+            icon = "<span style='color:#1A73E8;'>⊙</span>"
+            message = message.replace("⏱️", "")
+        elif "⏳" in message:
+            icon = "<span style='color:#1A73E8;'>⏳</span>"
+            message = message.replace("⏳", "")
         
+        # Format theo UI Demo: icon + timestamp + message + timestamp bên phải
         formatted_message = f"""
-            <div style='margin-bottom: 2px; line-height: 1.1;'>
-                <span style='color:#70757A; font-size: 9px;'>{timestamp}</span>&nbsp;
-                {icon}&nbsp;
-                <span style='color:#202124;'>{message}</span>
+            <div style='margin-bottom: 2px; line-height: 1.2;'>
+                <table width='100%' cellpadding='0' cellspacing='0' border='0'><tr>
+                    <td style='white-space: nowrap; vertical-align: top;'>
+                        {icon}&nbsp;
+                        <span style='color:#70757A; font-size: 10px;'>{timestamp}</span>&nbsp;&nbsp;
+                        <span style='color:#202124; font-size: 11px;'>{message.strip()}</span>
+                    </td>
+                    <td style='text-align: right; white-space: nowrap; vertical-align: top; color:#70757A; font-size: 9px; padding-left: 8px;'>
+                        {timestamp}
+                    </td>
+                </tr></table>
             </div>
         """
         

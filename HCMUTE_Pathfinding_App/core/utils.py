@@ -133,3 +133,15 @@ class Timer:
     def elapsed_ms(self) -> float:
         """Thời gian đã đo (milliseconds)."""
         return self._elapsed_ms
+
+    def elapsed_live(self) -> float:
+        """
+        Trả về thời gian đã trôi qua mà KHÔNG dừng timer.
+        Dùng cho cập nhật thời gian thực trên UI.
+        
+        Returns:
+            Thời gian đã trôi qua (milliseconds)
+        """
+        if self._start_time is not None:
+            return (time.perf_counter() - self._start_time) * 1000
+        return self._elapsed_ms

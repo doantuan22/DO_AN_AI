@@ -8,7 +8,6 @@ mô phỏng từng bước, hiển thị kết quả.
 
 import os
 import sys
-import time
 from typing import Optional, Generator
 
 from PyQt6.QtWidgets import (
@@ -471,19 +470,14 @@ class MainWindow(QMainWindow):
             
             self._total_visited = len(visited)
             
-            # Cập nhật bản đồ
-            self._map_widget.reset_all_nodes()
-            self._map_widget.highlight_visited(visited)
-            self._map_widget.highlight_frontier(frontier)
-            if current:
-                self._map_widget.highlight_current(current)
+            # Cập nhật bản đồ (incremental — chỉ đổi node thay đổi trạng thái)
+            self._map_widget.update_step(current, visited, frontier)
                 
             if log:
                 self._control_panel.add_log(log)
                 
             # Cập nhật stats thời gian thực
-            elapsed = (time.perf_counter() - self._exec_timer._start_time) * 1000 \
-                if self._exec_timer._start_time else 0
+            elapsed = self._exec_timer.elapsed_live()
             self._control_panel.update_stats(
                 distance=cost if cost > 0 else None,
                 node_count=self._total_visited,

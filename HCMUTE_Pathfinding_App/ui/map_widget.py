@@ -674,6 +674,34 @@ class MapWidget(QGraphicsView):
             self._node_items[self._start_node].set_state("start")
         if self._goal_node and self._goal_node in self._node_items:
             self._node_items[self._goal_node].set_state("goal")
+    
+    def update_step(self, current: str, visited: List[str], frontier: List[str]):
+        """
+        Cập nhật trạng thái node theo bước mô phỏng — chỉ thay đổi incremental.
+        Hiệu năng O(delta) thay vì O(n) như reset_all_nodes + re-highlight.
+        """
+        # Tính desired state cho mỗi node
+        visited_set = set(visited)
+        frontier_set = set(frontier)
+        protected = {self._start_node, self._goal_node}
+        
+        for nid, item in self._node_items.items():
+            if nid in protected:
+                continue  # Không đổi trạng thái start/goal
+            
+            # Xác định trạng thái mong muốn
+            if nid == current:
+                desired = "current"
+            elif nid in frontier_set:
+                desired = "frontier"
+            elif nid in visited_set:
+                desired = "visited"
+            else:
+                desired = "normal"
+            
+            # Chỉ cập nhật nếu thực sự thay đổi
+            if item._state != desired:
+                item.set_state(desired)
             
     def full_reset(self):
         """Xóa hoàn toàn ghim, đường đi và đưa bản đồ về trạng thái ban đầu."""

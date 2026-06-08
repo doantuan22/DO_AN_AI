@@ -88,6 +88,7 @@ class Graph:
         "N09": "Phòng Y tế",
         "N10": "VP Thư viện",
         "N11": "Khối C (dưới)",
+        "N12": "",          # Giao lộ nội bộ
         "N13": "Khối B (dưới)",
         "N14": "Khối Thư viện",
         "N15": "P. Công tác HSSV",
@@ -95,8 +96,15 @@ class Graph:
         "N17": "Xưởng Nhiệt ĐL",
         "N18": "Xưởng Cơ khí ĐL",
         "N19": "Khu thực hành",
+        "N20": "",          # Giao lộ nội bộ
+        "N21": "",          # Giao lộ nội bộ
         "N22": "Khối D",
+        "N23": "",          # Giao lộ nội bộ
+        "N24": "",          # Giao lộ nội bộ
+        "N25": "",          # Giao lộ nội bộ
         "N26": "Khối A (trên)",
+        "N27": "",          # Giao lộ nội bộ
+        "N28": "",          # Giao lộ nội bộ
         "N30": "Khối F.1",
         "N31": "Khoa CN May",
         "N32": "Xưởng Động cơ",
@@ -187,8 +195,12 @@ class Graph:
             node_id = node_data.get("id", "")
             x = node_data.get("x", 0)
             y = node_data.get("y", 0)
-            # Ưu tiên tên từ JSON, kể cả chuỗi rỗng để cho phép ẩn tên node.
-            name = node_data["name"] if "name" in node_data else self.NODE_NAMES.get(node_id, node_id)
+            # Ưu tiên tên từ JSON nếu có giá trị thực; nếu rỗng hoặc không có, fallback sang NODE_NAMES
+            json_name = node_data.get("name")
+            if json_name:  # Có tên thực sự (non-empty string)
+                name = json_name
+            else:
+                name = self.NODE_NAMES.get(node_id, "")
             
             node = Node(node_id, x, y, name)
             self.nodes[node_id] = node
