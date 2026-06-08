@@ -282,6 +282,7 @@ class MapWidget(QGraphicsView):
     
     node_clicked = pyqtSignal(str)
     graph_edit_clicked = pyqtSignal()
+    sample_walk_clicked = pyqtSignal()
     
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -331,7 +332,16 @@ class MapWidget(QGraphicsView):
         self._route_active_glow: Optional[QGraphicsLineItem] = None
         self._route_dot: Optional[QGraphicsEllipseItem] = None
         self._route_flow_items: List[QGraphicsLineItem] = []
+        self._route_segment_items: List[List[QGraphicsLineItem]] = []
         self._route_flow_phase = 0.0
+        self._avatar_timer = QTimer(self)
+        self._avatar_timer.timeout.connect(self._animate_avatar_step)
+        self._avatar_item: Optional[QGraphicsPixmapItem] = None
+        self._avatar_segments: List[Tuple[float, float, float, float]] = []
+        self._avatar_segment_index = 0
+        self._avatar_segment_progress = 0
+        self._avatar_step_count = 20
+        self._avatar_hiding_route = False
         self._last_current_node: Optional[str] = None
         self._pulse_timer = QTimer(self)
         self._pulse_timer.timeout.connect(self._tick_pulses)
@@ -349,6 +359,7 @@ class MapWidget(QGraphicsView):
         self._zoom_card: Optional[QFrame] = None
         self._graph_edit_button: Optional[QPushButton] = None
         self._graph_toggle_button: Optional[QPushButton] = None
+        self._sample_walk_button: Optional[QPushButton] = None
         
         # Khởi tạo các widget nổi
         self._setup_floating_controls()
@@ -458,6 +469,36 @@ class MapWidget(QGraphicsView):
         """)
         self._graph_toggle_button.show()
 
+        self._sample_walk_button = QPushButton(self)
+        self._sample_walk_button.setObjectName("sampleWalkButton")
+        self._sample_walk_button.setText("▶")
+        self._sample_walk_button.setToolTip("Đi mẫu theo lộ trình")
+        self._sample_walk_button.setEnabled(False)
+        self._sample_walk_button.clicked.connect(self.sample_walk_clicked.emit)
+        self._sample_walk_button.setStyleSheet("""
+            QPushButton#sampleWalkButton {
+                background-color: rgba(255, 255, 255, 0.95);
+                border: 1px solid rgba(215, 227, 244, 0.95);
+                border-radius: 12px;
+                color: #0B74FF;
+                font-family: 'Segoe UI';
+                font-size: 19px;
+                font-weight: 900;
+                min-height: 48px;
+                min-width: 48px;
+            }
+            QPushButton#sampleWalkButton:hover {
+                background-color: #EEF5FF;
+                border-color: #0B74FF;
+            }
+            QPushButton#sampleWalkButton:disabled {
+                color: #CBD5E1;
+                background-color: rgba(248, 250, 252, 0.88);
+                border-color: #E2E8F0;
+            }
+        """)
+        self._sample_walk_button.show()
+
         self._graph_edit_button = QPushButton(self)
         self._graph_edit_button.setObjectName("graphEditButton")
         self._graph_edit_button.setText("⚙")
@@ -492,6 +533,11 @@ class MapWidget(QGraphicsView):
         if self._graph_edit_button:
             self._graph_edit_button.setEnabled(enabled)
 
+    def set_sample_walk_enabled(self, enabled: bool):
+        """Bật nút đi mẫu khi đã có đường đi hợp lệ."""
+        if self._sample_walk_button:
+            self._sample_walk_button.setEnabled(enabled)
+
     def toggle_graph_overlay(self):
         """Tạm ẩn/hiện node, cạnh, nhãn và route trên bản đồ."""
         self.set_graph_overlay_hidden(not self._graph_overlay_hidden)
@@ -511,6 +557,8 @@ class MapWidget(QGraphicsView):
             item.setVisible(visible)
         for item in self._pulse_items:
             item.setVisible(visible)
+        if self._avatar_item:
+            self._avatar_item.setVisible(visible)
 
         if self._start_tooltip:
             self._start_tooltip.setVisible(visible)
@@ -522,6 +570,10 @@ class MapWidget(QGraphicsView):
             self._route_flow_timer.stop()
         elif self._route_flow_items:
             self._route_flow_timer.start(42)
+        if hidden:
+            self._avatar_timer.stop()
+        elif self._avatar_item and self._avatar_segments:
+            self._avatar_timer.start(28)
 
         if self._graph_toggle_button:
             self._graph_toggle_button.setText("◎" if hidden else "◉")
@@ -540,10 +592,14 @@ class MapWidget(QGraphicsView):
         self._pulse_items.clear()
         self._route_timer.stop()
         self._route_flow_timer.stop()
+        self._avatar_timer.stop()
         self._route_dot = None
         self._route_active_line = None
         self._route_active_glow = None
         self._route_flow_items.clear()
+        self._route_segment_items.clear()
+        self._avatar_item = None
+        self._avatar_segments = []
         self._last_current_node = None
         self._start_tooltip = None
         self._goal_tooltip = None
@@ -917,6 +973,7 @@ class MapWidget(QGraphicsView):
         self._route_active_line = None
         self._route_active_glow = None
         self._route_flow_items.clear()
+        self._route_segment_items.clear()
         self._route_flow_phase = 0.0
         self._route_timer.start(18)
 
@@ -938,14 +995,18 @@ class MapWidget(QGraphicsView):
 
             self._route_active_glow = self._scene.addLine(sx, sy, sx, sy, glow_pen)
             self._route_active_line = self._scene.addLine(sx, sy, sx, sy, line_pen)
+            segment_items: List[QGraphicsLineItem] = []
             if self._route_active_glow is not None:
                 self._route_active_glow.setZValue(4)
                 self._route_active_glow.setVisible(not self._graph_overlay_hidden)
                 self._path_items.append(self._route_active_glow)
+                segment_items.append(self._route_active_glow)
             if self._route_active_line is not None:
                 self._route_active_line.setZValue(6)
                 self._route_active_line.setVisible(not self._graph_overlay_hidden)
                 self._path_items.append(self._route_active_line)
+                segment_items.append(self._route_active_line)
+            self._route_segment_items.append(segment_items)
 
         self._route_segment_progress += 1
         t = min(1.0, self._route_segment_progress / 12.0)
@@ -972,7 +1033,7 @@ class MapWidget(QGraphicsView):
 
         # Lớp route nền đã được vẽ trong _animate_route_step. Lớp dưới đây chỉ là
         # highlight chuyển động, dùng dashOffset để chạy mượt mà không cần vẽ lại scene.
-        for sx, sy, ex, ey in self._route_segments:
+        for index, (sx, sy, ex, ey) in enumerate(self._route_segments):
             flow_pen = QPen(QColor("#E9FFFB"), 3.6)
             flow_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
             flow_pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
@@ -984,6 +1045,8 @@ class MapWidget(QGraphicsView):
                 flow_line.setVisible(not self._graph_overlay_hidden)
                 self._route_flow_items.append(flow_line)
                 self._path_items.append(flow_line)
+                if index < len(self._route_segment_items):
+                    self._route_segment_items[index].append(flow_line)
 
         self._route_flow_phase = 0.0
         if self._route_flow_items:
@@ -1008,6 +1071,157 @@ class MapWidget(QGraphicsView):
             pen.setDashPattern([7, 10])
             pen.setDashOffset(-self._route_flow_phase - index * 2.0)
             item.setPen(pen)
+
+    def animate_avatar_along_path(self, path: List[str], avatar_path: str):
+        """Hiển thị avatar nhỏ và cho đi mẫu từ node bắt đầu đến node đích."""
+        if not self._graph or len(path) < 2:
+            return
+
+        pixmap = QPixmap(avatar_path)
+        if pixmap.isNull():
+            return
+
+        self._clear_avatar()
+        self._ensure_full_route_drawn()
+
+        target_size = int(NodeItem.NODE_RADIUS_BIG * 2 * 1.33)
+        avatar = pixmap.scaled(
+            target_size,
+            target_size,
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation,
+        )
+
+        self._avatar_segments = []
+        for i in range(len(path) - 1):
+            src = self._graph.get_node(path[i])
+            dst = self._graph.get_node(path[i + 1])
+            if src and dst:
+                self._avatar_segments.append((src.x, src.y, dst.x, dst.y))
+
+        if not self._avatar_segments:
+            return
+
+        sx, sy, _, _ = self._avatar_segments[0]
+        self._avatar_item = self._scene.addPixmap(avatar)
+        if self._avatar_item is None:
+            return
+        self._avatar_item.setZValue(24)
+        self._avatar_item.setOffset(-avatar.width() / 2, -avatar.height() / 2)
+        self._avatar_item.setPos(sx, sy)
+        self._avatar_item.setVisible(not self._graph_overlay_hidden)
+
+        self._avatar_segment_index = 0
+        self._avatar_segment_progress = 0
+        self._avatar_step_count = 22
+        self._restore_full_route_visibility()
+        self._avatar_hiding_route = True
+        self._avatar_timer.start(28)
+
+    def _ensure_full_route_drawn(self):
+        """Hoàn tất visual route nếu người dùng bấm đi mẫu trước khi draw animation xong."""
+        if not self._route_segments:
+            return
+
+        self._route_timer.stop()
+        while len(self._route_segment_items) < len(self._route_segments):
+            sx, sy, ex, ey = self._route_segments[len(self._route_segment_items)]
+            glow_pen = QPen(QColor(0, 209, 178, 80), 13)
+            glow_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+            glow_pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+            line_pen = QPen(MapColors.EDGE_PATH, 6.8)
+            line_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+            line_pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+
+            segment_items: List[QGraphicsLineItem] = []
+            glow = self._scene.addLine(sx, sy, ex, ey, glow_pen)
+            line = self._scene.addLine(sx, sy, ex, ey, line_pen)
+            if glow is not None:
+                glow.setZValue(4)
+                glow.setVisible(not self._graph_overlay_hidden)
+                self._path_items.append(glow)
+                segment_items.append(glow)
+            if line is not None:
+                line.setZValue(6)
+                line.setVisible(not self._graph_overlay_hidden)
+                self._path_items.append(line)
+                segment_items.append(line)
+            self._route_segment_items.append(segment_items)
+
+        if not self._route_flow_items:
+            self._start_route_flow()
+
+    def _animate_avatar_step(self):
+        """Tick di chuyển avatar dọc theo route bằng QTimer."""
+        if self._avatar_item is None or self._avatar_segment_index >= len(self._avatar_segments):
+            self._avatar_timer.stop()
+            self._restore_full_route_visibility()
+            return
+
+        sx, sy, ex, ey = self._avatar_segments[self._avatar_segment_index]
+        self._avatar_segment_progress += 1
+        t = min(1.0, self._avatar_segment_progress / float(self._avatar_step_count))
+        # Smoothstep giúp chuyển động dịu hơn tuyến tính.
+        eased = t * t * (3 - 2 * t)
+        x = sx + (ex - sx) * eased
+        y = sy + (ey - sy) * eased
+        self._avatar_item.setPos(x, y)
+        self._update_route_visibility_for_avatar(x, y)
+
+        if t >= 1.0:
+            self._avatar_segment_index += 1
+            self._avatar_segment_progress = 0
+            if self._avatar_segment_index >= len(self._avatar_segments):
+                self._avatar_timer.stop()
+                self._restore_full_route_visibility()
+
+    def _update_route_visibility_for_avatar(self, avatar_x: float, avatar_y: float):
+        """Avatar đi đến đâu thì phần route phía sau biến mất đến đó."""
+        if not self._avatar_hiding_route:
+            return
+
+        for index, items in enumerate(self._route_segment_items):
+            if index < self._avatar_segment_index:
+                for item in items:
+                    item.setVisible(False)
+            elif index == self._avatar_segment_index and index < len(self._route_segments):
+                _, _, ex, ey = self._route_segments[index]
+                for item in items:
+                    item.setLine(avatar_x, avatar_y, ex, ey)
+                    item.setVisible(not self._graph_overlay_hidden)
+            else:
+                sx, sy, ex, ey = self._route_segments[index]
+                for item in items:
+                    item.setLine(sx, sy, ex, ey)
+                    item.setVisible(not self._graph_overlay_hidden)
+
+        if self._route_dot is not None:
+            self._route_dot.setVisible(False)
+
+    def _restore_full_route_visibility(self):
+        """Khi avatar tới đích, hiện lại route đầy đủ như kết quả ban đầu."""
+        self._avatar_hiding_route = False
+        for index, items in enumerate(self._route_segment_items):
+            if index >= len(self._route_segments):
+                continue
+            sx, sy, ex, ey = self._route_segments[index]
+            for item in items:
+                item.setLine(sx, sy, ex, ey)
+                item.setVisible(not self._graph_overlay_hidden)
+        if self._route_dot is not None and self._route_segments:
+            _, _, ex, ey = self._route_segments[-1]
+            self._route_dot.setPos(ex, ey)
+            self._route_dot.setVisible(not self._graph_overlay_hidden)
+        if self._route_flow_items and not self._graph_overlay_hidden:
+            self._route_flow_timer.start(42)
+
+    def _clear_avatar(self):
+        self._avatar_timer.stop()
+        if self._avatar_item is not None:
+            self._scene.removeItem(self._avatar_item)
+        self._avatar_item = None
+        self._avatar_segments = []
+        self._avatar_hiding_route = False
                     
     def clear_path(self):
         self._route_timer.stop()
@@ -1017,6 +1231,8 @@ class MapWidget(QGraphicsView):
         self._route_active_glow = None
         self._route_dot = None
         self._route_flow_items.clear()
+        self._route_segment_items.clear()
+        self._clear_avatar()
         for item in self._path_items:
             self._scene.removeItem(item)
         self._path_items.clear()
@@ -1104,9 +1320,17 @@ class MapWidget(QGraphicsView):
             self._graph_toggle_button.adjustSize()
             bottom_y = self.height() - self._graph_toggle_button.height() - 16
             self._graph_toggle_button.move(16, bottom_y)
+        if self._sample_walk_button:
+            self._sample_walk_button.adjustSize()
+            x = 16
+            if self._graph_toggle_button:
+                x += self._graph_toggle_button.width() + 10
+            self._sample_walk_button.move(x, bottom_y)
         if self._graph_edit_button:
             self._graph_edit_button.adjustSize()
             x = 16
             if self._graph_toggle_button:
                 x += self._graph_toggle_button.width() + 10
+            if self._sample_walk_button:
+                x += self._sample_walk_button.width() + 10
             self._graph_edit_button.move(x, bottom_y)

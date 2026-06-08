@@ -107,6 +107,7 @@ class MainWindow(QMainWindow):
             self._base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         self._json_path = os.path.join(self._base_dir, "data", "hcmute_graph_nodes_edges.json")
         self._map_path = os.path.join(self._base_dir, "assets", "map.png")
+        self._avatar_path = os.path.join(self._base_dir, "assets", "avata01.png")
         
         # ── Khởi tạo dữ liệu ──
         self._graph = Graph()
@@ -233,6 +234,7 @@ class MainWindow(QMainWindow):
         # Click chọn trên bản đồ
         self._map_widget.node_clicked.connect(self._on_node_clicked)
         self._map_widget.graph_edit_clicked.connect(self._on_edit_graph)
+        self._map_widget.sample_walk_clicked.connect(self._on_sample_walk)
         
         # Nút điều khiển Panel
         self._control_panel.start_clicked.connect(self._on_start)
@@ -462,6 +464,9 @@ class MainWindow(QMainWindow):
         
         self._populate_node_combos()
         self._control_panel.reset_stats()
+        self._final_path = []
+        self._final_cost = 0.0
+        self._map_widget.set_sample_walk_enabled(False)
         self._sync_ready_state()
         self._control_panel.add_log(
             f"🛠️ Đã cập nhật bản đồ: {len(self._graph.nodes)} node, {len(self._graph.edges)} cạnh"
@@ -572,6 +577,7 @@ class MainWindow(QMainWindow):
         
         if self._final_path and len(self._final_path) > 1:
             self._map_widget.highlight_path(self._final_path)
+            self._map_widget.set_sample_walk_enabled(True)
             self._show_toast("Đã tìm thấy lộ trình tối ưu")
             
             # Báo cáo kết quả
@@ -626,6 +632,7 @@ class MainWindow(QMainWindow):
         self._control_panel.add_log("⏹️ Đã dừng tìm kiếm")
         self._control_panel.set_finished_state()
         self._map_widget.set_graph_edit_enabled(True)
+        self._map_widget.set_sample_walk_enabled(False)
         self._set_app_state("idle")
         
     def _on_reset(self):
@@ -638,9 +645,12 @@ class MainWindow(QMainWindow):
         self._start_node = None
         self._goal_node = None
         self._click_count = 0
+        self._final_path = []
+        self._final_cost = 0.0
         
         self._control_panel.set_finished_state()
         self._map_widget.set_graph_edit_enabled(True)
+        self._map_widget.set_sample_walk_enabled(False)
         self._control_panel.reset_stats()
         self._control_panel.clear_log()
         self._control_panel.set_start_display("(Chọn trên bản đồ)")
@@ -657,6 +667,17 @@ class MainWindow(QMainWindow):
         self._control_panel.add_log("↻ Đã reset toàn bộ hệ thống")
         self._control_panel.add_log("✅ Khởi tạo đồ thị HCMUTE thành công")
         self._sync_ready_state()
+
+    def _on_sample_walk(self):
+        """Cho avatar đi mẫu theo lộ trình đã tìm được."""
+        if not self._final_path or len(self._final_path) < 2:
+            self._control_panel.add_log("⚠️ Chưa có lộ trình để đi mẫu")
+            return
+        if not os.path.exists(self._avatar_path):
+            self._control_panel.add_log("⚠️ Không tìm thấy assets/avata01.png")
+            return
+        self._map_widget.animate_avatar_along_path(self._final_path, self._avatar_path)
+        self._control_panel.add_log("▶ Đi mẫu theo lộ trình đã tìm được")
         
     def _update_status(self, text: str, color: str):
         """Cập nhật trạng thái hiển thị trên header."""
