@@ -8,6 +8,7 @@ UCS, Greedy và A* trên đồ thị mẫu.
 import sys
 import os
 import unittest
+import tempfile
 from typing import Optional
 
 # Thêm thư mục gốc vào sys.path để import được các module
@@ -83,6 +84,27 @@ class TestGraphSetup(unittest.TestCase):
         """Test tính chi phí đường đi."""
         cost = self.graph.calculate_path_cost(["A", "B", "C"])
         self.assertEqual(cost, 200)
+
+    def test_load_preserves_empty_node_name(self):
+        """Empty JSON name means the node label is intentionally hidden."""
+        data = """
+        {
+          "nodes": [
+            {"id": "N11", "x": 10, "y": 20, "name": ""}
+          ],
+          "edges": []
+        }
+        """
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", suffix=".json", delete=False) as f:
+            f.write(data)
+            path = f.name
+        try:
+            graph = Graph()
+            graph.load_from_json(path)
+            self.assertEqual(graph.get_node("N11").name, "")
+            self.assertEqual(graph.get_node_name("N11"), "N11")
+        finally:
+            os.remove(path)
 
 
 def _run_algorithm_to_end(gen) -> Optional[dict]:

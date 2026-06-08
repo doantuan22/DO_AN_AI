@@ -15,7 +15,7 @@ from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox,
     QPushButton, QTextEdit, QFrame, QSizePolicy, QGridLayout, QScrollArea, QStyle, QApplication
 )
-from PyQt6.QtCore import Qt, QSize, pyqtSignal
+from PyQt6.QtCore import Qt, QSize, pyqtSignal, QTimer
 from PyQt6.QtGui import QFont, QTextCursor, QIcon
 from typing import Optional
 
@@ -145,6 +145,48 @@ PANEL_STYLESHEET = """
         padding: 8px;
         line-height: 1.3;
     }
+
+    QFrame#pointCard {
+        background-color: #F8FBFF;
+        border: 1px solid #DDE7F5;
+        border-radius: 10px;
+    }
+    QFrame#pointCard[selected="true"] {
+        background-color: #FFFFFF;
+        border: 1px solid #9CC7FF;
+    }
+    QLabel#pointTitle {
+        color: #64748B;
+        font-size: 11px;
+        font-weight: 800;
+    }
+    QLabel#pointValue {
+        color: #0F172A;
+        font-size: 13px;
+        font-weight: 800;
+    }
+    QPushButton#btnClearPoint {
+        background-color: #EEF5FF;
+        border: 1px solid #D7E3F4;
+        color: #0B74FF;
+        border-radius: 12px;
+        min-width: 24px;
+        max-width: 24px;
+        min-height: 24px;
+        max-height: 24px;
+        padding: 0px;
+        font-size: 13px;
+        font-weight: 900;
+    }
+    QPushButton#btnClearPoint:hover {
+        background-color: #E0EEFF;
+        border-color: #0B74FF;
+    }
+    QPushButton#btnClearPoint:disabled {
+        background-color: #F1F5F9;
+        border-color: #E2E8F0;
+        color: #CBD5E1;
+    }
     
     /* Control Buttons */
     QPushButton {
@@ -251,6 +293,8 @@ class ControlPanel(QWidget):
     stop_clicked = pyqtSignal()
     reset_clicked = pyqtSignal()
     graph_edit_clicked = pyqtSignal()
+    clear_start_clicked = pyqtSignal()
+    clear_goal_clicked = pyqtSignal()
     algorithm_changed = pyqtSignal(str)
     heuristic_changed = pyqtSignal(str)
     
@@ -261,6 +305,9 @@ class ControlPanel(QWidget):
         self.setStyleSheet(PANEL_STYLESHEET)
         
         self._is_paused = False
+        self._ready_to_start = False
+        self._stat_numeric = {"distance": 0.0, "nodes": 0.0, "time": 0.0}
+        self._stat_timers: dict[str, QTimer] = {}
         self._setup_ui()
     
     def _setup_ui(self):
@@ -318,38 +365,76 @@ class ControlPanel(QWidget):
         
         # Điểm đi
         start_row = QHBoxLayout()
-        lbl_start = QLabel("● Điểm đi:")
-        lbl_start.setFont(QFont("Segoe UI", 9, QFont.Weight.Bold))
-        lbl_start.setMinimumWidth(86)
-        self.start_label = QLabel("(Chọn trên bản đồ)")
-        self.start_label.setFont(QFont("Segoe UI", 9, QFont.Weight.Bold))
-        self.start_label.setStyleSheet("color: #1A73E8;")
+        self.start_card = QFrame()
+        self.start_card.setObjectName("pointCard")
+        self.start_card.setProperty("selected", "false")
+        start_card_layout = QHBoxLayout(self.start_card)
+        start_card_layout.setContentsMargins(12, 9, 10, 9)
+        start_card_layout.setSpacing(10)
+        start_icon = QLabel("●")
+        start_icon.setStyleSheet("color: #0B74FF; font-size: 18px;")
+        start_text = QWidget()
+        start_text_layout = QVBoxLayout(start_text)
+        start_text_layout.setContentsMargins(0, 0, 0, 0)
+        start_text_layout.setSpacing(0)
+        lbl_start = QLabel("ĐIỂM ĐI")
+        lbl_start.setObjectName("pointTitle")
+        self.start_label = QLabel("Chọn trên bản đồ")
+        self.start_label.setObjectName("pointValue")
         self.start_label.setWordWrap(False)
+        self.btn_clear_start = QPushButton("×")
+        self.btn_clear_start.setObjectName("btnClearPoint")
+        self.btn_clear_start.setToolTip("Xóa điểm đi")
+        self.btn_clear_start.setEnabled(False)
+        self.btn_clear_start.clicked.connect(self.clear_start_clicked.emit)
+        start_text_layout.addWidget(lbl_start)
+        start_text_layout.addWidget(self.start_label)
+        start_card_layout.addWidget(start_icon)
+        start_card_layout.addWidget(start_text, 1)
+        start_card_layout.addWidget(self.btn_clear_start)
         self.start_combo = QComboBox()
         self.start_combo.setPlaceholderText("Danh sách...")
         self.start_combo.setMinimumWidth(150)
         self.start_combo.setMaximumWidth(170)
         
-        start_row.addWidget(lbl_start)
-        start_row.addWidget(self.start_label, 1)
+        start_row.addWidget(self.start_card, 1)
         start_row.addWidget(self.start_combo)
         
         # Điểm đến
         goal_row = QHBoxLayout()
-        lbl_goal = QLabel("● Điểm đến:")
-        lbl_goal.setFont(QFont("Segoe UI", 9, QFont.Weight.Bold))
-        lbl_goal.setMinimumWidth(86)
-        self.goal_label = QLabel("(Chọn trên bản đồ)")
-        self.goal_label.setFont(QFont("Segoe UI", 9, QFont.Weight.Bold))
-        self.goal_label.setStyleSheet("color: #D93025;")
+        self.goal_card = QFrame()
+        self.goal_card.setObjectName("pointCard")
+        self.goal_card.setProperty("selected", "false")
+        goal_card_layout = QHBoxLayout(self.goal_card)
+        goal_card_layout.setContentsMargins(12, 9, 10, 9)
+        goal_card_layout.setSpacing(10)
+        goal_icon = QLabel("◆")
+        goal_icon.setStyleSheet("color: #00C896; font-size: 17px;")
+        goal_text = QWidget()
+        goal_text_layout = QVBoxLayout(goal_text)
+        goal_text_layout.setContentsMargins(0, 0, 0, 0)
+        goal_text_layout.setSpacing(0)
+        lbl_goal = QLabel("ĐIỂM ĐẾN")
+        lbl_goal.setObjectName("pointTitle")
+        self.goal_label = QLabel("Chọn trên bản đồ")
+        self.goal_label.setObjectName("pointValue")
         self.goal_label.setWordWrap(False)
+        self.btn_clear_goal = QPushButton("×")
+        self.btn_clear_goal.setObjectName("btnClearPoint")
+        self.btn_clear_goal.setToolTip("Xóa điểm đến")
+        self.btn_clear_goal.setEnabled(False)
+        self.btn_clear_goal.clicked.connect(self.clear_goal_clicked.emit)
+        goal_text_layout.addWidget(lbl_goal)
+        goal_text_layout.addWidget(self.goal_label)
+        goal_card_layout.addWidget(goal_icon)
+        goal_card_layout.addWidget(goal_text, 1)
+        goal_card_layout.addWidget(self.btn_clear_goal)
         self.goal_combo = QComboBox()
         self.goal_combo.setPlaceholderText("Danh sách...")
         self.goal_combo.setMinimumWidth(150)
         self.goal_combo.setMaximumWidth(170)
         
-        goal_row.addWidget(lbl_goal)
-        goal_row.addWidget(self.goal_label, 1)
+        goal_row.addWidget(self.goal_card, 1)
         goal_row.addWidget(self.goal_combo)
         
         points_layout.addLayout(start_row)
@@ -394,9 +479,10 @@ class ControlPanel(QWidget):
         self.btn_graph_edit = QPushButton("Chỉnh sửa node / cạnh")
         self.btn_graph_edit.setObjectName("btnGraphEdit")
         self.btn_graph_edit.clicked.connect(self.graph_edit_clicked.emit)
-        main_layout.addWidget(self.btn_graph_edit)
+        self.btn_graph_edit.setVisible(False)
         
         self._setup_button_icons()
+        self.btn_start.setEnabled(False)
         
         # ── 4. Bảng log kết quả ──
         lbl_log = QLabel("4. Bản log kết quả")
@@ -533,15 +619,26 @@ class ControlPanel(QWidget):
     def set_start_display(self, name: str):
         """Cập nhật text hiển thị điểm bắt đầu."""
         # Giới hạn độ dài để tránh đè nút
+        selected = bool(name and not name.startswith("(") and "Chọn" not in name)
         if len(name) > 20:
             name = name[:18] + "..."
-        self.start_label.setText(name)
+        self.start_label.setText(name.strip("()") if name.startswith("(") else name)
+        self.btn_clear_start.setEnabled(selected)
+        self._set_card_selected(self.start_card, selected)
     
     def set_goal_display(self, name: str):
         """Cập nhật text hiển thị điểm đích."""
+        selected = bool(name and not name.startswith("(") and "Chọn" not in name)
         if len(name) > 20:
             name = name[:18] + "..."
-        self.goal_label.setText(name)
+        self.goal_label.setText(name.strip("()") if name.startswith("(") else name)
+        self.btn_clear_goal.setEnabled(selected)
+        self._set_card_selected(self.goal_card, selected)
+
+    def _set_card_selected(self, card: QFrame, selected: bool):
+        card.setProperty("selected", "true" if selected else "false")
+        card.style().unpolish(card)
+        card.style().polish(card)
     
     def add_log(self, message: str):
         """Thêm một bản ghi log có định dạng HTML theo style UI Demo."""
@@ -582,14 +679,18 @@ class ControlPanel(QWidget):
             icon = "<span style='color:#1A73E8;'>⏳</span>"
             message = message.replace("⏳", "")
         
-        # Format theo UI Demo: icon + timestamp + message + timestamp bên phải
+        if not message.strip():
+            self.log_text.append("<div style='height: 6px;'></div>")
+            return
+
+        # Format dạng activity timeline/card list.
         formatted_message = f"""
-            <div style='margin-bottom: 2px; line-height: 1.2;'>
+            <div style='margin: 0 0 6px 0; padding: 7px 8px; border: 1px solid #E4ECF7; border-radius: 8px; background: #F8FBFF; line-height: 1.25;'>
                 <table width='100%' cellpadding='0' cellspacing='0' border='0'><tr>
                     <td style='white-space: nowrap; vertical-align: top;'>
                         {icon}&nbsp;
-                        <span style='color:#70757A; font-size: 10px;'>{timestamp}</span>&nbsp;&nbsp;
-                        <span style='color:#202124; font-size: 11px;'>{message.strip()}</span>
+                        <span style='color:#64748B; font-size: 10px;'>{timestamp}</span>&nbsp;&nbsp;
+                        <span style='color:#0F172A; font-size: 11px; font-weight: 600;'>{message.strip()}</span>
                     </td>
                     <td style='text-align: right; white-space: nowrap; vertical-align: top; color:#70757A; font-size: 9px; padding-left: 8px;'>
                         {timestamp}
@@ -612,17 +713,46 @@ class ControlPanel(QWidget):
                      time_ms: Optional[float] = None):
         """Cập nhật dữ liệu thẻ thống kê."""
         if distance is not None:
-            self.stat_distance["value"].setText(f"{distance:.1f} m")
+            self._animate_stat("distance", float(distance), self.stat_distance["value"], "{:.1f} m")
         if node_count is not None:
-            self.stat_nodes["value"].setText(str(node_count))
+            self._animate_stat("nodes", float(node_count), self.stat_nodes["value"], "{:.0f}")
         if time_ms is not None:
-            self.stat_time["value"].setText(format_time_ms(time_ms))
+            self._animate_stat("time", float(time_ms), self.stat_time["value"], "time")
+
+    def _animate_stat(self, key: str, target: float, label: QLabel, fmt: str):
+        """Count-up nhẹ cho stat card, không block UI."""
+        start = self._stat_numeric.get(key, 0.0)
+        if abs(target - start) < 0.01:
+            return
+        timer = self._stat_timers.get(key)
+        if timer:
+            timer.stop()
+        steps = 10
+        state = {"i": 0}
+        timer = QTimer(self)
+
+        def tick():
+            state["i"] += 1
+            t = state["i"] / steps
+            value = start + (target - start) * t
+            if fmt == "time":
+                label.setText(format_time_ms(value))
+            else:
+                label.setText(fmt.format(value))
+            if state["i"] >= steps:
+                timer.stop()
+                self._stat_numeric[key] = target
+
+        timer.timeout.connect(tick)
+        self._stat_timers[key] = timer
+        timer.start(18)
     
     def reset_stats(self):
         """Reset các thẻ thống kê về trạng thái ban đầu."""
         self.stat_distance["value"].setText("— m")
         self.stat_nodes["value"].setText("—")
         self.stat_time["value"].setText("— ms")
+        self._stat_numeric = {"distance": 0.0, "nodes": 0.0, "time": 0.0}
     
     def get_selected_algorithm(self) -> str:
         """Trả về tên thuật toán đang chọn."""
@@ -638,7 +768,7 @@ class ControlPanel(QWidget):
     
     def set_running_state(self, running: bool):
         """Cập nhật tính năng vô hiệu hóa/bật khi thuật toán đang chạy."""
-        self.btn_start.setEnabled(not running)
+        self.btn_start.setEnabled((not running) and self._ready_to_start)
         self.btn_pause.setEnabled(running)
         self.btn_stop.setEnabled(running)
         self.algo_combo.setEnabled(not running)
@@ -653,7 +783,7 @@ class ControlPanel(QWidget):
     
     def set_finished_state(self):
         """Thiết lập trạng thái khi hoàn tất/dừng tìm kiếm."""
-        self.btn_start.setEnabled(True)
+        self.btn_start.setEnabled(self._ready_to_start)
         self.btn_pause.setEnabled(False)
         self.btn_stop.setEnabled(False)
         self.algo_combo.setEnabled(True)
@@ -663,6 +793,12 @@ class ControlPanel(QWidget):
         self.btn_graph_edit.setEnabled(True)
         self._is_paused = False
         self._set_pause_button(paused=False)
+
+    def set_ready_to_start(self, ready: bool):
+        """Bật nút Start chỉ khi đã có đủ điểm đi và điểm đến."""
+        self._ready_to_start = ready
+        if not self.btn_pause.isEnabled() and not self.btn_stop.isEnabled():
+            self.btn_start.setEnabled(ready)
     
     def _on_pause_clicked(self):
         """Bật tắt tạm dừng/tiếp tục."""

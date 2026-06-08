@@ -79,6 +79,15 @@ MAIN_WINDOW_STYLE = """
         font-size: 13px;
         padding-right: 18px;
     }
+    QLabel#toast {
+        background-color: #0F172A;
+        color: #FFFFFF;
+        border-radius: 12px;
+        padding: 12px 18px;
+        font-family: 'Segoe UI';
+        font-size: 13px;
+        font-weight: 800;
+    }
 """
 
 
@@ -117,6 +126,7 @@ class MainWindow(QMainWindow):
         self._total_visited = 0
         self._final_path = []
         self._final_cost = 0.0
+        self._app_state = "idle"
         
         # ── Xây dựng giao diện ──
         self._setup_window()
@@ -125,6 +135,7 @@ class MainWindow(QMainWindow):
         
         # ── Tải dữ liệu ──
         self._load_data()
+        self._set_app_state("idle")
     
     def _setup_window(self):
         """Cấu hình cửa sổ chính."""
@@ -211,11 +222,17 @@ class MainWindow(QMainWindow):
         body_layout.addWidget(self._control_panel)
         
         app_layout.addWidget(body, 1)
+
+        self._toast_label = QLabel(central)
+        self._toast_label.setObjectName("toast")
+        self._toast_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._toast_label.hide()
     
     def _connect_signals(self):
         """Kết nối các signal/slot điều khiển."""
         # Click chọn trên bản đồ
         self._map_widget.node_clicked.connect(self._on_node_clicked)
+        self._map_widget.graph_edit_clicked.connect(self._on_edit_graph)
         
         # Nút điều khiển Panel
         self._control_panel.start_clicked.connect(self._on_start)
@@ -224,6 +241,8 @@ class MainWindow(QMainWindow):
         self._control_panel.stop_clicked.connect(self._on_stop)
         self._control_panel.reset_clicked.connect(self._on_reset)
         self._control_panel.graph_edit_clicked.connect(self._on_edit_graph)
+        self._control_panel.clear_start_clicked.connect(self._clear_start)
+        self._control_panel.clear_goal_clicked.connect(self._clear_goal)
         
         # Combo box chọn địa điểm
         self._control_panel.start_combo.currentIndexChanged.connect(
@@ -246,6 +265,7 @@ class MainWindow(QMainWindow):
             
             # Điền danh sách combo box
             self._populate_node_combos()
+            self._sync_ready_state()
             
         except FileNotFoundError as e:
             self._control_panel.add_log(f"❌ Lỗi tải file: {e}")
@@ -283,25 +303,31 @@ class MainWindow(QMainWindow):
         """Xử lý click chọn node trên bản đồ."""
         if self._is_running:
             return
-            
-        name = self._graph.get_node_name(node_id)
-        
-        if self._click_count == 0:
+
+        # Click lại node đang được chọn sẽ bỏ chọn node đó. Cách này giúp người dùng
+        # sửa nhanh điểm đi/điểm đến trực tiếp trên bản đồ mà không cần dùng nút xóa.
+        if node_id == self._start_node:
+            self._clear_start()
+            return
+        if node_id == self._goal_node:
+            self._clear_goal()
+            return
+
+        if self._start_node is None:
             self._set_start(node_id)
-            self._click_count = 1
-        elif self._click_count == 1:
-            if node_id == self._start_node:
-                self._control_panel.add_log("⚠️ Điểm đích không được trùng điểm bắt đầu!")
-                return
+            self._click_count = 1 if self._goal_node is None else 2
+        elif self._goal_node is None:
             self._set_goal(node_id)
             self._click_count = 2
         else:
-            # Đã chọn cả hai -> Click lại sẽ reset chọn điểm bắt đầu mới
+            # Đã chọn cả hai -> click node khác sẽ bắt đầu một cặp lựa chọn mới.
             self._map_widget.full_reset()
             self._set_start(node_id)
             self._goal_node = None
             self._control_panel.set_goal_display("(Chọn trên bản đồ)")
+            self._set_combo_to_node(self._control_panel.goal_combo, None)
             self._click_count = 1
+            self._sync_ready_state()
             
     def _set_start(self, node_id: str):
         """Cập nhật điểm bắt đầu."""
@@ -310,6 +336,7 @@ class MainWindow(QMainWindow):
         self._map_widget.set_start_node(node_id)
         self._control_panel.set_start_display(name)
         self._control_panel.add_log(f"📍 Điểm bắt đầu: {name}")
+        self._map_widget.pulse_node(node_id)
         
         # Đồng bộ Combo Box
         for i in range(self._control_panel.start_combo.count()):
@@ -318,6 +345,7 @@ class MainWindow(QMainWindow):
                 self._control_panel.start_combo.setCurrentIndex(i)
                 self._control_panel.start_combo.blockSignals(False)
                 break
+        self._sync_ready_state()
                 
     def _set_goal(self, node_id: str):
         """Cập nhật điểm đích."""
@@ -326,6 +354,7 @@ class MainWindow(QMainWindow):
         self._map_widget.set_goal_node(node_id)
         self._control_panel.set_goal_display(name)
         self._control_panel.add_log(f"⭐ Điểm đích: {name}")
+        self._map_widget.pulse_node(node_id)
         
         # Đồng bộ Combo Box
         for i in range(self._control_panel.goal_combo.count()):
@@ -334,6 +363,46 @@ class MainWindow(QMainWindow):
                 self._control_panel.goal_combo.setCurrentIndex(i)
                 self._control_panel.goal_combo.blockSignals(False)
                 break
+        self._sync_ready_state()
+
+    def _clear_start(self):
+        """Xóa riêng điểm bắt đầu mà không ảnh hưởng graph."""
+        if self._is_running:
+            return
+        self._start_node = None
+        self._click_count = 0 if not self._goal_node else 1
+        self._map_widget.clear_start_node()
+        self._control_panel.set_start_display("(Chọn trên bản đồ)")
+        self._set_combo_to_node(self._control_panel.start_combo, None)
+        self._control_panel.add_log("↺ Đã xóa điểm bắt đầu")
+        self._sync_ready_state()
+
+    def _clear_goal(self):
+        """Xóa riêng điểm đích mà không ảnh hưởng graph."""
+        if self._is_running:
+            return
+        self._goal_node = None
+        self._click_count = 1 if self._start_node else 0
+        self._map_widget.clear_goal_node()
+        self._control_panel.set_goal_display("(Chọn trên bản đồ)")
+        self._set_combo_to_node(self._control_panel.goal_combo, None)
+        self._control_panel.add_log("↺ Đã xóa điểm đến")
+        self._sync_ready_state()
+
+    def _sync_ready_state(self):
+        """Đồng bộ trạng thái chọn điểm với header và nút Start."""
+        ready = bool(self._start_node and self._goal_node)
+        self._control_panel.set_ready_to_start(ready)
+        if self._is_running:
+            return
+        if ready:
+            self._set_app_state("ready")
+        elif self._start_node and not self._goal_node:
+            self._set_app_state("selecting_goal")
+        elif self._goal_node and not self._start_node:
+            self._set_app_state("selecting_start")
+        else:
+            self._set_app_state("idle")
                 
     def _on_start_combo_changed(self, index: int):
         node_id = self._control_panel.start_combo.itemData(index)
@@ -393,6 +462,7 @@ class MainWindow(QMainWindow):
         
         self._populate_node_combos()
         self._control_panel.reset_stats()
+        self._sync_ready_state()
         self._control_panel.add_log(
             f"🛠️ Đã cập nhật bản đồ: {len(self._graph.nodes)} node, {len(self._graph.edges)} cạnh"
         )
@@ -448,7 +518,8 @@ class MainWindow(QMainWindow):
         self._final_cost = 0.0
         
         self._control_panel.set_running_state(True)
-        self._update_status("Đang chạy", "#1A73E8")
+        self._map_widget.set_graph_edit_enabled(False)
+        self._set_app_state("running")
         
         # Khởi động Timer bước chạy
         self._timer.start(self._step_delay)
@@ -501,6 +572,7 @@ class MainWindow(QMainWindow):
         
         if self._final_path and len(self._final_path) > 1:
             self._map_widget.highlight_path(self._final_path)
+            self._show_toast("Đã tìm thấy lộ trình tối ưu")
             
             # Báo cáo kết quả
             algo_name = self._control_panel.get_selected_algorithm()
@@ -531,17 +603,18 @@ class MainWindow(QMainWindow):
             time_ms=exec_time
         )
         self._control_panel.set_finished_state()
-        self._update_status("Hoàn tất", "#34A853")
+        self._map_widget.set_graph_edit_enabled(True)
+        self._set_app_state("completed" if self._final_path else "error")
         
     def _on_pause(self):
         self._is_paused = True
         self._control_panel.add_log("⏸️ Tạm dừng mô phỏng")
-        self._update_status("Tạm dừng", "#F9AB00")
+        self._set_app_state("paused")
         
     def _on_resume(self):
         self._is_paused = False
         self._control_panel.add_log("▶️ Tiếp tục mô phỏng")
-        self._update_status("Đang chạy", "#1A73E8")
+        self._set_app_state("running")
         
     def _on_stop(self):
         self._timer.stop()
@@ -552,7 +625,8 @@ class MainWindow(QMainWindow):
         
         self._control_panel.add_log("⏹️ Đã dừng tìm kiếm")
         self._control_panel.set_finished_state()
-        self._update_status("Đã dừng", "#D93025")
+        self._map_widget.set_graph_edit_enabled(True)
+        self._set_app_state("idle")
         
     def _on_reset(self):
         self._timer.stop()
@@ -566,6 +640,7 @@ class MainWindow(QMainWindow):
         self._click_count = 0
         
         self._control_panel.set_finished_state()
+        self._map_widget.set_graph_edit_enabled(True)
         self._control_panel.reset_stats()
         self._control_panel.clear_log()
         self._control_panel.set_start_display("(Chọn trên bản đồ)")
@@ -581,7 +656,7 @@ class MainWindow(QMainWindow):
         
         self._control_panel.add_log("↻ Đã reset toàn bộ hệ thống")
         self._control_panel.add_log("✅ Khởi tạo đồ thị HCMUTE thành công")
-        self._update_status("Sẵn sàng", "#34A853")
+        self._sync_ready_state()
         
     def _update_status(self, text: str, color: str):
         """Cập nhật trạng thái hiển thị trên header."""
@@ -589,3 +664,37 @@ class MainWindow(QMainWindow):
             f"<span style='color: {color}; font-size: 14px;'>●</span>&nbsp;Trạng thái: "
             f"<span style='color: {color}; font-weight: bold;'>{text}</span>"
         )
+
+    def _set_app_state(self, state: str):
+        """State UI tập trung để header, panel và feedback luôn đồng bộ."""
+        self._app_state = state
+        labels = {
+            "idle": ("Sẵn sàng", "#22C55E"),
+            "selecting_start": ("Chọn điểm đi", "#0B74FF"),
+            "selecting_goal": ("Chọn điểm đến", "#0B74FF"),
+            "ready": ("Sẵn sàng chạy", "#22C55E"),
+            "running": ("Đang tìm đường", "#F59E0B"),
+            "paused": ("Tạm dừng", "#F59E0B"),
+            "completed": ("Hoàn tất", "#22C55E"),
+            "error": ("Lỗi", "#EF4444"),
+        }
+        text, color = labels.get(state, labels["idle"])
+        self._update_status(text, color)
+
+    def _show_toast(self, message: str, timeout_ms: int = 2600):
+        self._toast_label.setText(message)
+        self._toast_label.adjustSize()
+        self._position_toast()
+        self._toast_label.show()
+        self._toast_label.raise_()
+        QTimer.singleShot(timeout_ms, self._toast_label.hide)
+
+    def _position_toast(self):
+        if not hasattr(self, "_toast_label"):
+            return
+        x = max(0, (self.centralWidget().width() - self._toast_label.width()) // 2)
+        self._toast_label.move(x, 86)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self._position_toast()

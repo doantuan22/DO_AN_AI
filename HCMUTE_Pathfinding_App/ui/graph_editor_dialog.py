@@ -138,7 +138,7 @@ class GraphEditorDialog(QDialog):
         tabs.addTab(self._create_visual_tab(), "Ban do truc quan")
         tabs.addTab(self._create_nodes_tab(), "Node")
         tabs.addTab(self._create_edges_tab(), "Canh")
-        tabs.addTab(self._create_display_tab(edge_visible, edge_width, edge_opacity), "Hien thi canh")
+        tabs.addTab(self._create_display_tab(edge_visible, edge_width, edge_opacity), "Cai dat")
 
         bottom = QHBoxLayout()
         self.btn_save = QPushButton("Luu JSON")
@@ -374,6 +374,24 @@ class GraphEditorDialog(QDialog):
         grid.addWidget(btn_apply, 3, 0, 1, 3)
 
         layout.addWidget(box)
+
+        node_box = QGroupBox("Cai dat ten node")
+        node_layout = QVBoxLayout(node_box)
+
+        btn_hide_all_names = QPushButton("An toan bo ten node")
+        btn_hide_all_names.clicked.connect(self._clear_all_node_names)
+
+        note = QLabel(
+            "Chuc nang nay se xoa truong ten hien thi cua tat ca node. "
+            "Tren log va combo, node khong co ten se hien ID goc nhu N11, N22."
+        )
+        note.setWordWrap(True)
+        note.setStyleSheet("color: #70757A;")
+
+        node_layout.addWidget(btn_hide_all_names)
+        node_layout.addWidget(note)
+
+        layout.addWidget(node_box)
         return tab
 
     def _reload_all(self):
@@ -554,6 +572,26 @@ class GraphEditorDialog(QDialog):
             self._select_node(self._selected_node_id)
         except Exception as exc:
             self._show_error(exc)
+
+    def _clear_all_node_names(self):
+        """Xoa ten hien thi cua tat ca node tren graph."""
+        named_count = sum(1 for node in self._graph.nodes.values() if node.name)
+        if named_count == 0:
+            self._status_label.setText("Tat ca node hien da khong co ten hien thi.")
+            return
+
+        answer = QMessageBox.question(
+            self,
+            "An toan bo ten node",
+            f"Xoa ten hien thi cua {named_count} node? Ban van can bam Luu JSON de ghi vao file.",
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+
+        for node in self._graph.nodes.values():
+            node.name = ""
+
+        self._after_graph_changed(f"Da an ten hien thi cua {named_count} node")
 
     def _pick_visual_edge(self, node_id: str, create: bool):
         if self._visual_edge_first is None:

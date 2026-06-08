@@ -195,10 +195,10 @@ class Graph:
             node_id = node_data.get("id", "")
             x = node_data.get("x", 0)
             y = node_data.get("y", 0)
-            # Ưu tiên tên từ JSON nếu có giá trị thực; nếu rỗng hoặc không có, fallback sang NODE_NAMES
-            json_name = node_data.get("name")
-            if json_name:  # Có tên thực sự (non-empty string)
-                name = json_name
+            # Nếu JSON có field "name" thì tôn trọng tuyệt đối, kể cả chuỗi rỗng
+            # vì chuỗi rỗng nghĩa là người dùng đã chủ động ẩn tên node.
+            if "name" in node_data:
+                name = str(node_data.get("name", ""))
             else:
                 name = self.NODE_NAMES.get(node_id, "")
             
@@ -409,7 +409,9 @@ class Graph:
     def get_node_name(self, node_id: str) -> str:
         """Lấy tên hiển thị của node."""
         node = self.nodes.get(node_id)
-        return node.name if node else node_id
+        if node is None:
+            return node_id
+        return node.name if node.name else node_id
     
     def get_node_position(self, node_id: str) -> Optional[Tuple[int, int]]:
         """Lấy tọa độ (x, y) của node."""
