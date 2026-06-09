@@ -77,7 +77,7 @@ class WelcomeScreen(QWidget):
         self.overlay = QFrame(self)
         self.overlay.setGeometry(0, 0, self.width(), self.height())
         self.overlay.setStyleSheet(
-            "background-color: rgba(7, 24, 54, 72); border-radius: 30px;"
+            "background-color: rgba(255, 255, 255, 118); border-radius: 30px;"
         )
 
         self.card = QFrame(self)

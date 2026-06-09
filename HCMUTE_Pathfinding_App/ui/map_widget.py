@@ -343,6 +343,9 @@ class MapWidget(QGraphicsView):
         self._avatar_segment_progress = 0
         self._avatar_step_count = 20
         self._avatar_hiding_route = False
+        self._firework_timer = QTimer(self)
+        self._firework_timer.timeout.connect(self._animate_fireworks)
+        self._firework_particles: List[dict] = []
         self._last_current_node: Optional[str] = None
         self._pulse_timer = QTimer(self)
         self._pulse_timer.timeout.connect(self._tick_pulses)
@@ -1227,6 +1230,9 @@ class MapWidget(QGraphicsView):
         if self._avatar_item is None or self._avatar_segment_index >= len(self._avatar_segments):
             self._avatar_timer.stop()
             self._restore_full_route_visibility()
+            if self._avatar_segments:
+                _, _, ex, ey = self._avatar_segments[-1]
+                self._spawn_fireworks(ex, ey)
             return
 
         sx, sy, ex, ey = self._avatar_segments[self._avatar_segment_index]
@@ -1245,6 +1251,68 @@ class MapWidget(QGraphicsView):
             if self._avatar_segment_index >= len(self._avatar_segments):
                 self._avatar_timer.stop()
                 self._restore_full_route_visibility()
+                self._spawn_fireworks(ex, ey)
+
+    def _spawn_fireworks(self, x: float, y: float):
+        """Tạo pháo hoa nhỏ tại node đích khi avatar đi mẫu tới nơi."""
+        if self._graph_overlay_hidden:
+            return
+
+        colors = [
+            QColor("#0B74FF"),
+            QColor("#00D1B2"),
+            QColor("#22C55E"),
+            QColor("#F59E0B"),
+            QColor("#EF4444"),
+            QColor("#FFFFFF"),
+        ]
+        burst_count = 22
+        for i in range(burst_count):
+            angle = (math.tau / burst_count) * i
+            speed = 2.4 + (i % 5) * 0.42
+            radius = 3.2 if i % 3 else 4.4
+            color = colors[i % len(colors)]
+            item = self._scene.addEllipse(
+                -radius,
+                -radius,
+                radius * 2,
+                radius * 2,
+                QPen(Qt.PenStyle.NoPen),
+                QBrush(color),
+            )
+            if item is None:
+                continue
+            item.setPos(x, y)
+            item.setZValue(30)
+            self._firework_particles.append({
+                "item": item,
+                "vx": math.cos(angle) * speed,
+                "vy": math.sin(angle) * speed - 0.65,
+                "life": 0,
+                "max_life": 34 + (i % 6),
+            })
+
+        self.pulse_node(self._goal_node, MapColors.EDGE_PATH)
+        if not self._firework_timer.isActive():
+            self._firework_timer.start(16)
+
+    def _animate_fireworks(self):
+        remaining = []
+        for particle in self._firework_particles:
+            item = particle["item"]
+            particle["life"] += 1
+            particle["vy"] += 0.055
+            item.moveBy(particle["vx"], particle["vy"])
+            t = particle["life"] / particle["max_life"]
+            item.setOpacity(max(0.0, 1.0 - t))
+            item.setScale(1.0 + t * 0.85)
+            if particle["life"] >= particle["max_life"]:
+                self._scene.removeItem(item)
+            else:
+                remaining.append(particle)
+        self._firework_particles = remaining
+        if not self._firework_particles:
+            self._firework_timer.stop()
 
     def _update_route_visibility_for_avatar(self, avatar_x: float, avatar_y: float):
         """Avatar đi đến đâu thì phần route phía sau biến mất đến đó."""
@@ -1288,11 +1356,18 @@ class MapWidget(QGraphicsView):
 
     def _clear_avatar(self):
         self._avatar_timer.stop()
+        self._clear_fireworks()
         if self._avatar_item is not None:
             self._scene.removeItem(self._avatar_item)
         self._avatar_item = None
         self._avatar_segments = []
         self._avatar_hiding_route = False
+
+    def _clear_fireworks(self):
+        self._firework_timer.stop()
+        for particle in self._firework_particles:
+            self._scene.removeItem(particle["item"])
+        self._firework_particles.clear()
                     
     def clear_path(self):
         self._route_timer.stop()
