@@ -1,9 +1,4 @@
-"""
-graph.py - Module xử lý đồ thị HCMUTE
-=============================================
-Đọc dữ liệu từ file JSON, xây dựng cấu trúc đồ thị
-với danh sách kề (adjacency list), lưu trữ node, cạnh và trọng số.
-"""
+"""Mô hình đồ thị HCMUTE: node, cạnh, adjacency list và đọc/lưu JSON."""
 
 import json
 import os
@@ -12,15 +7,7 @@ from typing import Dict, List, Tuple, Optional, Any
 
 
 class Node:
-    """
-    Đại diện cho một node (địa điểm/giao lộ) trên bản đồ HCMUTE.
-    
-    Attributes:
-        id: Mã định danh duy nhất của node (vd: "N01")
-        x: Tọa độ x trên ảnh bản đồ (pixel)
-        y: Tọa độ y trên ảnh bản đồ (pixel)
-        name: Tên hiển thị của địa điểm (vd: "Cổng chính")
-    """
+    """Node trên bản đồ: ID, tọa độ pixel và tên hiển thị."""
     
     def __init__(self, node_id: str, x: int, y: int, name: str = ""):
         self.id = node_id
@@ -29,7 +16,7 @@ class Node:
         self.name = name
     
     def position(self) -> Tuple[int, int]:
-        """Trả về tọa độ (x, y) của node."""
+        """Trả về tọa độ pixel của node."""
         return (self.x, self.y)
     
     def __repr__(self) -> str:
@@ -45,14 +32,7 @@ class Node:
 
 
 class Edge:
-    """
-    Đại diện cho một cạnh (đoạn đường) nối hai node.
-    
-    Attributes:
-        source: ID node nguồn
-        target: ID node đích
-        weight: Trọng số cạnh (khoảng cách tính bằng pixel)
-    """
+    """Cạnh nối hai node, weight là khoảng cách/chi phí."""
     
     def __init__(self, source: str, target: str, weight: float):
         self.source = source
@@ -64,18 +44,9 @@ class Edge:
 
 
 class Graph:
-    """
-    Đồ thị HCMUTE - lưu trữ dưới dạng danh sách kề.
-    Đồ thị vô hướng: mỗi cạnh được thêm cả hai chiều.
+    """Đồ thị vô hướng lưu bằng danh sách kề để thuật toán truy vấn nhanh."""
     
-    Attributes:
-        nodes: Dict mapping node_id -> Node object
-        edges: List tất cả các cạnh
-        adjacency: Dict mapping node_id -> List[(neighbor_id, weight)]
-    """
-    
-    # Bảng mapping node ID -> tên địa điểm trên bản đồ HCMUTE
-    # Dựa trên tọa độ pixel và vị trí trên bản đồ thực tế
+    # Tên mặc định khi JSON chưa có field name.
     NODE_NAMES = {
         "N01": "Sân bóng chuyền",
         "N02": "Ký túc xá B",
@@ -152,23 +123,11 @@ class Graph:
     
     @property
     def image_size(self) -> Tuple[int, int]:
-        """Trả về kích thước ảnh bản đồ gốc (width, height)."""
+        """Trả về kích thước ảnh bản đồ gốc."""
         return (self._image_width, self._image_height)
     
     def load_from_json(self, filepath: str) -> bool:
-        """
-        Đọc dữ liệu đồ thị từ file JSON.
-        
-        Hỗ trợ nhiều format JSON linh hoạt:
-        - edges có thể dùng "from"/"to" hoặc "source"/"target"
-        - nodes có thể có hoặc không có trường "name"
-        
-        Args:
-            filepath: Đường dẫn đến file JSON chứa dữ liệu đồ thị
-            
-        Returns:
-            True nếu đọc thành công, False nếu có lỗi
-        """
+        """Đọc JSON, tạo node/edge và adjacency list cho đồ thị."""
         if not os.path.exists(filepath):
             raise FileNotFoundError(f"Không tìm thấy file dữ liệu: {filepath}")
         
@@ -184,19 +143,17 @@ class Graph:
         self._image_width = 0
         self._image_height = 0
         
-        # Đọc kích thước ảnh (nếu có)
+        # Lưu kích thước ảnh để editor giới hạn tọa độ.
         if "image_size" in data:
             self._image_width = data["image_size"].get("width", 0)
             self._image_height = data["image_size"].get("height", 0)
         
-        # Đọc danh sách nodes
         nodes_data = data.get("nodes", [])
         for node_data in nodes_data:
             node_id = node_data.get("id", "")
             x = node_data.get("x", 0)
             y = node_data.get("y", 0)
-            # Nếu JSON có field "name" thì tôn trọng tuyệt đối, kể cả chuỗi rỗng
-            # vì chuỗi rỗng nghĩa là người dùng đã chủ động ẩn tên node.
+            # name="" là người dùng chủ động ẩn tên, không fallback.
             if "name" in node_data:
                 name = str(node_data.get("name", ""))
             else:
@@ -206,10 +163,9 @@ class Graph:
             self.nodes[node_id] = node
             self.adjacency[node_id] = []
         
-        # Đọc danh sách edges
         edges_data = data.get("edges", [])
         for edge_data in edges_data:
-            # Hỗ trợ cả "from"/"to" và "source"/"target"
+            # Hỗ trợ cả format from/to và source/target.
             source = edge_data.get("from", edge_data.get("source", ""))
             target = edge_data.get("to", edge_data.get("target", ""))
             weight = edge_data.get("weight", 1.0)
@@ -218,14 +174,14 @@ class Graph:
                 edge = Edge(source, target, weight)
                 self.edges.append(edge)
                 
-                # Đồ thị vô hướng: thêm cả hai chiều
+                # Đồ thị vô hướng nên adjacency lưu cả hai chiều.
                 self.adjacency[source].append((target, weight))
                 self.adjacency[target].append((source, weight))
         
         return True
     
     def to_dict(self) -> Dict[str, Any]:
-        """Chuyển đồ thị hiện tại thành dữ liệu có thể lưu JSON."""
+        """Chuyển đồ thị hiện tại thành dict để lưu JSON."""
         nodes = []
         for node_id in self.get_all_node_ids():
             node = self.nodes[node_id]
@@ -253,7 +209,7 @@ class Graph:
         }
     
     def save_to_json(self, filepath: str) -> bool:
-        """Lưu đồ thị hiện tại ra file JSON."""
+        """Ghi đồ thị hiện tại ra file JSON."""
         directory = os.path.dirname(filepath)
         if directory:
             os.makedirs(directory, exist_ok=True)
@@ -275,7 +231,7 @@ class Graph:
         return node
     
     def update_node(self, node_id: str, x: int, y: int, name: str = "") -> Node:
-        """Cập nhật tọa độ và tên hiển thị của node."""
+        """Cập nhật tọa độ và tên node."""
         node = self.nodes.get(node_id)
         if node is None:
             raise ValueError(f"Node '{node_id}' không tồn tại")
@@ -286,7 +242,7 @@ class Graph:
         return node
     
     def delete_node(self, node_id: str) -> None:
-        """Xóa node và toàn bộ cạnh liên quan."""
+        """Xóa node cùng toàn bộ cạnh liên quan."""
         if node_id not in self.nodes:
             raise ValueError(f"Node '{node_id}' không tồn tại")
         
@@ -300,7 +256,7 @@ class Graph:
         ]
     
     def add_edge(self, source: str, target: str, weight: Optional[float] = None) -> Edge:
-        """Thêm cạnh vô hướng giữa hai node."""
+        """Thêm cạnh vô hướng; tự tính weight nếu không truyền vào."""
         if source not in self.nodes or target not in self.nodes:
             raise ValueError("Hai node của cạnh phải tồn tại")
         if source == target:
@@ -344,7 +300,7 @@ class Graph:
         return self._find_edge(source, target) is not None
     
     def calculate_euclidean_weight(self, source: str, target: str) -> float:
-        """Tính trọng số cạnh theo khoảng cách Euclidean giữa hai node."""
+        """Tính weight theo khoảng cách Euclidean giữa hai node."""
         src = self.nodes.get(source)
         dst = self.nodes.get(target)
         if src is None or dst is None:
@@ -378,56 +334,38 @@ class Graph:
         ]
     
     def get_node(self, node_id: str) -> Optional[Node]:
-        """Lấy thông tin node theo ID."""
+        """Lấy node theo ID."""
         return self.nodes.get(node_id)
     
     def get_neighbors(self, node_id: str) -> List[Tuple[str, float]]:
-        """
-        Lấy danh sách các node kề và trọng số cạnh.
-        
-        Returns:
-            List of (neighbor_id, weight) tuples
-        """
+        """Lấy danh sách (neighbor_id, weight) của node."""
         return self.adjacency.get(node_id, [])
     
     def get_edge_weight(self, source: str, target: str) -> Optional[float]:
-        """
-        Lấy trọng số cạnh giữa hai node.
-        
-        Returns:
-            Trọng số cạnh nếu tồn tại, None nếu không có cạnh
-        """
+        """Lấy weight giữa hai node, None nếu không có cạnh."""
         for neighbor, weight in self.adjacency.get(source, []):
             if neighbor == target:
                 return weight
         return None
     
     def get_all_node_ids(self) -> List[str]:
-        """Lấy danh sách tất cả ID node, sắp xếp theo thứ tự."""
+        """Lấy danh sách ID node đã sắp xếp."""
         return sorted(self.nodes.keys())
     
     def get_node_name(self, node_id: str) -> str:
-        """Lấy tên hiển thị của node."""
+        """Lấy tên node; nếu rỗng thì fallback về ID."""
         node = self.nodes.get(node_id)
         if node is None:
             return node_id
         return node.name if node.name else node_id
     
     def get_node_position(self, node_id: str) -> Optional[Tuple[int, int]]:
-        """Lấy tọa độ (x, y) của node."""
+        """Lấy tọa độ node theo ID."""
         node = self.nodes.get(node_id)
         return node.position() if node else None
     
     def calculate_path_cost(self, path: List[str]) -> float:
-        """
-        Tính tổng chi phí của một đường đi.
-        
-        Args:
-            path: Danh sách các node ID theo thứ tự đường đi
-            
-        Returns:
-            Tổng trọng số của các cạnh trên đường đi
-        """
+        """Tính tổng weight của các cạnh trong path."""
         if len(path) < 2:
             return 0.0
         
@@ -437,12 +375,12 @@ class Graph:
             if weight is not None:
                 total_cost += weight
             else:
-                # Cạnh không tồn tại - đường đi không hợp lệ
+                # Path không hợp lệ nếu thiếu cạnh giữa hai node liên tiếp.
                 return float('inf')
         return total_cost
     
     def node_exists(self, node_id: str) -> bool:
-        """Kiểm tra node có tồn tại trong đồ thị không."""
+        """Kiểm tra node có trong đồ thị không."""
         return node_id in self.nodes
     
     def __len__(self) -> int:
