@@ -20,10 +20,12 @@ from PyQt6.QtGui import QFont, QColor, QIcon, QPixmap
 from core.graph import Graph
 from core.algorithms import get_algorithm, needs_heuristic, ALGORITHM_MAP
 from core.heuristic import get_heuristic_function
+from core.history_store import HistoryStore
 from core.utils import Timer, get_timestamp
 from ui.map_widget import MapWidget
 from ui.control_panel import ControlPanel
 from ui.graph_editor_dialog import GraphEditorDialog
+from ui.history_dialog import HistoryDialog
 
 
 # ──────────────────────────────────────────────────────────────
@@ -103,11 +105,13 @@ class MainWindow(QMainWindow):
         else:
             self._base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         self._json_path = os.path.join(self._base_dir, "data", "hcmute_graph_nodes_edges.json")
+        self._history_db_path = os.path.join(self._base_dir, "data", "path_history.sqlite3")
         self._map_path = os.path.join(self._base_dir, "assets", "map.png")
         self._avatar_path = os.path.join(self._base_dir, "assets", "avata01.png")
         
         # ── Khởi tạo dữ liệu ──
         self._graph = Graph()
+        self._history_store = HistoryStore(self._history_db_path)
         self._timer = QTimer()
         self._timer.timeout.connect(self._execute_step)
         
@@ -242,6 +246,7 @@ class MainWindow(QMainWindow):
         # Click chọn trên bản đồ
         self._map_widget.node_clicked.connect(self._on_node_clicked)
         self._map_widget.graph_edit_clicked.connect(self._on_edit_graph)
+        self._map_widget.history_clicked.connect(self._on_show_history)
         self._map_widget.sample_walk_clicked.connect(self._on_sample_walk)
         self._map_widget.algorithm_speed_changed.connect(self._on_algorithm_speed_changed)
         
@@ -449,6 +454,11 @@ class MainWindow(QMainWindow):
         dialog.graph_changed.connect(self._on_graph_changed)
         dialog.edge_display_changed.connect(self._map_widget.set_edge_display)
         dialog.exec()
+
+    def _on_show_history(self):
+        """Mở bảng lịch sử đường đi đã lưu trong SQLite."""
+        dialog = HistoryDialog(self._history_store, self)
+        dialog.exec()
     
     def _on_graph_changed(self):
         """Dựng lại map và lựa chọn sau khi graph được chỉnh sửa."""
@@ -535,8 +545,33 @@ class MainWindow(QMainWindow):
         self._map_widget.set_graph_edit_enabled(False)
         self._set_app_state("running")
         
-        # Khởi động Timer bước chạy
-        self._timer.start(self._step_delay)
+        # Khi ẩn node/cạnh, bản đồ là giao diện chính sạch: chạy xong ngay và chỉ hiện route cuối.
+        if self._map_widget.is_graph_overlay_hidden():
+            self._execute_all_steps_without_animation()
+        else:
+            # Khởi động Timer bước chạy để mô phỏng từng bước trên node.
+            self._timer.start(self._step_delay)
+
+    def _execute_all_steps_without_animation(self):
+        """Chạy generator đến hết, ghi log đầy đủ nhưng không tô từng bước lên bản đồ."""
+        if not self._algorithm_gen or not self._is_running:
+            return
+
+        for step in self._algorithm_gen:
+            visited = step.get("visited", [])
+            path = step.get("path", [])
+            cost = step.get("cost", 0)
+            log = step.get("log", "")
+
+            self._total_visited = len(visited)
+            if log:
+                self._control_panel.add_log(log)
+            if log and ("✅" in log or "❌" in log):
+                self._final_path = path
+                self._final_cost = cost
+
+        self._algorithm_gen = None
+        self._on_algorithm_finished()
         
     def _execute_step(self):
         """Thực hiện một bước trong generator thuật toán."""
@@ -585,7 +620,10 @@ class MainWindow(QMainWindow):
         self._is_running = False
         
         if self._final_path and len(self._final_path) > 1:
-            self._map_widget.highlight_path(self._final_path)
+            self._map_widget.highlight_path(
+                self._final_path,
+                animate=not self._map_widget.is_graph_overlay_hidden(),
+            )
             self._map_widget.set_sample_walk_enabled(True)
             self._show_toast("Đã tìm thấy lộ trình tối ưu")
             
@@ -610,6 +648,7 @@ class MainWindow(QMainWindow):
             self._control_panel.add_log(f"🛣️ Tổng quãng đường: {self._final_cost:.1f} m")
             self._control_panel.add_log(f"🔍 Số node đã duyệt: {self._total_visited}")
             self._control_panel.add_log(f"⏱️ Thời gian xử lý: {exec_time:.2f} ms")
+            self._save_history(algo_name, exec_time)
             self._control_panel.add_log("✅ Tính toán hoàn tất!")
             
         self._control_panel.update_stats(
@@ -620,6 +659,27 @@ class MainWindow(QMainWindow):
         self._control_panel.set_finished_state()
         self._map_widget.set_graph_edit_enabled(True)
         self._set_app_state("completed" if self._final_path else "error")
+
+    def _save_history(self, algo_name: str, exec_time: float):
+        """Lưu kết quả tìm đường thành công vào SQLite."""
+        if not self._start_node or not self._goal_node or len(self._final_path) < 2:
+            return
+        try:
+            self._history_store.add_route(
+                algorithm=algo_name,
+                start_node_id=self._start_node,
+                start_node_name=self._graph.get_node_name(self._start_node),
+                goal_node_id=self._goal_node,
+                goal_node_name=self._graph.get_node_name(self._goal_node),
+                distance_m=self._final_cost,
+                path_node_ids=self._final_path,
+                path_names=[self._graph.get_node_name(node_id) for node_id in self._final_path],
+                visited_count=self._total_visited,
+                elapsed_ms=exec_time,
+            )
+            self._control_panel.add_log("💾 Đã lưu lịch sử đường đi")
+        except Exception as exc:
+            self._control_panel.add_log(f"⚠️ Không thể lưu lịch sử: {exc}")
         
     def _on_pause(self):
         self._is_paused = True
