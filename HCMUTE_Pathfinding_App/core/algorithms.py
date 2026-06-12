@@ -1,17 +1,50 @@
-"""Các thuật toán tìm đường dạng generator để UI mô phỏng từng bước."""
+
+
+"""
+algorithms.py - Module cài đặt các thuật toán tìm kiếm trên đồ thị
+====================================================================
+Bao gồm 5 thuật toán:
+  1. BFS  (Breadth-First Search)
+  2. DFS  (Depth-First Search)
+  3. UCS  (Uniform-Cost Search)
+  4. Greedy Search
+  5. A* Search
+
+Mỗi thuật toán được cài đặt dưới dạng generator (yield từng bước)
+để hỗ trợ mô phỏng trực quan trên giao diện.
+
+Mỗi bước yield một dict chứa trạng thái hiện tại của thuật toán.
+"""
 
 import heapq
 import time
 from collections import deque
-from typing import List, Dict, Tuple, Optional, Generator, Callable, Any, Deque
+from typing import List, Dict, Tuple, Optional, Generator, Callable, Any
 
 from core.graph import Graph
 from core.heuristic import euclidean_distance, manhattan_distance
 
 
+# ──────────────────────────────────────────────────────────────
+# Kiểu dữ liệu cho mỗi bước mô phỏng
+# ──────────────────────────────────────────────────────────────
+
 def _make_step(current: str, visited: list, frontier: list,
                path: list, cost: float, log: str) -> dict:
-    """Tạo dữ liệu một bước chạy để map/log/stat cập nhật đồng bộ."""
+    """
+    Tạo dict mô tả một bước của thuật toán.
+    
+    Args:
+        current: Node đang xét
+        visited: Danh sách các node đã duyệt
+        frontier: Danh sách các node trong hàng đợi/ngăn xếp
+        path: Đường đi hiện tại đến node current
+        cost: Chi phí tích lũy đến node current
+        log: Thông báo log cho bước này
+        
+    Returns:
+        Dict chứa trạng thái bước hiện tại
+    """
     return {
         "current": current,
         "visited": list(visited),
@@ -22,9 +55,23 @@ def _make_step(current: str, visited: list, frontier: list,
     }
 
 
+# ──────────────────────────────────────────────────────────────
+# 1. BFS - Breadth-First Search
+# ──────────────────────────────────────────────────────────────
+
 def bfs(graph: Graph, start: str, goal: str) -> Generator:
-    """BFS dùng queue FIFO, phù hợp tìm đường ít cạnh nhất."""
-    # Kiểm tra đầu vào.
+    """
+    Thuật toán BFS - Tìm kiếm theo chiều rộng.
+    
+    Args:
+        graph: Đồ thị HCMUTE
+        start: ID node bắt đầu
+        goal: ID node đích
+        
+    Yields:
+        Dict trạng thái mỗi bước
+    """
+    # Kiểm tra đầu vào
     if not graph.node_exists(start) or not graph.node_exists(goal):
         yield _make_step(start, [], [], [], 0, "❌ Node không tồn tại trong đồ thị!")
         return
@@ -34,12 +81,12 @@ def bfs(graph: Graph, start: str, goal: str) -> Generator:
                         f"✅ Điểm bắt đầu trùng điểm đích: {graph.get_node_name(start)}")
         return
     
-    # Queue lưu (node, path) để khôi phục đường đi khi gặp goal.
-    queue: Deque[Tuple[str, List[str]]] = deque()
+    # Khởi tạo
+    queue = deque()          # Hàng đợi FIFO
     queue.append((start, [start]))  # (node_id, path_to_node)
-    visited: set[str] = set()
+    visited = set()          # Tập các node đã thăm
     visited.add(start)
-    visited_order: List[str] = [start]
+    visited_order = [start]  # Thứ tự duyệt
     
     yield _make_step(start, visited_order, [start], [start], 0,
                     f"🔵 BFS: Khởi tạo - Thêm {graph.get_node_name(start)} vào queue")
@@ -47,13 +94,13 @@ def bfs(graph: Graph, start: str, goal: str) -> Generator:
     while queue:
         current, path = queue.popleft()
         
-        # Frontier là các node còn trong queue để UI tô màu.
+        # Lấy danh sách frontier hiện tại để hiển thị
         frontier_nodes = [item[0] for item in queue]
         
         yield _make_step(current, visited_order, frontier_nodes, path, 0,
                         f"🔍 Đang xét: {graph.get_node_name(current)}")
         
-        # Gặp goal thì trả về path và tổng chi phí.
+        # Kiểm tra đã đến đích chưa
         if current == goal:
             cost = graph.calculate_path_cost(path)
             route = " → ".join(graph.get_node_name(n) for n in path)
@@ -61,7 +108,7 @@ def bfs(graph: Graph, start: str, goal: str) -> Generator:
                             f"✅ Tìm thấy đường đi!\n   Lộ trình: {route}\n   Tổng: {cost:.1f} m")
             return
         
-        # BFS thêm node kề chưa thăm vào cuối queue.
+        # Mở rộng các node kề
         for neighbor, weight in graph.get_neighbors(current):
             if neighbor not in visited:
                 visited.add(neighbor)
@@ -74,13 +121,28 @@ def bfs(graph: Graph, start: str, goal: str) -> Generator:
                                path, 0,
                                f"   ➕ Thêm {graph.get_node_name(neighbor)} vào queue")
     
+    # Không tìm thấy đường đi
     yield _make_step("", visited_order, [], [], 0,
                     f"❌ Không tìm thấy đường đi từ {graph.get_node_name(start)} "
                     f"đến {graph.get_node_name(goal)}")
 
 
+# ──────────────────────────────────────────────────────────────
+# 2. DFS - Depth-First Search
+# ──────────────────────────────────────────────────────────────
+
 def dfs(graph: Graph, start: str, goal: str) -> Generator:
-    """DFS dùng stack LIFO, đi sâu trước và không đảm bảo tối ưu."""
+    """
+    Thuật toán DFS - Tìm kiếm theo chiều sâu.
+    
+    Args:
+        graph: Đồ thị HCMUTE
+        start: ID node bắt đầu
+        goal: ID node đích
+        
+    Yields:
+        Dict trạng thái mỗi bước
+    """
     if not graph.node_exists(start) or not graph.node_exists(goal):
         yield _make_step(start, [], [], [], 0, "❌ Node không tồn tại trong đồ thị!")
         return
@@ -90,10 +152,10 @@ def dfs(graph: Graph, start: str, goal: str) -> Generator:
                         f"✅ Điểm bắt đầu trùng điểm đích: {graph.get_node_name(start)}")
         return
     
-    # Stack lưu (node, path) để đi sâu và quay lui.
+    # Khởi tạo ngăn xếp
     stack = [(start, [start])]  # (node_id, path_to_node)
     visited = set()
-    visited_order: List[str] = []
+    visited_order = []
     
     yield _make_step(start, visited_order, [start], [start], 0,
                     f"🟣 DFS: Khởi tạo - Thêm {graph.get_node_name(start)} vào stack")
@@ -112,7 +174,7 @@ def dfs(graph: Graph, start: str, goal: str) -> Generator:
         yield _make_step(current, visited_order, frontier_nodes, path, 0,
                         f"🔍 Đang xét: {graph.get_node_name(current)}")
         
-        # Gặp goal thì trả về path hiện tại.
+        # Kiểm tra đích
         if current == goal:
             cost = graph.calculate_path_cost(path)
             route = " → ".join(graph.get_node_name(n) for n in path)
@@ -120,7 +182,7 @@ def dfs(graph: Graph, start: str, goal: str) -> Generator:
                             f"✅ Tìm thấy đường đi!\n   Lộ trình: {route}\n   Tổng: {cost:.1f} m")
             return
         
-        # Đảo thứ tự để node đầu danh sách kề được xét trước.
+        # Mở rộng theo chiều sâu (đảo thứ tự để duyệt node đầu tiên trước)
         neighbors = graph.get_neighbors(current)
         for neighbor, weight in reversed(neighbors):
             if neighbor not in visited:
@@ -136,8 +198,21 @@ def dfs(graph: Graph, start: str, goal: str) -> Generator:
                     f"đến {graph.get_node_name(goal)}")
 
 
+# ──────────────────────────────────────────────────────────────
+# 3. UCS - Uniform-Cost Search
+# ──────────────────────────────────────────────────────────────
+
 def ucs(graph: Graph, start: str, goal: str) -> Generator:
-    """UCS dùng min-heap theo g(n), đảm bảo tối ưu theo trọng số."""
+    """
+    Thuật toán UCS - Tìm kiếm chi phí đồng nhất.
+    Args:
+        graph: Đồ thị HCMUTE
+        start: ID node bắt đầu
+        goal: ID node đích
+        
+    Yields:
+        Dict trạng thái mỗi bước
+    """
     if not graph.node_exists(start) or not graph.node_exists(goal):
         yield _make_step(start, [], [], [], 0, "❌ Node không tồn tại trong đồ thị!")
         return
@@ -147,11 +222,12 @@ def ucs(graph: Graph, start: str, goal: str) -> Generator:
                         f"✅ Điểm bắt đầu trùng điểm đích: {graph.get_node_name(start)}")
         return
     
-    # Heap lưu (g, counter, node, path); counter phá hòa khi g bằng nhau.
+    # Priority queue: (cost, counter, node_id, path)
+    # counter dùng để phá vỡ tie-breaking khi cost bằng nhau
     counter = 0
     pq: list[tuple[float, int, str, list[str]]] = [(0.0, counter, start, [start])]
     visited = set()
-    visited_order: List[str] = []
+    visited_order = []
     
     yield _make_step(start, visited_order, [start], [start], 0,
                     f"🟠 UCS: Khởi tạo - g({graph.get_node_name(start)}) = 0")
@@ -170,7 +246,7 @@ def ucs(graph: Graph, start: str, goal: str) -> Generator:
         yield _make_step(current, visited_order, frontier_nodes, path, cost,
                         f"🔍 Đang xét: {graph.get_node_name(current)} | g(n) = {cost:.1f}")
         
-        # Node đầu tiên lấy ra là goal thì chi phí đã tối ưu.
+        # Kiểm tra đích
         if current == goal:
             route = " → ".join(graph.get_node_name(n) for n in path)
             yield _make_step(current, visited_order, [], path, cost,
@@ -178,7 +254,7 @@ def ucs(graph: Graph, start: str, goal: str) -> Generator:
                             f"Tổng chi phí: {cost:.1f} m")
             return
         
-        # Đẩy láng giềng vào heap với chi phí tích lũy mới.
+        # Mở rộng
         for neighbor, weight in graph.get_neighbors(current):
             if neighbor not in visited:
                 new_cost = cost + weight
@@ -196,9 +272,24 @@ def ucs(graph: Graph, start: str, goal: str) -> Generator:
                     f"đến {graph.get_node_name(goal)}")
 
 
+# ──────────────────────────────────────────────────────────────
+# 4. Greedy Search
+# ──────────────────────────────────────────────────────────────
+
 def greedy_search(graph: Graph, start: str, goal: str,
                   heuristic_func: Optional[Callable[..., Any]] = None) -> Generator:
-    """Greedy ưu tiên h(n) nhỏ nhất, nhanh nhưng không đảm bảo tối ưu."""
+    """
+    Thuật toán Greedy Best-First Search.
+    
+    Args:
+        graph: Đồ thị HCMUTE
+        start: ID node bắt đầu
+        goal: ID node đích
+        heuristic_func: Hàm heuristic (mặc định: Euclidean)
+        
+    Yields:
+        Dict trạng thái mỗi bước
+    """
     if heuristic_func is None:
         heuristic_func = euclidean_distance
     
@@ -211,15 +302,15 @@ def greedy_search(graph: Graph, start: str, goal: str,
                         f"✅ Điểm bắt đầu trùng điểm đích: {graph.get_node_name(start)}")
         return
     
-    goal_pos = graph.get_node_position(goal) or (0, 0)
+    goal_pos = graph.get_node_position(goal)
     
-    # Heap ưu tiên h(n); vẫn giữ g_cost để hiển thị tổng đã đi.
+    # Priority queue: (h(n), counter, node_id, path, g_cost)
     counter = 0
-    start_pos = graph.get_node_position(start) or (0, 0)
+    start_pos = graph.get_node_position(start)
     h_start = heuristic_func(start_pos, goal_pos)
     pq: list[tuple[float, int, str, list[str], float]] = [(h_start, counter, start, [start], 0.0)]
     visited = set()
-    visited_order: List[str] = []
+    visited_order = []
     
     yield _make_step(start, visited_order, [start], [start], 0,
                     f"🟢 Greedy: Khởi tạo - h({graph.get_node_name(start)}) = {h_start:.1f}")
@@ -238,7 +329,7 @@ def greedy_search(graph: Graph, start: str, goal: str,
         yield _make_step(current, visited_order, frontier_nodes, path, g_cost,
                         f"🔍 Đang xét: {graph.get_node_name(current)} | h(n) = {h_val:.1f}")
         
-        # Greedy dừng khi chạm goal, path có thể không tối ưu.
+        # Kiểm tra đích
         if current == goal:
             total_cost = graph.calculate_path_cost(path)
             route = " → ".join(graph.get_node_name(n) for n in path)
@@ -247,10 +338,10 @@ def greedy_search(graph: Graph, start: str, goal: str,
                             f"Tổng: {total_cost:.1f} m")
             return
         
-        # Chỉ xếp h(n) vào heap, không cộng g(n) vào ưu tiên.
+        # Mở rộng
         for neighbor, weight in graph.get_neighbors(current):
             if neighbor not in visited:
-                n_pos = graph.get_node_position(neighbor) or (0, 0)
+                n_pos = graph.get_node_position(neighbor)
                 h_n = heuristic_func(n_pos, goal_pos)
                 counter += 1
                 new_g = g_cost + weight
@@ -266,9 +357,24 @@ def greedy_search(graph: Graph, start: str, goal: str,
                     f"đến {graph.get_node_name(goal)}")
 
 
+# ──────────────────────────────────────────────────────────────
+# 5. A* Search
+# ──────────────────────────────────────────────────────────────
+
 def astar(graph: Graph, start: str, goal: str,
           heuristic_func: Optional[Callable[..., Any]] = None) -> Generator:
-    """A* ưu tiên f(n)=g(n)+h(n), tối ưu khi heuristic không vượt quá thực tế."""
+    """
+    Thuật toán A* Search.
+
+    Args:
+        graph: Đồ thị HCMUTE
+        start: ID node bắt đầu
+        goal: ID node đích
+        heuristic_func: Hàm heuristic (mặc định: Euclidean)
+        
+    Yields:
+        Dict trạng thái mỗi bước
+    """
     if heuristic_func is None:
         heuristic_func = euclidean_distance
     
@@ -281,20 +387,20 @@ def astar(graph: Graph, start: str, goal: str,
                         f"✅ Điểm bắt đầu trùng điểm đích: {graph.get_node_name(start)}")
         return
     
-    goal_pos = graph.get_node_position(goal) or (0, 0)
+    goal_pos = graph.get_node_position(goal)
     
-    # Heap lưu f(n), path và g(n) thật để tái tạo đường đi.
+    # Priority queue: (f(n), counter, node_id, path, g_cost)
     counter = 0
-    start_pos = graph.get_node_position(start) or (0, 0)
+    start_pos = graph.get_node_position(start)
     h_start = heuristic_func(start_pos, goal_pos)
     f_start = h_start  # g(start) = 0
     pq: list[tuple[float, int, str, list[str], float]] = [(f_start, counter, start, [start], 0.0)]
     
-    # best_g chặn mở rộng lại nếu đường mới không tốt hơn.
+    # Lưu chi phí tốt nhất đến mỗi node
     best_g: Dict[str, float] = {start: 0.0}
     
     visited = set()
-    visited_order: List[str] = []
+    visited_order = []
     
     yield _make_step(start, visited_order, [start], [start], 0,
                     f"⭐ A*: Khởi tạo - f({graph.get_node_name(start)}) = "
@@ -309,7 +415,7 @@ def astar(graph: Graph, start: str, goal: str,
         visited.add(current)
         visited_order.append(current)
         
-        cur_pos = graph.get_node_position(current) or (0, 0)
+        cur_pos = graph.get_node_position(current)
         h_cur = heuristic_func(cur_pos, goal_pos)
         
         frontier_nodes = [item[2] for item in pq if item[2] not in visited]
@@ -318,7 +424,7 @@ def astar(graph: Graph, start: str, goal: str,
                         f"🔍 Đang xét: {graph.get_node_name(current)} | "
                         f"f(n) = g({g_cost:.1f}) + h({h_cur:.1f}) = {f_val:.1f}")
         
-        # Với heuristic phù hợp, goal đầu tiên lấy ra là tối ưu.
+        # Kiểm tra đích
         if current == goal:
             route = " → ".join(graph.get_node_name(n) for n in path)
             yield _make_step(current, visited_order, [], path, g_cost,
@@ -326,13 +432,14 @@ def astar(graph: Graph, start: str, goal: str,
                             f"Tổng chi phí: {g_cost:.1f} m")
             return
         
+        # Mở rộng
         for neighbor, weight in graph.get_neighbors(current):
             new_g = g_cost + weight
             
-            # Chỉ mở rộng nếu tìm được đường tốt hơn đến neighbor.
+            # Chỉ mở rộng nếu tìm được đường tốt hơn đến neighbor
             if neighbor not in visited and (neighbor not in best_g or new_g < best_g[neighbor]):
                 best_g[neighbor] = new_g
-                n_pos = graph.get_node_position(neighbor) or (0, 0)
+                n_pos = graph.get_node_position(neighbor)
                 h_n = heuristic_func(n_pos, goal_pos)
                 f_n = new_g + h_n
                 counter += 1
@@ -349,6 +456,10 @@ def astar(graph: Graph, start: str, goal: str,
                     f"đến {graph.get_node_name(goal)}")
 
 
+# ──────────────────────────────────────────────────────────────
+# Mapping tên thuật toán -> hàm tương ứng
+# ──────────────────────────────────────────────────────────────
+
 ALGORITHM_MAP = {
     "BFS": bfs,
     "DFS": dfs,
@@ -357,11 +468,20 @@ ALGORITHM_MAP = {
     "A*": astar,
 }
 
+# Các thuật toán cần heuristic
 ALGORITHMS_WITH_HEURISTIC = {"Greedy", "A*"}
 
 
 def get_algorithm(name: str):
-    """Lấy hàm thuật toán theo tên hiển thị trên UI."""
+    """
+    Lấy hàm thuật toán theo tên.
+    
+    Args:
+        name: Tên thuật toán ("BFS", "DFS", "UCS", "Greedy", "A*")
+        
+    Returns:
+        Hàm thuật toán tương ứng
+    """
     func = ALGORITHM_MAP.get(name)
     if func is None:
         available = ", ".join(ALGORITHM_MAP.keys())

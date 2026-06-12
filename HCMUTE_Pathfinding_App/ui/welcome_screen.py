@@ -6,7 +6,7 @@ import os
 import sys
 
 from PyQt6.QtCore import QEasingCurve, QPropertyAnimation, QTimer, Qt
-from PyQt6.QtGui import QBitmap, QColor, QFont, QPainter, QPainterPath, QPixmap, QRegion
+from PyQt6.QtGui import QBitmap, QColor, QFont, QPainter, QPixmap, QRegion
 from PyQt6.QtWidgets import (
     QApplication,
     QFrame,
@@ -33,7 +33,7 @@ class WelcomeScreen(QWidget):
             Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.setFixedSize(860, 640)
+        self.setFixedSize(720, 560)
         self.setWindowOpacity(0.0)
         self._apply_rounded_window_mask()
 
@@ -77,12 +77,12 @@ class WelcomeScreen(QWidget):
         self.overlay = QFrame(self)
         self.overlay.setGeometry(0, 0, self.width(), self.height())
         self.overlay.setStyleSheet(
-            "background-color: rgba(255, 255, 255, 118); border-radius: 30px;"
+            "background-color: rgba(7, 24, 54, 72); border-radius: 30px;"
         )
 
         self.card = QFrame(self)
         self.card.setObjectName("welcomeCard")
-        self.card.setGeometry(54, 38, 752, 564)
+        self.card.setGeometry(46, 34, 628, 492)
         self.card.setStyleSheet(
             """
             QFrame#welcomeCard {
@@ -96,7 +96,7 @@ class WelcomeScreen(QWidget):
             }
             QLabel#title {
                 color: #FFFFFF;
-                font-size: 30px;
+                font-size: 26px;
                 font-weight: 900;
             }
             QLabel#statusLabel {
@@ -114,9 +114,9 @@ class WelcomeScreen(QWidget):
                 color: white;
                 border: none;
                 border-radius: 19px;
-                min-width: 176px;
-                min-height: 42px;
-                font-size: 15px;
+                min-width: 154px;
+                min-height: 38px;
+                font-size: 14px;
                 font-weight: 900;
                 padding: 0 18px;
             }
@@ -151,23 +151,22 @@ class WelcomeScreen(QWidget):
         self.card.setGraphicsEffect(shadow)
 
         layout = QVBoxLayout(self.card)
-        layout.setContentsMargins(40, 30, 40, 32)
-        layout.setSpacing(14)
+        layout.setContentsMargins(34, 26, 34, 28)
+        layout.setSpacing(12)
 
         self.lbl_banner = QLabel()
-        self.lbl_banner.setFixedSize(672, 224)
-        self.lbl_banner.setScaledContents(False)
-        self.lbl_banner.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.lbl_banner.setStyleSheet("background-color: transparent;")
-        self._banner_source = QPixmap(self.banner_path) if os.path.exists(self.banner_path) else QPixmap()
-        self._set_banner_pixmap()
+        self.lbl_banner.setFixedHeight(126)
+        self.lbl_banner.setScaledContents(True)
+        self.lbl_banner.setStyleSheet("border-radius: 16px;")
+        if os.path.exists(self.banner_path):
+            self.lbl_banner.setPixmap(QPixmap(self.banner_path))
         layout.addWidget(self.lbl_banner)
 
         logo_row = QHBoxLayout()
-        logo_row.setSpacing(20)
+        logo_row.setSpacing(16)
 
         self.lbl_logo = QLabel()
-        self.lbl_logo.setFixedSize(98, 98)
+        self.lbl_logo.setFixedSize(86, 86)
         self.lbl_logo.setScaledContents(True)
         if os.path.exists(self.logo_path):
             self.lbl_logo.setPixmap(QPixmap(self.logo_path))
@@ -189,7 +188,7 @@ class WelcomeScreen(QWidget):
 
         self.loading_area = QWidget()
         loading_layout = QVBoxLayout(self.loading_area)
-        loading_layout.setContentsMargins(28, 4, 28, 0)
+        loading_layout.setContentsMargins(18, 2, 18, 0)
         loading_layout.setSpacing(9)
 
         status_row = QHBoxLayout()
@@ -203,16 +202,16 @@ class WelcomeScreen(QWidget):
         loading_layout.addLayout(status_row)
 
         self.track_area = QWidget()
-        self.track_area.setFixedHeight(104)
+        self.track_area.setFixedHeight(86)
         self.track = QProgressBar(self.track_area)
         self.track.setObjectName("loadingTrack")
-        self.track.setGeometry(54, 50, 496, 16)
+        self.track.setGeometry(46, 42, 420, 16)
         self.track.setRange(0, 100)
         self.track.setValue(0)
         self.track.setTextVisible(False)
 
         self.lbl_shimmer = QLabel(self.track_area)
-        self.lbl_shimmer.setGeometry(54, 50, 88, 16)
+        self.lbl_shimmer.setGeometry(46, 42, 96, 16)
         self.lbl_shimmer.setStyleSheet(
             """
             background: qlineargradient(
@@ -228,13 +227,13 @@ class WelcomeScreen(QWidget):
         self.lbl_shimmer.raise_()
 
         self.lbl_target = QLabel(self.track_area)
-        self.lbl_target.setGeometry(566, 27, 56, 56)
+        self.lbl_target.setGeometry(472, 24, 48, 48)
         self.lbl_target.setScaledContents(True)
         if os.path.exists(self.target_path):
             self.lbl_target.setPixmap(QPixmap(self.target_path))
 
         self.lbl_pedestrian = QLabel(self.track_area)
-        self.lbl_pedestrian.setGeometry(14, 22, 62, 62)
+        self.lbl_pedestrian.setGeometry(12, 18, 58, 58)
         self.lbl_pedestrian.setScaledContents(False)
         self.lbl_pedestrian.setStyleSheet("background: transparent;")
         loading_layout.addWidget(self.track_area)
@@ -249,8 +248,8 @@ class WelcomeScreen(QWidget):
             frame_path = os.path.join(self.frames_dir, f"walk_{i}.png")
             if os.path.exists(frame_path):
                 frame = QPixmap(frame_path).scaled(
-                    62,
-                    62,
+                    58,
+                    58,
                     Qt.AspectRatioMode.KeepAspectRatio,
                     Qt.TransformationMode.SmoothTransformation,
                 )
@@ -261,34 +260,8 @@ class WelcomeScreen(QWidget):
         else:
             self.lbl_pedestrian.setText(">")
             self.lbl_pedestrian.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.lbl_pedestrian.setFont(QFont("Segoe UI", 24, QFont.Weight.Bold))
+            self.lbl_pedestrian.setFont(QFont("Segoe UI", 22, QFont.Weight.Bold))
             self.lbl_pedestrian.setStyleSheet("color: #0B74FF; background: transparent;")
-
-    def _set_banner_pixmap(self):
-        """Scale banner không méo và hiển thị đầy đủ ảnh."""
-        if self._banner_source.isNull():
-            return
-
-        target_size = self.lbl_banner.size()
-        scaled = self._banner_source.scaled(
-            target_size,
-            Qt.AspectRatioMode.KeepAspectRatio,
-            Qt.TransformationMode.SmoothTransformation,
-        )
-        rounded = QPixmap(target_size)
-        rounded.fill(Qt.GlobalColor.transparent)
-
-        painter = QPainter(rounded)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        path = QPainterPath()
-        path.addRoundedRect(0, 0, target_size.width(), target_size.height(), 18, 18)
-        painter.setClipPath(path)
-        x = (target_size.width() - scaled.width()) // 2
-        y = (target_size.height() - scaled.height()) // 2
-        painter.drawPixmap(x, y, scaled)
-        painter.end()
-
-        self.lbl_banner.setPixmap(rounded)
 
     def _apply_rounded_window_mask(self):
         """Clip toàn bộ splash thành bo góc thật, kể cả pixmap nền."""
@@ -341,18 +314,13 @@ class WelcomeScreen(QWidget):
         self.lbl_status.setText(self._status_messages[status_index])
 
         start_x = 24
-        run_length = 484
+        run_length = 414
         current_x = start_x + int(run_length * (self.loading_value / 100))
-        self.lbl_pedestrian.move(current_x, 19)
+        self.lbl_pedestrian.move(current_x, 14)
 
-        track_x = self.track.x()
-        track_w = self.track.width()
-        shimmer_w = self.lbl_shimmer.width()
-        # Shimmer chỉ chạy trong phần thanh đã load, không tràn ra khỏi track.
-        loaded_w = max(shimmer_w, int(track_w * (self.loading_value / 100)))
-        shimmer_span = max(1, loaded_w - shimmer_w)
-        shimmer_x = track_x + int((self.loading_value * 8) % shimmer_span)
-        self.lbl_shimmer.move(shimmer_x, 50)
+        shimmer_range = 540
+        shimmer_x = 46 - 96 + int((self.loading_value * 9) % shimmer_range)
+        self.lbl_shimmer.move(shimmer_x, 42)
         self.lbl_shimmer.raise_()
 
         if self.walk_frames:
