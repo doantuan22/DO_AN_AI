@@ -1,4 +1,4 @@
-"""Dialog showing saved pathfinding history."""
+# Dialog hiển thị lịch sử tìm đường đã lưu
 
 from typing import List, Optional
 
@@ -122,7 +122,7 @@ HISTORY_DIALOG_STYLE = """
 
 
 class HistoryDialog(QDialog):
-    """Table view for routes saved in SQLite."""
+    # Table view cho các route đã lưu trong SQLite
 
     def __init__(self, store: HistoryStore, parent=None):
         super().__init__(parent)

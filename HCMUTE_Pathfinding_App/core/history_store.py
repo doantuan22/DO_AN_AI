@@ -1,4 +1,5 @@
-"""SQLite storage for completed pathfinding runs."""
+# Lưu trữ lịch sử tìm đường vào SQLite
+# Hỗ trợ thêm, liệt kê, xóa các lần chạy thuật toán
 
 import json
 import os
@@ -27,6 +28,7 @@ CREATE TABLE IF NOT EXISTS path_history (
 """
 
 
+# Bản ghi lịch sử đường đi
 @dataclass(frozen=True)
 class PathHistoryRecord:
     id: int
@@ -48,8 +50,8 @@ class PathHistoryRecord:
         return " -> ".join(names)
 
 
+# Repository SQLite cho lịch sử tìm đường
 class HistoryStore:
-    """Small SQLite repository for route history."""
 
     def __init__(self, db_path: str):
         self.db_path = db_path
@@ -63,6 +65,7 @@ class HistoryStore:
             with conn:
                 conn.execute(CREATE_PATH_HISTORY_TABLE_SQL)
 
+    # Thêm kết quả tìm đường vào DB
     def add_route(
         self,
         algorithm: str,
@@ -106,6 +109,7 @@ class HistoryStore:
                 )
                 return int(cursor.lastrowid)
 
+    # Lấy danh sách lịch sử, mới nhất trước
     def list_routes(self, limit: Optional[int] = None) -> List[PathHistoryRecord]:
         sql = "SELECT * FROM path_history ORDER BY id DESC"
         params: tuple = ()

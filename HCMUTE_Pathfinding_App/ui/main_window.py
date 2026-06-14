@@ -1,10 +1,5 @@
-"""
-main_window.py - Cửa sổ chính của ứng dụng (Redesigned matching UI_demo)
-========================================================================
-Ghép các thành phần giao diện (MapWidget + ControlPanel),
-quản lý luồng hoạt động chính: chọn node, chạy thuật toán,
-mô phỏng từng bước, hiển thị kết quả.
-"""
+# Cửa sổ chính: ghép MapWidget + ControlPanel
+# Quản lý luồng chọn node, chạy thuật toán, mô phỏng và hiển thị kết quả
 
 import os
 import sys
@@ -90,11 +85,8 @@ MAIN_WINDOW_STYLE = """
 """
 
 
+# Cửa sổ chính của ứng dụng
 class MainWindow(QMainWindow):
-    """
-    Cửa sổ chính của ứng dụng Tìm đường HCMUTE.
-    Giao diện Header màu trắng nhẹ nhàng, đồng nhất với Bản đồ & Control Panel.
-    """
     
     def __init__(self):
         super().__init__()
@@ -140,7 +132,7 @@ class MainWindow(QMainWindow):
         self._set_app_state("idle")
     
     def _setup_window(self):
-        """Cấu hình cửa sổ chính."""
+        # Cấu hình cửa sổ chính
         self.setWindowTitle("Hệ thống dẫn đường trong khuôn viên HCMUTE")
         self.setMinimumSize(1280, 780)
         self.resize(1480, 860)
@@ -155,7 +147,7 @@ class MainWindow(QMainWindow):
             self.move(x, y)
     
     def _setup_ui(self):
-        """Xây dựng layout giao diện chính."""
+        # Xây dựng layout giao diện
         central = QWidget()
         central.setObjectName("appRoot")
         self.setCentralWidget(central)
@@ -242,7 +234,7 @@ class MainWindow(QMainWindow):
         self._toast_label.hide()
     
     def _connect_signals(self):
-        """Kết nối các signal/slot điều khiển."""
+        # Kết nối signal/slot điều khiển
         # Click chọn trên bản đồ
         self._map_widget.node_clicked.connect(self._on_node_clicked)
         self._map_widget.graph_edit_clicked.connect(self._on_edit_graph)
@@ -267,7 +259,7 @@ class MainWindow(QMainWindow):
             self._on_goal_combo_changed)
     
     def _load_data(self):
-        """Tải dữ liệu đồ thị JSON và ảnh nền bản đồ."""
+        # Tải dữ liệu đồ thị JSON và ảnh nền bản đồ
         try:
             # Tải đồ thị
             self._graph.load_from_json(self._json_path)
@@ -291,7 +283,7 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, "Lỗi", f"Đã xảy ra lỗi: {e}")
     
     def _populate_node_combos(self):
-        """Cập nhật danh sách node trong combo box và giữ lựa chọn hiện tại nếu còn hợp lệ."""
+        # Cập nhật danh sách node trong combo box
         node_list = [
             (nid, self._graph.get_node_name(nid))
             for nid in self._graph.get_all_node_ids()
@@ -316,7 +308,7 @@ class MainWindow(QMainWindow):
         combo.setCurrentIndex(0)
     
     def _on_node_clicked(self, node_id: str):
-        """Xử lý click chọn node trên bản đồ."""
+        # Xử lý click chọn node trên bản đồ
         if self._is_running:
             return
 
@@ -346,7 +338,7 @@ class MainWindow(QMainWindow):
             self._sync_ready_state()
             
     def _set_start(self, node_id: str):
-        """Cập nhật điểm bắt đầu."""
+        # Cập nhật điểm bắt đầu
         self._start_node = node_id
         name = self._graph.get_node_name(node_id)
         self._map_widget.set_start_node(node_id)
@@ -364,7 +356,7 @@ class MainWindow(QMainWindow):
         self._sync_ready_state()
                 
     def _set_goal(self, node_id: str):
-        """Cập nhật điểm đích."""
+        # Cập nhật điểm đích
         self._goal_node = node_id
         name = self._graph.get_node_name(node_id)
         self._map_widget.set_goal_node(node_id)
@@ -382,7 +374,7 @@ class MainWindow(QMainWindow):
         self._sync_ready_state()
 
     def _clear_start(self):
-        """Xóa riêng điểm bắt đầu mà không ảnh hưởng graph."""
+        # Xóa điểm bắt đầu
         if self._is_running:
             return
         self._start_node = None
@@ -394,7 +386,7 @@ class MainWindow(QMainWindow):
         self._sync_ready_state()
 
     def _clear_goal(self):
-        """Xóa riêng điểm đích mà không ảnh hưởng graph."""
+        # Xóa điểm đích
         if self._is_running:
             return
         self._goal_node = None
@@ -406,7 +398,7 @@ class MainWindow(QMainWindow):
         self._sync_ready_state()
 
     def _sync_ready_state(self):
-        """Đồng bộ trạng thái chọn điểm với header và nút Start."""
+        # Đồng bộ trạng thái chọn điểm với header và nút Start
         ready = bool(self._start_node and self._goal_node)
         self._control_panel.set_ready_to_start(ready)
         if self._is_running:
@@ -436,7 +428,7 @@ class MainWindow(QMainWindow):
             self._click_count = 2
     
     def _on_edit_graph(self):
-        """Mở công cụ chỉnh sửa node/cạnh của bản đồ."""
+        # Mở công cụ chỉnh sửa node/cạnh
         if self._is_running:
             QMessageBox.warning(self, "Đang chạy", "Vui lòng dừng thuật toán trước khi chỉnh sửa bản đồ.")
             return
@@ -456,12 +448,12 @@ class MainWindow(QMainWindow):
         dialog.exec()
 
     def _on_show_history(self):
-        """Mở bảng lịch sử đường đi đã lưu trong SQLite."""
+        # Mở bảng lịch sử đường đi
         dialog = HistoryDialog(self._history_store, self)
         dialog.exec()
     
     def _on_graph_changed(self):
-        """Dựng lại map và lựa chọn sau khi graph được chỉnh sửa."""
+        # Dựng lại map sau khi graph được chỉnh sửa
         edge_display = self._map_widget.edge_display()
         
         if self._start_node and not self._graph.node_exists(self._start_node):
@@ -496,7 +488,7 @@ class MainWindow(QMainWindow):
     # ──────────────────────────────────────────────────
     
     def _on_start(self):
-        """Khởi chạy thuật toán tìm đường."""
+        # Khởi chạy thuật toán tìm đường
         if not self._start_node:
             QMessageBox.warning(self, "Thiếu thông tin", "Vui lòng chọn điểm bắt đầu!")
             return
@@ -553,7 +545,7 @@ class MainWindow(QMainWindow):
             self._timer.start(self._step_delay)
 
     def _execute_all_steps_without_animation(self):
-        """Chạy generator đến hết, ghi log đầy đủ nhưng không tô từng bước lên bản đồ."""
+        # Chạy generator đến hết, không tô từng bước lên bản đồ
         if not self._algorithm_gen or not self._is_running:
             return
 
@@ -574,7 +566,7 @@ class MainWindow(QMainWindow):
         self._on_algorithm_finished()
         
     def _execute_step(self):
-        """Thực hiện một bước trong generator thuật toán."""
+        # Thực hiện một bước trong generator thuật toán
         if not self._algorithm_gen or not self._is_running or self._is_paused:
             return
             
@@ -614,7 +606,7 @@ class MainWindow(QMainWindow):
             self._on_algorithm_finished()
             
     def _on_algorithm_finished(self):
-        """Xử lý khi kết thúc duyệt."""
+        # Xử lý khi kết thúc duyệt
         self._timer.stop()
         exec_time = self._exec_timer.stop()
         self._is_running = False
@@ -661,7 +653,7 @@ class MainWindow(QMainWindow):
         self._set_app_state("completed" if self._final_path else "error")
 
     def _save_history(self, algo_name: str, exec_time: float):
-        """Lưu kết quả tìm đường thành công vào SQLite."""
+        # Lưu kết quả vào SQLite
         if not self._start_node or not self._goal_node or len(self._final_path) < 2:
             return
         try:
@@ -738,7 +730,7 @@ class MainWindow(QMainWindow):
         self._sync_ready_state()
 
     def _on_sample_walk(self):
-        """Cho avatar đi mẫu theo lộ trình đã tìm được."""
+        # Cho avatar đi mẫu theo lộ trình
         if not self._final_path or len(self._final_path) < 2:
             self._control_panel.add_log("⚠️ Chưa có lộ trình để đi mẫu")
             return
@@ -749,7 +741,7 @@ class MainWindow(QMainWindow):
         self._control_panel.add_log("▶ Đi mẫu theo lộ trình đã tìm được")
 
     def _on_algorithm_speed_changed(self, speed_name: str):
-        """Cập nhật tốc độ mô phỏng thuật toán từ nút nổi trên bản đồ."""
+        # Cập nhật tốc độ mô phỏng
         speed_delays = {
             "Nhanh": 140,
             "Trung bình": 400,
@@ -761,14 +753,14 @@ class MainWindow(QMainWindow):
         self._control_panel.add_log(f"⏱ Tốc độ xử lý: {speed_name}")
         
     def _update_status(self, text: str, color: str):
-        """Cập nhật trạng thái hiển thị trên header."""
+        # Cập nhật trạng thái hiển thị trên header
         self._status_label.setText(
             f"<span style='color: {color}; font-size: 14px;'>●</span>&nbsp;Trạng thái: "
             f"<span style='color: {color}; font-weight: bold;'>{text}</span>"
         )
 
     def _set_app_state(self, state: str):
-        """State UI tập trung để header, panel và feedback luôn đồng bộ."""
+        # State UI tập trung: đồng bộ header, panel, feedback
         self._app_state = state
         labels = {
             "idle": ("Sẵn sàng", "#22C55E"),

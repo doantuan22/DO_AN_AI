@@ -1,6 +1,4 @@
-"""
-welcome_screen.py - Modern splash / loading screen for the HCMUTE pathfinding app.
-"""
+# Màn hình chờ (splash screen) có loading bar và chuyển cảnh mượt mà
 
 import os
 import sys
@@ -24,7 +22,7 @@ from ui.main_window import MainWindow
 
 
 class WelcomeScreen(QWidget):
-    """Frameless welcome screen with smooth loading and transition to MainWindow."""
+    # Màn hình chào mừng không viền
 
     def __init__(self):
         super().__init__()
@@ -264,7 +262,7 @@ class WelcomeScreen(QWidget):
             self.lbl_pedestrian.setStyleSheet("color: #0B74FF; background: transparent;")
 
     def _apply_rounded_window_mask(self):
-        """Clip toàn bộ splash thành bo góc thật, kể cả pixmap nền."""
+        # Clip toàn bộ splash thành bo góc thật
         mask = QBitmap(self.size())
         mask.fill(Qt.GlobalColor.color0)
         painter = QPainter(mask)

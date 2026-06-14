@@ -1,22 +1,12 @@
-"""
-control_panel.py - Panel điều khiển bên phải (Redesigned matching UI_demo, no ScrollArea)
-====================================================================================
-Chứa các widget cho phép người dùng:
-- Chọn thuật toán tìm kiếm
-- Chọn hàm heuristic
-- Xem điểm bắt đầu / điểm đích đã chọn
-- Điều khiển: Bắt đầu, Tạm dừng, Tiếp tục, Dừng, Reset
-- Xem log thuật toán theo thời gian thực
-- Xem thống kê kết quả
-Hiển thị đầy đủ, không sử dụng thanh cuộn, không đè nút lên nhau.
-"""
+# Panel điều khiển bên phải: chọn thuật toán, heuristic, điểm đi/đến
+# Hiển thị log, thống kê, và các nút điều khiển mô phỏng
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox,
     QPushButton, QTextEdit, QFrame, QSizePolicy, QGridLayout, QScrollArea, QStyle, QApplication
 )
 from PyQt6.QtCore import Qt, QSize, pyqtSignal, QTimer
-from PyQt6.QtGui import QFont, QTextCursor, QIcon
+from PyQt6.QtGui import QFont, QTextCursor, QIcon, QPixmap
 from typing import Optional
 
 from core.utils import format_time_ms, get_timestamp
@@ -272,20 +262,8 @@ PANEL_STYLESHEET = """
 """
 
 
+# Panel điều khiển bên phải
 class ControlPanel(QWidget):
-    """
-    Panel điều khiển bên phải của ứng dụng.
-    Được tối ưu hiển thị đầy đủ trực tiếp không cần cuộn, không đè nút lên nhau.
-    
-    Signals:
-        start_clicked: Khi nhấn nút Bắt đầu
-        pause_clicked: Khi nhấn nút Tạm dừng
-        resume_clicked: Khi nhấn nút Tiếp tục
-        stop_clicked: Khi nhấn nút Dừng
-        reset_clicked: Khi nhấn nút Reset
-        algorithm_changed: Khi thay đổi thuật toán (str)
-        heuristic_changed: Khi thay đổi heuristic (str)
-    """
     
     start_clicked = pyqtSignal()
     pause_clicked = pyqtSignal()
@@ -311,7 +289,7 @@ class ControlPanel(QWidget):
         self._setup_ui()
     
     def _setup_ui(self):
-        """Xây dựng giao diện panel điều khiển phân bổ theo tỷ lệ tự động."""
+        # Xây dựng giao diện panel
         outer_layout = QVBoxLayout(self)
         outer_layout.setContentsMargins(0, 0, 0, 0)
         outer_layout.setSpacing(0)
@@ -330,6 +308,55 @@ class ControlPanel(QWidget):
         main_layout = QVBoxLayout(content)
         main_layout.setContentsMargins(18, 14, 18, 16)
         main_layout.setSpacing(12)
+        
+        # ── Banner ──
+        banner_frame = QFrame()
+        banner_frame.setObjectName("bannerFrame")
+        banner_frame.setStyleSheet("""
+            QFrame#bannerFrame {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                    stop:0 #0057E7, stop:1 #1A73E8);
+                border-radius: 12px;
+                border: none;
+            }
+        """)
+        banner_layout = QVBoxLayout(banner_frame)
+        banner_layout.setContentsMargins(0, 0, 0, 0)
+        banner_layout.setSpacing(0)
+        
+        self.banner_label = QLabel()
+        self.banner_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.banner_label.setStyleSheet("""
+            border-radius: 12px;
+            background: transparent;
+        """)
+        
+        # Load banner image
+        import os
+        banner_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                    "assets", "banner.png")
+        if os.path.exists(banner_path):
+            banner_pixmap = QPixmap(banner_path)
+            # Scale to fit panel width (470 - margins)
+            scaled = banner_pixmap.scaledToWidth(
+                434, Qt.TransformationMode.SmoothTransformation)
+            self.banner_label.setPixmap(scaled)
+            self.banner_label.setFixedHeight(scaled.height())
+        else:
+            # Fallback text banner if image not found
+            self.banner_label.setText("🗺️ HCMUTE Pathfinding")
+            self.banner_label.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
+            self.banner_label.setStyleSheet("""
+                color: white;
+                padding: 18px;
+                font-size: 16px;
+                font-weight: bold;
+                background: transparent;
+            """)
+            self.banner_label.setFixedHeight(80)
+        
+        banner_layout.addWidget(self.banner_label)
+        main_layout.addWidget(banner_frame)
         
         # ── 1. Chọn thuật toán ──
         lbl_algo = QLabel("1. Chọn thuật toán")
@@ -515,7 +542,7 @@ class ControlPanel(QWidget):
         main_layout.addLayout(stat_layout)
     
     def _create_stat_card(self, title: str, value: str, icon: str) -> dict:
-        """Tạo thẻ thống kê ngang gọn gàng, co giãn tốt."""
+        # Tạo thẻ thống kê
         frame = QFrame()
         frame.setObjectName("statCard")
         frame.setFrameShape(QFrame.Shape.StyledPanel)
@@ -559,7 +586,7 @@ class ControlPanel(QWidget):
         return {"frame": frame, "title": title_label, "value": value_label, "icon": icon_label}
     
     def _setup_button_icons(self):
-        """Dùng icon native của Qt để tránh lỗi hiển thị emoji/ký tự đặc biệt."""
+        # Dùng icon native Qt thay vì emoji
         self._icon_play = self._standard_icon("SP_MediaPlay", "SP_ArrowRight")
         self._icon_pause = self._standard_icon("SP_MediaPause", "SP_TitleBarMinButton")
         self._icon_stop = self._standard_icon("SP_MediaStop", "SP_DialogCancelButton")
@@ -582,7 +609,7 @@ class ControlPanel(QWidget):
         style = self.style()
         if style is None:
             app = QApplication.instance()
-            if app is not None:
+            if app is not None and isinstance(app, QApplication):
                 style = app.style()
                 
         if style is not None:
@@ -603,7 +630,7 @@ class ControlPanel(QWidget):
     # ──────────────────────────────────────────────────
     
     def populate_node_combos(self, nodes: list):
-        """Điền danh sách các node vào 2 combo box."""
+        # Điền danh sách node vào combo box
         self.start_combo.clear()
         self.goal_combo.clear()
         
@@ -617,7 +644,7 @@ class ControlPanel(QWidget):
             self.goal_combo.addItem(display, node_id)
     
     def set_start_display(self, name: str):
-        """Cập nhật text hiển thị điểm bắt đầu."""
+        # Cập nhật hiển thị điểm bắt đầu
         # Giới hạn độ dài để tránh đè nút
         selected = bool(name and not name.startswith("(") and "Chọn" not in name)
         if len(name) > 20:
@@ -627,7 +654,7 @@ class ControlPanel(QWidget):
         self._set_card_selected(self.start_card, selected)
     
     def set_goal_display(self, name: str):
-        """Cập nhật text hiển thị điểm đích."""
+        # Cập nhật hiển thị điểm đích
         selected = bool(name and not name.startswith("(") and "Chọn" not in name)
         if len(name) > 20:
             name = name[:18] + "..."
@@ -637,11 +664,13 @@ class ControlPanel(QWidget):
 
     def _set_card_selected(self, card: QFrame, selected: bool):
         card.setProperty("selected", "true" if selected else "false")
-        card.style().unpolish(card)
-        card.style().polish(card)
+        style = card.style()
+        if style is not None:
+            style.unpolish(card)
+            style.polish(card)
     
     def add_log(self, message: str):
-        """Thêm một bản ghi log có định dạng HTML theo style UI Demo."""
+        # Thêm log có định dạng HTML
         timestamp = get_timestamp()
         
         icon = "<span style='color:#1A73E8;'>●</span>"
@@ -706,12 +735,12 @@ class ControlPanel(QWidget):
         self.log_text.setTextCursor(cursor)
     
     def clear_log(self):
-        """Xóa trắng bảng log."""
+        # Xóa trắng log
         self.log_text.clear()
     
     def update_stats(self, distance: Optional[float] = None, node_count: Optional[int] = None,
                      time_ms: Optional[float] = None):
-        """Cập nhật dữ liệu thẻ thống kê."""
+        # Cập nhật dữ liệu thẻ thống kê
         if distance is not None:
             self._animate_stat("distance", float(distance), self.stat_distance["value"], "{:.1f} m")
         if node_count is not None:
@@ -720,7 +749,7 @@ class ControlPanel(QWidget):
             self._animate_stat("time", float(time_ms), self.stat_time["value"], "time")
 
     def _animate_stat(self, key: str, target: float, label: QLabel, fmt: str):
-        """Count-up nhẹ cho stat card, không block UI."""
+        # Count-up animation cho stat card
         start = self._stat_numeric.get(key, 0.0)
         if abs(target - start) < 0.01:
             return
@@ -748,18 +777,18 @@ class ControlPanel(QWidget):
         timer.start(18)
     
     def reset_stats(self):
-        """Reset các thẻ thống kê về trạng thái ban đầu."""
+        # Reset thống kê về trạng thái ban đầu
         self.stat_distance["value"].setText("— m")
         self.stat_nodes["value"].setText("—")
         self.stat_time["value"].setText("— ms")
         self._stat_numeric = {"distance": 0.0, "nodes": 0.0, "time": 0.0}
     
     def get_selected_algorithm(self) -> str:
-        """Trả về tên thuật toán đang chọn."""
+        # Trả về tên thuật toán đang chọn
         return self.algo_combo.currentText()
     
     def get_selected_heuristic(self) -> str:
-        """Trả về tên heuristic đang chọn."""
+        # Trả về tên heuristic đang chọn
         return self.heuristic_combo.currentText()
     
     # ──────────────────────────────────────────────────
@@ -767,7 +796,7 @@ class ControlPanel(QWidget):
     # ──────────────────────────────────────────────────
     
     def set_running_state(self, running: bool):
-        """Cập nhật tính năng vô hiệu hóa/bật khi thuật toán đang chạy."""
+        # Vô hiệu hóa/bật các widget khi thuật toán đang chạy
         self.btn_start.setEnabled((not running) and self._ready_to_start)
         self.btn_pause.setEnabled(running)
         self.btn_stop.setEnabled(running)
@@ -782,7 +811,7 @@ class ControlPanel(QWidget):
             self._set_pause_button(paused=False)
     
     def set_finished_state(self):
-        """Thiết lập trạng thái khi hoàn tất/dừng tìm kiếm."""
+        # Thiết lập trạng thái khi hoàn tất
         self.btn_start.setEnabled(self._ready_to_start)
         self.btn_pause.setEnabled(False)
         self.btn_stop.setEnabled(False)
@@ -795,13 +824,13 @@ class ControlPanel(QWidget):
         self._set_pause_button(paused=False)
 
     def set_ready_to_start(self, ready: bool):
-        """Bật nút Start chỉ khi đã có đủ điểm đi và điểm đến."""
+        # Bật nút Start khi đã có đủ điểm đi và đến
         self._ready_to_start = ready
         if not self.btn_pause.isEnabled() and not self.btn_stop.isEnabled():
             self.btn_start.setEnabled(ready)
     
     def _on_pause_clicked(self):
-        """Bật tắt tạm dừng/tiếp tục."""
+        # Toggle tạm dừng/tiếp tục
         if self._is_paused:
             self._is_paused = False
             self._set_pause_button(paused=False)
@@ -812,7 +841,7 @@ class ControlPanel(QWidget):
             self.pause_clicked.emit()
     
     def _on_algorithm_changed(self, algo_name: str):
-        """Cập nhật hiển thị heuristic dựa trên thuật toán."""
+        # Ẩn/hiện heuristic dựa trên thuật toán
         needs_heuristic = algo_name in ("Greedy", "A*")
         self.heuristic_combo.setEnabled(needs_heuristic)
         

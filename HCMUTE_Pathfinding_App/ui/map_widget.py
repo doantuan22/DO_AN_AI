@@ -1,15 +1,5 @@
-"""
-map_widget.py - Widget hiển thị bản đồ HCMUTE (Redesigned matching UI_demo)
-========================================================================
-Sử dụng QGraphicsView/QGraphicsScene để hiển thị:
-- Ảnh bản đồ nền
-- Các node với màu sắc theo trạng thái
-- Các cạnh nối các node
-- Đường đi kết quả highlight
-- Bản chú thích (legend) nổi cố định
-- Các nút zoom nổi cố định (+ / - / 🎯)
-- Bong bóng thông tin (tooltip) ghim mốc Bắt đầu/Đích cực đẹp
-"""
+# Widget hiển thị bản đồ HCMUTE: nền ảnh, node, cạnh, đường đi
+# Chứa bản chú thích, nút zoom, tooltip điểm bắt đầu/đích
 
 import os
 import math
@@ -36,7 +26,7 @@ from core.graph import Graph
 # ──────────────────────────────────────────────────────────────
 
 class MapColors:
-    """Định nghĩa hệ màu cho bản đồ."""
+    # Định nghĩa hệ màu cho bản đồ
     EDGE_NORMAL = QColor(172, 181, 204, 150)          # Xám xanh sáng
     EDGE_PATH = QColor(0, 204, 186)                   # Xanh ngọc giống UI demo
     
@@ -89,10 +79,7 @@ def get_node_icon(name: str) -> str:
 # ──────────────────────────────────────────────────────────────
 
 class MapPinTooltip(QGraphicsPathItem):
-    """
-    Bong bóng thoại hiển thị thông tin BẮT ĐẦU / ĐÍCH trên bản đồ.
-    Có mũi nhọn hướng xuống node, thiết kế shadow và bo góc cao cấp.
-    """
+    # Bong bóng hiển thị thông tin BẮT ĐẦU / ĐÍCH trên bản đồ
     def __init__(self, name: str, is_start: bool, parent=None):
         super().__init__(parent)
         self.name = name
@@ -161,10 +148,7 @@ class MapPinTooltip(QGraphicsPathItem):
 # ──────────────────────────────────────────────────────────────
 
 class NodeItem(QGraphicsEllipseItem):
-    """
-    Custom QGraphicsEllipseItem đại diện cho một node trên bản đồ.
-    Hỗ trợ hover effect phóng to, đổi màu động.
-    """
+    # Node Item: đại diện cho 1 node trên bản đồ
     
     NODE_RADIUS = 7.5      # Bán kính node thông thường
     NODE_RADIUS_BIG = 11.5 # Bán kính node được highlight
@@ -191,7 +175,7 @@ class NodeItem(QGraphicsEllipseItem):
         self.setOpacity(0.95)
     
     def set_state(self, state: str):
-        """Đặt trạng thái và tự động cập nhật màu sắc & kích thước node."""
+        # Đặt trạng thái và tự động cập nhật màu/kích thước
         self._state = state
         
         color_map = {
@@ -231,7 +215,7 @@ class NodeItem(QGraphicsEllipseItem):
 
 
 class PulseRing(QGraphicsEllipseItem):
-    """Vòng pulse/ripple không block UI, được MapWidget cập nhật bằng QTimer."""
+    # Vòng pulse/ripple không block UI, dùng QTimer
 
     def __init__(
         self,
@@ -275,10 +259,7 @@ class PulseRing(QGraphicsEllipseItem):
 # ──────────────────────────────────────────────────────────────
 
 class MapWidget(QGraphicsView):
-    """
-    Widget hiển thị bản đồ HCMUTE với cấu trúc widget nổi cố định.
-    Không bị méo mó, lệch vị trí khi zoom/resize.
-    """
+    # Widget hiển thị bản đồ HCMUTE với các control nổi cố định
     
     node_clicked = pyqtSignal(str)
     graph_edit_clicked = pyqtSignal()
@@ -373,13 +354,13 @@ class MapWidget(QGraphicsView):
         self._setup_floating_controls()
 
     def _set_canvas_background(self, color: QColor):
-        """Đồng bộ nền ngoài ảnh bản đồ với màu nền thực của map khi zoom out."""
+        # Đồng bộ nền canvas với nền map khi zoom out
         self.setBackgroundBrush(QBrush(color))
         self._scene.setBackgroundBrush(QBrush(color))
         self.viewport().setStyleSheet(f"background-color: {color.name()};")
     
     def _setup_floating_controls(self):
-        """Khởi tạo và cấu hình các widget nổi cố định phía trên View."""
+        # Khởi tạo các widget nổi cố định
         # 1. Legend Card (Góc trên bên trái)
         self._legend_card = QFrame(self)
         self._legend_card.setObjectName("legendCard")
@@ -585,17 +566,17 @@ class MapWidget(QGraphicsView):
         self._graph_edit_button.show()
 
     def set_graph_edit_enabled(self, enabled: bool):
-        """Bật/tắt nút chỉnh sửa graph nổi theo trạng thái chạy thuật toán."""
+        # Bật/tắt nút chỉnh sửa graph
         if self._graph_edit_button:
             self._graph_edit_button.setEnabled(enabled)
 
     def set_sample_walk_enabled(self, enabled: bool):
-        """Bật nút đi mẫu khi đã có đường đi hợp lệ."""
+        # Bật nút đi mẫu khi có route hợp lệ
         if self._sample_walk_button:
             self._sample_walk_button.setEnabled(enabled)
 
     def _show_speed_menu(self):
-        """Hiển thị menu chọn tốc độ mô phỏng thuật toán."""
+        # Hiển thị menu chọn tốc độ mô phỏng
         if self._speed_button is None:
             return
 
@@ -630,7 +611,7 @@ class MapWidget(QGraphicsView):
         menu.exec(self._speed_button.mapToGlobal(self._speed_button.rect().bottomLeft()))
 
     def set_algorithm_speed(self, speed_name: str):
-        """Cập nhật tốc độ được chọn và phát signal cho MainWindow."""
+        # Cập nhật tốc độ được chọn và phát signal
         if speed_name not in {"Nhanh", "Trung bình", "Chậm"}:
             return
         self._speed_name = speed_name
@@ -639,11 +620,11 @@ class MapWidget(QGraphicsView):
         self.algorithm_speed_changed.emit(speed_name)
 
     def toggle_graph_overlay(self):
-        """Tạm ẩn/hiện node, cạnh, nhãn và route trên bản đồ."""
+        # Tạm ẩn/hiện đồ thị trên bản đồ
         self.set_graph_overlay_hidden(not self._graph_overlay_hidden)
 
     def set_graph_overlay_hidden(self, hidden: bool):
-        """Ẩn hiện lớp đồ thị mà không thay đổi dữ liệu graph hay JSON."""
+        # Ẩn hiện lớp đồ thị mà không đổi dữ liệu
         self._graph_overlay_hidden = hidden
         visible = not hidden
 
@@ -671,11 +652,11 @@ class MapWidget(QGraphicsView):
             self._graph_toggle_button.setToolTip("Hiển thị lại đồ thị" if hidden else "Tạm ẩn đồ thị")
 
     def is_graph_overlay_hidden(self) -> bool:
-        """Cho biết bản đồ đang ẩn node/cạnh/nhãn hay không."""
+        # Kiểm tra xem bản đồ có đang ẩn đồ thị không
         return self._graph_overlay_hidden
 
     def _sync_graph_overlay_visibility(self):
-        """Ẩn node thường, nhưng giữ điểm bắt đầu/đích đang chọn luôn thấy được."""
+        # Ẩn node thường, giữ mốc start/goal
         selected_nodes = {self._start_node, self._goal_node}
         for node_id, item in self._node_items.items():
             item.setVisible((not self._graph_overlay_hidden) or node_id in selected_nodes)
@@ -685,7 +666,7 @@ class MapWidget(QGraphicsView):
             self._goal_tooltip.setVisible(True)
         
     def setup_map(self, graph: Graph, map_image_path: str):
-        """Khởi tạo toàn bộ bản đồ."""
+        # Khởi tạo toàn bộ bản đồ
         self._graph = graph
         
         # Xóa các item khỏi scene
@@ -753,7 +734,7 @@ class MapWidget(QGraphicsView):
         self.zoom_reset()
     
     def _draw_edges(self):
-        """Vẽ đường đi kết nối các node."""
+        # Vẽ các cạnh kết nối node
         if not self._graph:
             return
         
@@ -773,7 +754,7 @@ class MapWidget(QGraphicsView):
                     self._edge_items.append(line)
                     
     def _draw_nodes(self):
-        """Vẽ toàn bộ node."""
+        # Vẽ tất cả các node
         if not self._graph:
             return
         for node_id, node in self._graph.nodes.items():
@@ -783,7 +764,7 @@ class MapWidget(QGraphicsView):
             self._node_items[node_id] = item
             
     def _draw_labels(self):
-        """Vẽ tên các tòa nhà/vị trí quan trọng theo kiểu nhãn Google Maps."""
+        # Vẽ tên các vị trí theo kiểu nhãn bản đồ
         if not self._graph:
             return
             
@@ -844,7 +825,7 @@ class MapWidget(QGraphicsView):
             self.fitInView(self._scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
     
     def set_edge_display(self, visible: bool, width: float, opacity: int):
-        """Cập nhật cách hiển thị cạnh trên bản đồ."""
+        # Cập nhật cách hiển thị cạnh trên bản đồ
         self._edge_visible = visible
         self._edge_width = max(0.5, float(width))
         self._edge_opacity = max(20, min(255, int(opacity)))
@@ -859,7 +840,7 @@ class MapWidget(QGraphicsView):
             item.setVisible(self._edge_visible and not self._graph_overlay_hidden)
     
     def edge_display(self) -> Tuple[bool, float, int]:
-        """Trả về cấu hình hiển thị cạnh hiện tại."""
+        # Trả về cấu hình hiển thị cạnh hiện tại
         return self._edge_visible, self._edge_width, self._edge_opacity
 
     # ──────────────────────────────────────────────────
@@ -922,7 +903,7 @@ class MapWidget(QGraphicsView):
     # ──────────────────────────────────────────────────
     
     def set_start_node(self, node_id: str):
-        """Đặt node xuất phát và ghim bong bóng BẮT ĐẦU."""
+        # Đặt node xuất phát và ghim bong bóng BẮT ĐẦU
         # 1. Reset node xuất phát cũ
         if self._start_node and self._start_node in self._node_items:
             self._node_items[self._start_node].set_state("normal")
@@ -946,7 +927,7 @@ class MapWidget(QGraphicsView):
         self._sync_graph_overlay_visibility()
                 
     def set_goal_node(self, node_id: str):
-        """Đặt node đích và ghim bong bóng ĐÍCH."""
+        # Đặt node đích và ghim bong bóng ĐÍCH
         # 1. Reset node đích cũ
         if self._goal_node and self._goal_node in self._node_items:
             self._node_items[self._goal_node].set_state("normal")
@@ -970,7 +951,7 @@ class MapWidget(QGraphicsView):
         self._sync_graph_overlay_visibility()
 
     def clear_start_node(self):
-        """Xóa marker start nhưng giữ nguyên goal và các node khác."""
+        # Xóa marker start nhưng giữ nguyên goal và các node khác
         if self._start_tooltip:
             self._scene.removeItem(self._start_tooltip)
             self._start_tooltip = None
@@ -982,7 +963,7 @@ class MapWidget(QGraphicsView):
         self._sync_graph_overlay_visibility()
 
     def clear_goal_node(self):
-        """Xóa marker goal nhưng giữ nguyên start và các node khác."""
+        # Xóa marker goal nhưng giữ nguyên start và các node khác
         if self._goal_tooltip:
             self._scene.removeItem(self._goal_tooltip)
             self._goal_tooltip = None
@@ -994,7 +975,7 @@ class MapWidget(QGraphicsView):
         self._sync_graph_overlay_visibility()
 
     def pulse_node(self, node_id: str, color: Optional[QColor] = None):
-        """Tạo ripple/pulse 300ms quanh node được chọn hoặc đang duyệt."""
+        # Tạo ripple/pulse 300ms quanh node được chọn/đang duyệt
         if self._graph_overlay_hidden:
             return
         item = self._node_items.get(node_id)
@@ -1058,7 +1039,7 @@ class MapWidget(QGraphicsView):
                     self._node_items[nid].set_state("frontier")
                     
     def highlight_path(self, path: List[str], animate: bool = True):
-        """Vẽ lộ trình tối ưu, có thể vẽ ngay toàn bộ khi đang ở chế độ bản đồ sạch."""
+        # Vẽ lộ trình tối ưu, có thể vẽ toàn bộ nếu đang ở chế độ bản đồ sạch
         if not path or not self._graph:
             return
         
@@ -1112,7 +1093,7 @@ class MapWidget(QGraphicsView):
                 self._route_dot.setPos(end_x, end_y)
 
     def _animate_route_step(self):
-        """Tick animation vẽ route bằng QTimer để không khóa event loop."""
+        # Tick animation vẽ route bằng QTimer
         if self._route_segment_index >= len(self._route_segments):
             self._route_timer.stop()
             self._start_route_flow()
@@ -1161,7 +1142,7 @@ class MapWidget(QGraphicsView):
             self._route_active_glow = None
 
     def _start_route_flow(self):
-        """Phủ lớp dash chuyển động lên route để tạo cảm giác luồng navigation."""
+        # Phủ lớp dash chuyển động lên route
         if self._route_flow_items:
             return
 
@@ -1187,7 +1168,7 @@ class MapWidget(QGraphicsView):
             self._route_flow_timer.start(42)
 
     def _animate_route_flow(self):
-        """Dịch dash offset liên tục để route có hiệu ứng chuyển động sau khi hoàn tất."""
+        # Dịch dash offset liên tục để route có hiệu ứng chuyển động
         if not self._route_flow_items:
             self._route_flow_timer.stop()
             return
@@ -1207,7 +1188,7 @@ class MapWidget(QGraphicsView):
             item.setPen(pen)
 
     def animate_avatar_along_path(self, path: List[str], avatar_path: str):
-        """Hiển thị avatar nhỏ và cho đi mẫu từ node bắt đầu đến node đích."""
+        # Hiển thị avatar nhỏ và cho đi mẫu từ node bắt đầu đến node đích
         if not self._graph or len(path) < 2:
             return
 
@@ -1253,7 +1234,7 @@ class MapWidget(QGraphicsView):
         self._avatar_timer.start(28)
 
     def _ensure_full_route_drawn(self):
-        """Hoàn tất visual route nếu người dùng bấm đi mẫu trước khi draw animation xong."""
+        # Hoàn tất visual route nếu bấm đi mẫu trước khi animation xong
         if not self._route_segments:
             return
 
@@ -1286,7 +1267,7 @@ class MapWidget(QGraphicsView):
             self._start_route_flow()
 
     def _animate_avatar_step(self):
-        """Tick di chuyển avatar dọc theo route bằng QTimer."""
+        # Tick di chuyển avatar dọc theo route bằng QTimer
         if self._avatar_item is None or self._avatar_segment_index >= len(self._avatar_segments):
             self._avatar_timer.stop()
             self._restore_full_route_visibility()
@@ -1314,7 +1295,7 @@ class MapWidget(QGraphicsView):
                 self._spawn_fireworks(ex, ey)
 
     def _spawn_fireworks(self, x: float, y: float):
-        """Tạo pháo hoa nhỏ tại node đích khi avatar đi mẫu tới nơi."""
+        # Tạo pháo hoa nhỏ tại node đích khi avatar đi mẫu tới nơi
         colors = [
             QColor("#0B74FF"),
             QColor("#00D1B2"),
@@ -1372,7 +1353,7 @@ class MapWidget(QGraphicsView):
             self._firework_timer.stop()
 
     def _update_route_visibility_for_avatar(self, avatar_x: float, avatar_y: float):
-        """Avatar đi đến đâu thì phần route phía sau biến mất đến đó."""
+        # Avatar đi đến đâu thì phần route phía sau biến mất dần đó
         if not self._avatar_hiding_route:
             return
 
@@ -1395,7 +1376,7 @@ class MapWidget(QGraphicsView):
             self._route_dot.setVisible(False)
 
     def _restore_full_route_visibility(self):
-        """Khi avatar tới đích, hiện lại route đầy đủ như kết quả ban đầu."""
+        # Khi avatar tới đích, hiện lại route đầy đủ
         self._avatar_hiding_route = False
         for index, items in enumerate(self._route_segment_items):
             if index >= len(self._route_segments):
@@ -1441,7 +1422,7 @@ class MapWidget(QGraphicsView):
         self._path_items.clear()
         
     def reset_all_nodes(self):
-        """Khôi phục trạng thái ban đầu của các node trừ ghim Start/Goal."""
+        # Khôi phục trạng thái ban đầu của các node trừ ghim Start/Goal
         for nid, item in self._node_items.items():
             item.set_state("normal")
         self.clear_path()
@@ -1484,7 +1465,7 @@ class MapWidget(QGraphicsView):
                     self._last_current_node = nid
             
     def full_reset(self):
-        """Xóa hoàn toàn ghim, đường đi và đưa bản đồ về trạng thái ban đầu."""
+        # Xóa hoàn toàn ghim, đường đi và đưa bản đồ về trạng thái ban đầu
         if self._start_tooltip:
             self._scene.removeItem(self._start_tooltip)
             self._start_tooltip = None
@@ -1504,7 +1485,7 @@ class MapWidget(QGraphicsView):
     # ──────────────────────────────────────────────────
     
     def resizeEvent(self, event: QResizeEvent | None):
-        """Tự động giữ tỷ lệ fit view bản đồ và cố định góc các widget điều khiển nổi."""
+        # Tự động giữ tỷ lệ fit view bản đồ và cố định góc các widget điều khiển nổi
         super().resizeEvent(event)
         if not self._scene.sceneRect().isEmpty():
             self.fitInView(self._scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)

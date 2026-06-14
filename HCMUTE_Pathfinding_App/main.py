@@ -1,12 +1,5 @@
-"""
-main.py - Điểm khởi chạy ứng dụng
-====================================
-Hệ thống tìm đường trong khuôn viên HCMUTE
-Sử dụng các thuật toán: BFS, DFS, UCS, Greedy, A*
-
-Tác giả: Sinh viên HCMUTE
-Đồ án: AI cuối kỳ
-"""
+# Điểm khởi chạy ứng dụng tìm đường HCMUTE
+# Khởi tạo QApplication, hiển thị WelcomeScreen rồi vào MainWindow
 
 import sys
 
@@ -16,23 +9,18 @@ from PyQt6.QtGui import QFont
 from ui.welcome_screen import WelcomeScreen
 
 
+# Hàm main: cấu hình app và khởi động giao diện
 def main():
-    """Khởi chạy ứng dụng."""
-    # Tạo QApplication
     app = QApplication(sys.argv)
     
-    # Cấu hình font mặc định
     default_font = QFont("Segoe UI", 10)
     app.setFont(default_font)
-    
-    # Cấu hình High DPI
     app.setStyle("Fusion")
     
-    # Hiển thị màn hình welcome trước, sau đó WelcomeScreen sẽ tự mở MainWindow.
+    # Hiển thị WelcomeScreen, sau đó nó sẽ tự mở MainWindow
     window = WelcomeScreen()
     window.show()
     
-    # Chạy event loop
     sys.exit(app.exec())
 
 

@@ -1,6 +1,4 @@
-"""
-graph_editor_dialog.py - Dialog chỉnh sửa node/cạnh của bản đồ.
-"""
+# Dialog chỉnh sửa node/cạnh của bản đồ
 
 from typing import Optional
 
@@ -32,7 +30,7 @@ from ui.map_widget import MapWidget
 
 
 class EditableMapWidget(MapWidget):
-    """MapWidget có thêm signal click vùng trống để chỉnh sửa trực quan."""
+    # MapWidget có click vùng trống để chỉnh sửa trực quan
 
     map_clicked = pyqtSignal(float, float)
 
@@ -43,7 +41,7 @@ class EditableMapWidget(MapWidget):
         self._last_pan_pos = None
 
     def set_left_drag_pan(self, enabled: bool):
-        """Bật/tắt kéo bản đồ bằng chuột trái."""
+        # Bật/tắt kéo bản đồ bằng chuột trái
         self._left_drag_pan = enabled
 
     def mousePressEvent(self, event):
@@ -92,7 +90,7 @@ class EditableMapWidget(MapWidget):
 
 
 class GraphEditorDialog(QDialog):
-    """Công cụ thêm/sửa/xóa node, cạnh và chỉnh hiển thị cạnh."""
+    # Công cụ thêm/sửa/xóa node, cạnh và hiển thị
 
     graph_changed = pyqtSignal()
     edge_display_changed = pyqtSignal(bool, float, int)
@@ -574,7 +572,7 @@ class GraphEditorDialog(QDialog):
             self._show_error(exc)
 
     def _clear_all_node_names(self):
-        """Xoa ten hien thi cua tat ca node tren graph."""
+        # Xóa tên hiển thị của tất cả node trên graph
         named_count = sum(1 for node in self._graph.nodes.values() if node.name)
         if named_count == 0:
             self._status_label.setText("Tat ca node hien da khong co ten hien thi.")
