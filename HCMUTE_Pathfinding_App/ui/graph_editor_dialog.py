@@ -117,7 +117,7 @@ class GraphEditorDialog(QDialog):
         self._edge_opacity = edge_opacity
         self._modified = False
 
-        self.setWindowTitle("Chinh sua ban do")
+        self.setWindowTitle("Chỉnh sửa bản đồ")
         self.setMinimumSize(980, 680)
         self.resize(1180, 760)
 
@@ -129,19 +129,19 @@ class GraphEditorDialog(QDialog):
         root.setContentsMargins(14, 14, 14, 14)
         root.setSpacing(10)
 
-        self._status_label = QLabel("Chua co thay doi")
+        self._status_label = QLabel("Chưa có thay đổi")
         self._status_label.setStyleSheet("color: #5F6368;")
 
         tabs = QTabWidget()
-        tabs.addTab(self._create_visual_tab(), "Ban do truc quan")
-        tabs.addTab(self._create_nodes_tab(), "Node")
-        tabs.addTab(self._create_edges_tab(), "Canh")
-        tabs.addTab(self._create_display_tab(edge_visible, edge_width, edge_opacity), "Cai dat")
+        tabs.addTab(self._create_visual_tab(), "Bản đồ trực quan")
+        tabs.addTab(self._create_nodes_tab(), "Nút")
+        tabs.addTab(self._create_edges_tab(), "Cạnh")
+        tabs.addTab(self._create_display_tab(edge_visible, edge_width, edge_opacity), "Cài đặt")
 
         bottom = QHBoxLayout()
-        self.btn_save = QPushButton("Luu JSON")
+        self.btn_save = QPushButton("Lưu JSON")
         self.btn_save.clicked.connect(self._save)
-        btn_close = QPushButton("Dong")
+        btn_close = QPushButton("Đóng")
         btn_close.clicked.connect(self.close)
         bottom.addWidget(self._status_label, 1)
         bottom.addWidget(self.btn_save)
@@ -162,57 +162,57 @@ class GraphEditorDialog(QDialog):
         self.editor_map.node_clicked.connect(self._on_visual_node_clicked)
         self.editor_map.map_clicked.connect(self._on_visual_map_clicked)
 
-        side = QGroupBox("Thao tac truc tiep")
+        side = QGroupBox("Thao tác trực tiếp")
         side.setFixedWidth(310)
         side_layout = QVBoxLayout(side)
         side_layout.setSpacing(8)
 
         self.visual_mode_combo = QComboBox()
         self.visual_mode_combo.addItems([
-            "Di chuyen ban do",
-            "Chon node",
-            "Them node tai vi tri click",
-            "Di chuyen node da chon",
-            "Them canh bang 2 click",
-            "Xoa canh bang 2 click",
-            "Xoa node duoc click",
+            "Di chuyển bản đồ",
+            "Chọn nút",
+            "Thêm nút tại vị trí nhấp",
+            "Di chuyển nút đã chọn",
+            "Thêm cạnh bằng 2 lần nhấp",
+            "Xóa cạnh bằng 2 lần nhấp",
+            "Xóa nút được nhấp",
         ])
-        self.visual_mode_combo.setCurrentText("Chon node")
+        self.visual_mode_combo.setCurrentText("Chọn nút")
         self.visual_mode_combo.currentIndexChanged.connect(self._on_visual_mode_changed)
 
-        self.visual_selected_label = QLabel("Node dang chon: chua co")
+        self.visual_selected_label = QLabel("Nút đang chọn: chưa có")
         self.visual_selected_label.setWordWrap(True)
         self.visual_selected_label.setStyleSheet("color: #1A73E8; font-weight: bold;")
 
         form = QFormLayout()
         self.visual_node_id_edit = QLineEdit()
-        self.visual_node_id_edit.setPlaceholderText("Tu dong neu de trong")
+        self.visual_node_id_edit.setPlaceholderText("Tự động nếu để trống")
         self.visual_node_name_edit = QLineEdit()
-        self.visual_node_name_edit.setPlaceholderText("Ten hien thi")
+        self.visual_node_name_edit.setPlaceholderText("Tên hiển thị")
         self.visual_x_label = QLabel("-")
         self.visual_y_label = QLabel("-")
-        form.addRow("ID node moi", self.visual_node_id_edit)
-        form.addRow("Ten node", self.visual_node_name_edit)
-        form.addRow("X click", self.visual_x_label)
-        form.addRow("Y click", self.visual_y_label)
+        form.addRow("ID nút mới", self.visual_node_id_edit)
+        form.addRow("Tên nút", self.visual_node_name_edit)
+        form.addRow("Tọa độ X", self.visual_x_label)
+        form.addRow("Tọa độ Y", self.visual_y_label)
 
-        btn_rename = QPushButton("Doi ten node dang chon")
+        btn_rename = QPushButton("Đổi tên nút đang chọn")
         btn_rename.clicked.connect(self._rename_selected_from_visual)
-        btn_clear_name = QPushButton("An ten node dang chon")
+        btn_clear_name = QPushButton("Ẩn tên nút đang chọn")
         btn_clear_name.clicked.connect(self._clear_selected_node_name)
-        btn_recenter = QPushButton("Fit lai ban do")
+        btn_recenter = QPushButton("Căn vừa bản đồ")
         btn_recenter.clicked.connect(self.editor_map.zoom_reset)
 
         hint = QLabel(
-            "Chon mode roi thao tac tren ban do. "
-            "Co the giu chuot phai hoac chuot giua de keo ban do o moi che do. "
-            "Them/xoa canh dung 2 lan click vao 2 node. "
-            "Di chuyen node: chon node truoc, sau do click vi tri moi."
+            "Chọn chế độ rồi thao tác trên bản đồ. "
+            "Có thể giữ chuột phải hoặc chuột giữa để kéo bản đồ ở mọi chế độ. "
+            "Thêm hoặc xóa cạnh bằng cách nhấp lần lượt vào hai nút. "
+            "Để di chuyển nút, hãy chọn nút trước rồi nhấp vào vị trí mới."
         )
         hint.setWordWrap(True)
         hint.setStyleSheet("color: #70757A;")
 
-        side_layout.addWidget(QLabel("Che do"))
+        side_layout.addWidget(QLabel("Chế độ"))
         side_layout.addWidget(self.visual_mode_combo)
         side_layout.addWidget(self.visual_selected_label)
         side_layout.addLayout(form)
@@ -231,7 +231,7 @@ class GraphEditorDialog(QDialog):
         layout = QHBoxLayout(tab)
 
         self.node_table = QTableWidget(0, 4)
-        self.node_table.setHorizontalHeaderLabels(["ID", "Ten", "X", "Y"])
+        self.node_table.setHorizontalHeaderLabels(["ID", "Tên", "X", "Y"])
         self.node_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.node_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.node_table.itemSelectionChanged.connect(self._on_node_selected)
@@ -239,7 +239,7 @@ class GraphEditorDialog(QDialog):
         if header is not None:
             header.setStretchLastSection(True)
 
-        form_box = QGroupBox("Thong tin node")
+        form_box = QGroupBox("Thông tin nút")
         form_layout = QVBoxLayout(form_box)
         fields = QFormLayout()
 
@@ -251,27 +251,27 @@ class GraphEditorDialog(QDialog):
         self.node_y_spin.setRange(0, max(20000, self._graph.image_size[1] or 20000))
 
         fields.addRow("ID", self.node_id_edit)
-        fields.addRow("Ten hien thi", self.node_name_edit)
+        fields.addRow("Tên hiển thị", self.node_name_edit)
         fields.addRow("X", self.node_x_spin)
         fields.addRow("Y", self.node_y_spin)
 
         btn_row_1 = QHBoxLayout()
-        btn_new = QPushButton("Nhap node moi")
+        btn_new = QPushButton("Nhập nút mới")
         btn_new.clicked.connect(self._clear_node_form)
-        btn_add = QPushButton("Them node")
+        btn_add = QPushButton("Thêm nút")
         btn_add.clicked.connect(self._add_node)
         btn_row_1.addWidget(btn_new)
         btn_row_1.addWidget(btn_add)
 
         btn_row_2 = QHBoxLayout()
-        btn_update = QPushButton("Cap nhat node")
+        btn_update = QPushButton("Cập nhật nút")
         btn_update.clicked.connect(self._update_node)
-        btn_delete = QPushButton("Xoa node")
+        btn_delete = QPushButton("Xóa nút")
         btn_delete.clicked.connect(self._delete_node)
         btn_row_2.addWidget(btn_update)
         btn_row_2.addWidget(btn_delete)
 
-        note = QLabel("Xoa node se xoa tat ca canh lien quan.")
+        note = QLabel("Xóa nút sẽ xóa tất cả cạnh liên quan.")
         note.setWordWrap(True)
         note.setStyleSheet("color: #70757A;")
 
@@ -290,7 +290,7 @@ class GraphEditorDialog(QDialog):
         layout = QHBoxLayout(tab)
 
         self.edge_table = QTableWidget(0, 3)
-        self.edge_table.setHorizontalHeaderLabels(["Tu", "Den", "Trong so"])
+        self.edge_table.setHorizontalHeaderLabels(["Từ", "Đến", "Trọng số"])
         self.edge_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.edge_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.edge_table.itemSelectionChanged.connect(self._on_edge_selected)
@@ -298,7 +298,7 @@ class GraphEditorDialog(QDialog):
         if header_edge is not None:
             header_edge.setStretchLastSection(True)
 
-        form_box = QGroupBox("Thong tin canh")
+        form_box = QGroupBox("Thông tin cạnh")
         form_layout = QVBoxLayout(form_box)
         fields = QFormLayout()
 
@@ -308,22 +308,22 @@ class GraphEditorDialog(QDialog):
         self.edge_weight_spin.setRange(0.01, 100000.0)
         self.edge_weight_spin.setDecimals(2)
         self.edge_weight_spin.setSingleStep(5.0)
-        self.edge_auto_weight = QCheckBox("Tu tinh theo khoang cach 2 node")
+        self.edge_auto_weight = QCheckBox("Tự tính theo khoảng cách giữa hai nút")
         self.edge_auto_weight.setChecked(True)
         self.edge_auto_weight.stateChanged.connect(self._update_auto_weight)
         self.edge_source_combo.currentIndexChanged.connect(self._update_auto_weight)
         self.edge_target_combo.currentIndexChanged.connect(self._update_auto_weight)
 
-        fields.addRow("Node dau", self.edge_source_combo)
-        fields.addRow("Node cuoi", self.edge_target_combo)
-        fields.addRow("Trong so", self.edge_weight_spin)
+        fields.addRow("Nút đầu", self.edge_source_combo)
+        fields.addRow("Nút cuối", self.edge_target_combo)
+        fields.addRow("Trọng số", self.edge_weight_spin)
         fields.addRow("", self.edge_auto_weight)
 
-        btn_add = QPushButton("Them canh")
+        btn_add = QPushButton("Thêm cạnh")
         btn_add.clicked.connect(self._add_edge)
-        btn_update = QPushButton("Cap nhat trong so")
+        btn_update = QPushButton("Cập nhật trọng số")
         btn_update.clicked.connect(self._update_edge)
-        btn_delete = QPushButton("Xoa canh")
+        btn_delete = QPushButton("Xóa cạnh")
         btn_delete.clicked.connect(self._delete_edge)
 
         form_layout.addLayout(fields)
@@ -341,10 +341,10 @@ class GraphEditorDialog(QDialog):
         layout = QVBoxLayout(tab)
         layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
-        box = QGroupBox("Cach hien thi canh tren ban do")
+        box = QGroupBox("Cách hiển thị cạnh trên bản đồ")
         grid = QGridLayout(box)
 
-        self.show_edges_check = QCheckBox("Hien thi canh")
+        self.show_edges_check = QCheckBox("Hiển thị cạnh")
         self.show_edges_check.setChecked(edge_visible)
 
         self.edge_width_spin = QDoubleSpinBox()
@@ -360,28 +360,28 @@ class GraphEditorDialog(QDialog):
             lambda value: self.edge_opacity_label.setText(str(value))
         )
 
-        btn_apply = QPushButton("Ap dung hien thi")
+        btn_apply = QPushButton("Áp dụng hiển thị")
         btn_apply.clicked.connect(self._apply_edge_display)
 
         grid.addWidget(self.show_edges_check, 0, 0, 1, 2)
-        grid.addWidget(QLabel("Do day"), 1, 0)
+        grid.addWidget(QLabel("Độ dày"), 1, 0)
         grid.addWidget(self.edge_width_spin, 1, 1)
-        grid.addWidget(QLabel("Do mo"), 2, 0)
+        grid.addWidget(QLabel("Độ mờ"), 2, 0)
         grid.addWidget(self.edge_opacity_slider, 2, 1)
         grid.addWidget(self.edge_opacity_label, 2, 2)
         grid.addWidget(btn_apply, 3, 0, 1, 3)
 
         layout.addWidget(box)
 
-        node_box = QGroupBox("Cai dat ten node")
+        node_box = QGroupBox("Cài đặt tên nút")
         node_layout = QVBoxLayout(node_box)
 
-        btn_hide_all_names = QPushButton("An toan bo ten node")
+        btn_hide_all_names = QPushButton("Ẩn toàn bộ tên nút")
         btn_hide_all_names.clicked.connect(self._clear_all_node_names)
 
         note = QLabel(
-            "Chuc nang nay se xoa truong ten hien thi cua tat ca node. "
-            "Tren log va combo, node khong co ten se hien ID goc nhu N11, N22."
+            "Chức năng này sẽ xóa tên hiển thị của tất cả nút. "
+            "Trong nhật ký và hộp chọn, nút không có tên sẽ hiển thị ID gốc như N11, N22."
         )
         note.setWordWrap(True)
         note.setStyleSheet("color: #70757A;")
@@ -427,7 +427,7 @@ class GraphEditorDialog(QDialog):
         self.edge_target_combo.clear()
         for node_id in self._graph.get_all_node_ids():
             node = self._graph.nodes[node_id]
-            display_name = node.name if node.name else "(khong co ten)"
+            display_name = node.name if node.name else "(không có tên)"
             display = f"{display_name} ({node_id})"
             self.edge_source_combo.addItem(display, node_id)
             self.edge_target_combo.addItem(display, node_id)
@@ -455,8 +455,8 @@ class GraphEditorDialog(QDialog):
         self.node_x_spin.setValue(int(node.x))
         self.node_y_spin.setValue(int(node.y))
         if hasattr(self, "visual_selected_label"):
-            display_name = node.name if node.name else "(khong co ten)"
-            self.visual_selected_label.setText(f"Node dang chon: {display_name} ({node.id})")
+            display_name = node.name if node.name else "(không có tên)"
+            self.visual_selected_label.setText(f"Nút đang chọn: {display_name} ({node.id})")
             self.visual_node_name_edit.setText(node.name)
             self.visual_x_label.setText(str(node.x))
             self.visual_y_label.setText(str(node.y))
@@ -485,18 +485,18 @@ class GraphEditorDialog(QDialog):
         mode = self.visual_mode_combo.currentText()
         self._select_node(node_id)
 
-        if mode == "Them canh bang 2 click":
+        if mode == "Thêm cạnh bằng 2 lần nhấp":
             self._pick_visual_edge(node_id, create=True)
-        elif mode == "Xoa canh bang 2 click":
+        elif mode == "Xóa cạnh bằng 2 lần nhấp":
             self._pick_visual_edge(node_id, create=False)
-        elif mode == "Xoa node duoc click":
+        elif mode == "Xóa nút được nhấp":
             self._delete_node()
-        elif mode == "Di chuyen node da chon":
-            self._status_label.setText("Da chon node. Click vi tri moi tren ban do de di chuyen.")
-        elif mode == "Them node tai vi tri click":
-            self._status_label.setText("Vi tri nay da co node. Click vung trong de them node moi.")
+        elif mode == "Di chuyển nút đã chọn":
+            self._status_label.setText("Đã chọn nút. Hãy nhấp vị trí mới trên bản đồ để di chuyển.")
+        elif mode == "Thêm nút tại vị trí nhấp":
+            self._status_label.setText("Vị trí này đã có nút. Hãy nhấp vùng trống để thêm nút mới.")
         else:
-            self._status_label.setText(f"Da chon node {node_id}")
+            self._status_label.setText(f"Đã chọn nút {node_id}")
 
     def _on_visual_map_clicked(self, x: float, y: float):
         x_i = max(0, int(round(x)))
@@ -505,12 +505,12 @@ class GraphEditorDialog(QDialog):
         self.visual_y_label.setText(str(y_i))
 
         mode = self.visual_mode_combo.currentText()
-        if mode == "Them node tai vi tri click":
+        if mode == "Thêm nút tại vị trí nhấp":
             self._add_node_from_visual(x_i, y_i)
-        elif mode == "Di chuyen node da chon":
+        elif mode == "Di chuyển nút đã chọn":
             self._move_selected_node_from_visual(x_i, y_i)
         else:
-            self._status_label.setText(f"Vi tri click: x={x_i}, y={y_i}")
+            self._status_label.setText(f"Vị trí nhấp: x={x_i}, y={y_i}")
 
     def _add_node_from_visual(self, x: int, y: int):
         node_id = self.visual_node_id_edit.text().strip() or self._suggest_node_id()
@@ -520,53 +520,53 @@ class GraphEditorDialog(QDialog):
             self._selected_node_id = node_id
             self.visual_node_id_edit.clear()
             self.visual_node_name_edit.clear()
-            self._after_graph_changed(f"Da them node {node_id} tai ({x}, {y})")
+            self._after_graph_changed(f"Đã thêm nút {node_id} tại ({x}, {y})")
             self._select_node(node_id)
         except Exception as exc:
             self._show_error(exc)
 
     def _move_selected_node_from_visual(self, x: int, y: int):
         if not self._selected_node_id:
-            QMessageBox.warning(self, "Thieu lua chon", "Hay chon node truoc khi di chuyen.")
+            QMessageBox.warning(self, "Thiếu lựa chọn", "Hãy chọn nút trước khi di chuyển.")
             return
         node = self._graph.get_node(self._selected_node_id)
         if node is None:
             return
         try:
             self._graph.update_node(self._selected_node_id, x, y, node.name)
-            self._after_graph_changed(f"Da di chuyen node {self._selected_node_id} den ({x}, {y})")
+            self._after_graph_changed(f"Đã di chuyển nút {self._selected_node_id} đến ({x}, {y})")
             self._select_node(self._selected_node_id)
         except Exception as exc:
             self._show_error(exc)
 
     def _rename_selected_from_visual(self):
         if not self._selected_node_id:
-            QMessageBox.warning(self, "Thieu lua chon", "Hay chon node can doi ten.")
+            QMessageBox.warning(self, "Thiếu lựa chọn", "Hãy chọn nút cần đổi tên.")
             return
         node = self._graph.get_node(self._selected_node_id)
         if node is None:
             return
         new_name = self.visual_node_name_edit.text().strip()
         if not new_name:
-            QMessageBox.warning(self, "Thieu ten", "Nhap ten hien thi moi cho node.")
+            QMessageBox.warning(self, "Thiếu tên", "Hãy nhập tên hiển thị mới cho nút.")
             return
         try:
             self._graph.update_node(self._selected_node_id, node.x, node.y, new_name)
-            self._after_graph_changed(f"Da doi ten node {self._selected_node_id}")
+            self._after_graph_changed(f"Đã đổi tên nút {self._selected_node_id}")
             self._select_node(self._selected_node_id)
         except Exception as exc:
             self._show_error(exc)
 
     def _clear_selected_node_name(self):
         if not self._selected_node_id:
-            QMessageBox.warning(self, "Thieu lua chon", "Hay chon node can an ten.")
+            QMessageBox.warning(self, "Thiếu lựa chọn", "Hãy chọn nút cần ẩn tên.")
             return
         node = self._graph.get_node(self._selected_node_id)
         if node is None:
             return
         try:
             self._graph.update_node(self._selected_node_id, node.x, node.y, "")
-            self._after_graph_changed(f"Da an ten node {self._selected_node_id}")
+            self._after_graph_changed(f"Đã ẩn tên nút {self._selected_node_id}")
             self._select_node(self._selected_node_id)
         except Exception as exc:
             self._show_error(exc)
@@ -575,13 +575,13 @@ class GraphEditorDialog(QDialog):
         # Xóa tên hiển thị của tất cả node trên graph
         named_count = sum(1 for node in self._graph.nodes.values() if node.name)
         if named_count == 0:
-            self._status_label.setText("Tat ca node hien da khong co ten hien thi.")
+            self._status_label.setText("Tất cả nút hiện đã không có tên hiển thị.")
             return
 
         answer = QMessageBox.question(
             self,
-            "An toan bo ten node",
-            f"Xoa ten hien thi cua {named_count} node? Ban van can bam Luu JSON de ghi vao file.",
+            "Ẩn toàn bộ tên nút",
+            f"Xóa tên hiển thị của {named_count} nút? Bạn vẫn cần bấm Lưu JSON để ghi vào file.",
         )
         if answer != QMessageBox.StandardButton.Yes:
             return
@@ -589,30 +589,32 @@ class GraphEditorDialog(QDialog):
         for node in self._graph.nodes.values():
             node.name = ""
 
-        self._after_graph_changed(f"Da an ten hien thi cua {named_count} node")
+        self._after_graph_changed(f"Đã ẩn tên hiển thị của {named_count} nút")
 
     def _pick_visual_edge(self, node_id: str, create: bool):
         if self._visual_edge_first is None:
             self._visual_edge_first = node_id
             self._highlight_selected_node(node_id)
-            action = "them" if create else "xoa"
-            self._status_label.setText(f"Da chon node dau {node_id}. Click node thu hai de {action} canh.")
+            action = "thêm" if create else "xóa"
+            self._status_label.setText(
+                f"Đã chọn nút đầu {node_id}. Hãy nhấp nút thứ hai để {action} cạnh."
+            )
             return
 
         source = self._visual_edge_first
         target = node_id
         self._visual_edge_first = None
         if source == target:
-            self._status_label.setText("Hai dau canh khong duoc trung nhau.")
+            self._status_label.setText("Hai đầu cạnh không được trùng nhau.")
             return
 
         try:
             if create:
                 self._graph.add_edge(source, target)
-                self._after_graph_changed(f"Da them canh {source} - {target}")
+                self._after_graph_changed(f"Đã thêm cạnh {source} - {target}")
             else:
                 self._graph.delete_edge(source, target)
-                self._after_graph_changed(f"Da xoa canh {source} - {target}")
+                self._after_graph_changed(f"Đã xóa cạnh {source} - {target}")
         except Exception as exc:
             self._show_error(exc)
 
@@ -621,8 +623,8 @@ class GraphEditorDialog(QDialog):
         if node is None:
             return
         self._selected_node_id = node_id
-        display_name = node.name if node.name else "(khong co ten)"
-        self.visual_selected_label.setText(f"Node dang chon: {display_name} ({node.id})")
+        display_name = node.name if node.name else "(không có tên)"
+        self.visual_selected_label.setText(f"Nút đang chọn: {display_name} ({node.id})")
         self.visual_node_name_edit.setText(node.name)
         self.visual_x_label.setText(str(node.x))
         self.visual_y_label.setText(str(node.y))
@@ -660,7 +662,7 @@ class GraphEditorDialog(QDialog):
     def _on_visual_mode_changed(self):
         self._reset_visual_edge_pick()
         self.editor_map.set_left_drag_pan(
-            self.visual_mode_combo.currentText() == "Di chuyen ban do"
+            self.visual_mode_combo.currentText() == "Di chuyển bản đồ"
         )
 
     def _refresh_editor_map(self):
@@ -689,7 +691,7 @@ class GraphEditorDialog(QDialog):
         self.node_x_spin.setValue(0)
         self.node_y_spin.setValue(0)
         if hasattr(self, "visual_selected_label"):
-            self.visual_selected_label.setText("Node dang chon: chua co")
+            self.visual_selected_label.setText("Nút đang chọn: chưa có")
 
     def _add_node(self):
         try:
@@ -699,13 +701,13 @@ class GraphEditorDialog(QDialog):
                 self.node_y_spin.value(),
                 self.node_name_edit.text(),
             )
-            self._after_graph_changed("Da them node")
+            self._after_graph_changed("Đã thêm nút")
         except Exception as exc:
             self._show_error(exc)
 
     def _update_node(self):
         if not self._selected_node_id:
-            QMessageBox.warning(self, "Thieu lua chon", "Hay chon node can cap nhat.")
+            QMessageBox.warning(self, "Thiếu lựa chọn", "Hãy chọn nút cần cập nhật.")
             return
         try:
             self._graph.update_node(
@@ -714,25 +716,25 @@ class GraphEditorDialog(QDialog):
                 self.node_y_spin.value(),
                 self.node_name_edit.text(),
             )
-            self._after_graph_changed("Da cap nhat node")
+            self._after_graph_changed("Đã cập nhật nút")
         except Exception as exc:
             self._show_error(exc)
 
     def _delete_node(self):
         if not self._selected_node_id:
-            QMessageBox.warning(self, "Thieu lua chon", "Hay chon node can xoa.")
+            QMessageBox.warning(self, "Thiếu lựa chọn", "Hãy chọn nút cần xóa.")
             return
         answer = QMessageBox.question(
             self,
-            "Xoa node",
-            f"Xoa node {self._selected_node_id} va cac canh lien quan?",
+            "Xóa nút",
+            f"Xóa nút {self._selected_node_id} và các cạnh liên quan?",
         )
         if answer != QMessageBox.StandardButton.Yes:
             return
         try:
             self._graph.delete_node(self._selected_node_id)
             self._clear_node_form()
-            self._after_graph_changed("Da xoa node")
+            self._after_graph_changed("Đã xóa nút")
         except Exception as exc:
             self._show_error(exc)
 
@@ -741,7 +743,7 @@ class GraphEditorDialog(QDialog):
             source, target = self._current_edge_nodes()
             weight = None if self.edge_auto_weight.isChecked() else self.edge_weight_spin.value()
             self._graph.add_edge(source, target, weight)
-            self._after_graph_changed("Da them canh")
+            self._after_graph_changed("Đã thêm cạnh")
         except Exception as exc:
             self._show_error(exc)
 
@@ -749,22 +751,22 @@ class GraphEditorDialog(QDialog):
         try:
             source, target = self._current_edge_nodes()
             self._graph.update_edge(source, target, self.edge_weight_spin.value())
-            self._after_graph_changed("Da cap nhat canh")
+            self._after_graph_changed("Đã cập nhật cạnh")
         except Exception as exc:
             self._show_error(exc)
 
     def _delete_edge(self):
         if not self._selected_edge:
-            QMessageBox.warning(self, "Thieu lua chon", "Hay chon canh can xoa.")
+            QMessageBox.warning(self, "Thiếu lựa chọn", "Hãy chọn cạnh cần xóa.")
             return
         source, target = self._selected_edge
-        answer = QMessageBox.question(self, "Xoa canh", f"Xoa canh {source} - {target}?")
+        answer = QMessageBox.question(self, "Xóa cạnh", f"Xóa cạnh {source} - {target}?")
         if answer != QMessageBox.StandardButton.Yes:
             return
         try:
             self._graph.delete_edge(source, target)
             self._selected_edge = None
-            self._after_graph_changed("Da xoa canh")
+            self._after_graph_changed("Đã xóa cạnh")
         except Exception as exc:
             self._show_error(exc)
 
@@ -778,13 +780,13 @@ class GraphEditorDialog(QDialog):
         if hasattr(self, "editor_map"):
             self.editor_map.set_edge_display(visible, width, opacity)
         self.edge_display_changed.emit(visible, width, opacity)
-        self._status_label.setText("Da ap dung hien thi canh")
+        self._status_label.setText("Đã áp dụng cách hiển thị cạnh")
 
     def _save(self):
         try:
             self._graph.save_to_json(self._json_path)
             self._modified = False
-            self._status_label.setText(f"Da luu: {self._json_path}")
+            self._status_label.setText(f"Đã lưu: {self._json_path}")
         except Exception as exc:
             self._show_error(exc)
 
@@ -793,7 +795,7 @@ class GraphEditorDialog(QDialog):
         self._selected_edge = None
         self._reload_all()
         self.graph_changed.emit()
-        self._status_label.setText(f"{message}. Chua luu JSON.")
+        self._status_label.setText(f"{message}. Chưa lưu JSON.")
 
     def _update_auto_weight(self):
         if not hasattr(self, "edge_auto_weight") or not self.edge_auto_weight.isChecked():
@@ -811,7 +813,7 @@ class GraphEditorDialog(QDialog):
         source = self.edge_source_combo.currentData()
         target = self.edge_target_combo.currentData()
         if not source or not target:
-            raise ValueError("Hay chon du 2 node cho canh")
+            raise ValueError("Hãy chọn đủ hai nút cho cạnh")
         return source, target
 
     @staticmethod
@@ -823,14 +825,14 @@ class GraphEditorDialog(QDialog):
             combo.setCurrentIndex(index)
 
     def _show_error(self, exc: Exception):
-        QMessageBox.warning(self, "Loi chinh sua", str(exc))
+        QMessageBox.warning(self, "Lỗi chỉnh sửa", str(exc))
 
     def closeEvent(self, a0):
         if self._modified:
             answer = QMessageBox.question(
                 self,
-                "Chua luu JSON",
-                "Ban do da thay doi. Ban muon luu truoc khi dong?",
+                "Chưa lưu JSON",
+                "Bản đồ đã thay đổi. Bạn muốn lưu trước khi đóng?",
                 QMessageBox.StandardButton.Save
                 | QMessageBox.StandardButton.Discard
                 | QMessageBox.StandardButton.Cancel,
