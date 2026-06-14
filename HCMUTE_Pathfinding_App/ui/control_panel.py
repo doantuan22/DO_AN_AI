@@ -1,6 +1,8 @@
 # Panel điều khiển bên phải: chọn thuật toán, heuristic, điểm đi/đến
 # Hiển thị log, thống kê, và các nút điều khiển mô phỏng
 
+from html import escape
+
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox,
     QPushButton, QTextEdit, QFrame, QSizePolicy, QGridLayout, QScrollArea, QStyle, QApplication
@@ -719,7 +721,7 @@ class ControlPanel(QWidget):
                     <td style='white-space: nowrap; vertical-align: top;'>
                         {icon}&nbsp;
                         <span style='color:#64748B; font-size: 10px;'>{timestamp}</span>&nbsp;&nbsp;
-                        <span style='color:#0F172A; font-size: 11px; font-weight: 600;'>{message.strip()}</span>
+                        <span style='color:#0F172A; font-size: 11px; font-weight: 600;'>{escape(message.strip()).replace(chr(10), '<br>')}</span>
                     </td>
                     <td style='text-align: right; white-space: nowrap; vertical-align: top; color:#70757A; font-size: 9px; padding-left: 8px;'>
                         {timestamp}
@@ -822,6 +824,7 @@ class ControlPanel(QWidget):
         self.btn_graph_edit.setEnabled(True)
         self._is_paused = False
         self._set_pause_button(paused=False)
+        self._on_algorithm_changed(self.algo_combo.currentText())
 
     def set_ready_to_start(self, ready: bool):
         # Bật nút Start khi đã có đủ điểm đi và đến

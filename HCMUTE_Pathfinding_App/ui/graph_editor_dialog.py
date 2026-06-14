@@ -830,9 +830,32 @@ class GraphEditorDialog(QDialog):
             answer = QMessageBox.question(
                 self,
                 "Chua luu JSON",
-                "Ban do da thay doi nhung chua luu JSON. Dong cua so?",
+                "Ban do da thay doi. Ban muon luu truoc khi dong?",
+                QMessageBox.StandardButton.Save
+                | QMessageBox.StandardButton.Discard
+                | QMessageBox.StandardButton.Cancel,
+                QMessageBox.StandardButton.Cancel,
             )
-            if answer != QMessageBox.StandardButton.Yes:
+            if answer == QMessageBox.StandardButton.Save:
+                try:
+                    self._graph.save_to_json(self._json_path)
+                    self._modified = False
+                except Exception as exc:
+                    self._show_error(exc)
+                    if a0 is not None:
+                        a0.ignore()
+                    return
+            elif answer == QMessageBox.StandardButton.Discard:
+                try:
+                    self._graph.load_from_json(self._json_path)
+                    self._modified = False
+                    self.graph_changed.emit()
+                except Exception as exc:
+                    self._show_error(exc)
+                    if a0 is not None:
+                        a0.ignore()
+                    return
+            else:
                 if a0 is not None:
                     a0.ignore()
                 return

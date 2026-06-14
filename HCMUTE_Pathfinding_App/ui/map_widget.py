@@ -3,6 +3,7 @@
 
 import os
 import math
+from html import escape
 from typing import Optional, Dict, List, Tuple, Any
 
 from PyQt6.QtWidgets import (
@@ -132,8 +133,8 @@ class MapPinTooltip(QGraphicsPathItem):
         # HTML hiển thị title và nội dung
         html = f"""
             <div style='text-align: center; line-height: 1.15;'>
-                <span style='color: {self.accent_color.name()}; font-family: Segoe UI; font-size: 8pt; font-weight: 800;'>{title_text}</span><br>
-                <span style='color: #202124; font-family: Segoe UI; font-size: 9pt; font-weight: 800;'>{name}</span>
+                <span style='color: {self.accent_color.name()}; font-family: Segoe UI; font-size: 8pt; font-weight: 800;'>{escape(title_text)}</span><br>
+                <span style='color: #202124; font-family: Segoe UI; font-size: 9pt; font-weight: 800;'>{escape(name)}</span>
             </div>
         """
         self.text_item.document().setDocumentMargin(0)
@@ -783,7 +784,7 @@ class MapWidget(QGraphicsView):
             text.setFont(font)
             text.setDefaultTextColor(MapColors.TEXT_LABEL)
             text.setZValue(8)
-            text.setHtml(f"<div style='font-family: Segoe UI; font-size: 9px; font-weight: bold;'>{full_text}</div>")
+            text.setHtml(f"<div style='font-family: Segoe UI; font-size: 9px; font-weight: bold;'>{escape(full_text)}</div>")
             
             # Tính toán vị trí nhãn
             text_width = text.boundingRect().width()

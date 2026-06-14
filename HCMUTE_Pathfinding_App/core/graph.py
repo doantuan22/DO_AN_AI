@@ -137,46 +137,78 @@ class Graph:
                 data = json.load(f)
         except json.JSONDecodeError as e:
             raise ValueError(f"File JSON không hợp lệ: {e}")
-        
-        self.nodes.clear()
-        self.edges.clear()
-        self.adjacency.clear()
-        self._image_width = 0
-        self._image_height = 0
-        
-        if "image_size" in data:
-            self._image_width = data["image_size"].get("width", 0)
-            self._image_height = data["image_size"].get("height", 0)
-        
+
+        if not isinstance(data, dict):
+            raise ValueError("Dữ liệu đồ thị phải là một JSON object")
+
+        image_size = data.get("image_size", {})
+        if not isinstance(image_size, dict):
+            raise ValueError("image_size phải là một JSON object")
+        try:
+            image_width = max(0, int(image_size.get("width", 0)))
+            image_height = max(0, int(image_size.get("height", 0)))
+        except (TypeError, ValueError) as exc:
+            raise ValueError("Kích thước ảnh phải là số nguyên") from exc
+
+        new_nodes: Dict[str, Node] = {}
+        new_edges: List[Edge] = []
+        new_adjacency: Dict[str, List[Tuple[str, float]]] = {}
+
         nodes_data = data.get("nodes", [])
+        if not isinstance(nodes_data, list):
+            raise ValueError("nodes phải là một danh sách")
         for node_data in nodes_data:
-            node_id = node_data.get("id", "")
-            x = node_data.get("x", 0)
-            y = node_data.get("y", 0)
+            if not isinstance(node_data, dict):
+                raise ValueError("Mỗi node phải là một JSON object")
+            node_id = str(node_data.get("id", "")).strip()
+            if not node_id:
+                raise ValueError("Node ID không được để trống")
+            if node_id in new_nodes:
+                raise ValueError(f"Node '{node_id}' bị trùng trong file JSON")
+            try:
+                x = int(node_data.get("x", 0))
+                y = int(node_data.get("y", 0))
+            except (TypeError, ValueError) as exc:
+                raise ValueError(f"Tọa độ của node '{node_id}' không hợp lệ") from exc
             # name="" nghĩa là người dùng chủ động ẩn tên
             if "name" in node_data:
                 name = str(node_data.get("name", ""))
             else:
                 name = self.NODE_NAMES.get(node_id, "")
-            
+
             node = Node(node_id, x, y, name)
-            self.nodes[node_id] = node
-            self.adjacency[node_id] = []
-        
+            new_nodes[node_id] = node
+            new_adjacency[node_id] = []
+
         edges_data = data.get("edges", [])
+        if not isinstance(edges_data, list):
+            raise ValueError("edges phải là một danh sách")
+        seen_edges = set()
         for edge_data in edges_data:
+            if not isinstance(edge_data, dict):
+                raise ValueError("Mỗi cạnh phải là một JSON object")
             # Hỗ trợ cả format from/to và source/target
-            source = edge_data.get("from", edge_data.get("source", ""))
-            target = edge_data.get("to", edge_data.get("target", ""))
-            weight = edge_data.get("weight", 1.0)
-            
-            if source and target and source in self.nodes and target in self.nodes:
-                edge = Edge(source, target, weight)
-                self.edges.append(edge)
-                # Đồ thị vô hướng: lưu cả hai chiều
-                self.adjacency[source].append((target, weight))
-                self.adjacency[target].append((source, weight))
-        
+            source = str(edge_data.get("from", edge_data.get("source", ""))).strip()
+            target = str(edge_data.get("to", edge_data.get("target", ""))).strip()
+            if source not in new_nodes or target not in new_nodes:
+                raise ValueError(f"Cạnh {source} - {target} tham chiếu node không tồn tại")
+            if source == target:
+                raise ValueError(f"Cạnh {source} - {target} không được tự nối")
+            edge_key = frozenset((source, target))
+            if edge_key in seen_edges:
+                raise ValueError(f"Cạnh {source} - {target} bị trùng trong file JSON")
+            seen_edges.add(edge_key)
+            weight = self._validate_weight(edge_data.get("weight", 1.0))
+            edge = Edge(source, target, weight)
+            new_edges.append(edge)
+            new_adjacency[source].append((target, weight))
+            new_adjacency[target].append((source, weight))
+
+        self.nodes = new_nodes
+        self.edges = new_edges
+        self.adjacency = new_adjacency
+        self._image_width = image_width
+        self._image_height = image_height
         return True
     
     # Chuyển đồ thị thành dict để lưu JSON
@@ -265,10 +297,11 @@ class Graph:
         
         if weight is None:
             weight = self.calculate_euclidean_weight(source, target)
-        edge = Edge(source, target, float(weight))
+        weight = self._validate_weight(weight)
+        edge = Edge(source, target, weight)
         self.edges.append(edge)
-        self.adjacency[source].append((target, float(weight)))
-        self.adjacency[target].append((source, float(weight)))
+        self.adjacency[source].append((target, weight))
+        self.adjacency[target].append((source, weight))
         return edge
     
     # Cập nhật trọng số cạnh
@@ -277,9 +310,10 @@ class Graph:
         if edge is None:
             raise ValueError(f"Cạnh {source} - {target} không tồn tại")
         
-        edge.weight = float(weight)
-        self._set_adjacency_weight(source, target, float(weight))
-        self._set_adjacency_weight(target, source, float(weight))
+        weight = self._validate_weight(weight)
+        edge.weight = weight
+        self._set_adjacency_weight(source, target, weight)
+        self._set_adjacency_weight(target, source, weight)
         return edge
     
     # Xóa cạnh vô hướng giữa hai node
@@ -304,6 +338,16 @@ class Graph:
         if src is None or dst is None:
             raise ValueError("Hai node của cạnh phải tồn tại")
         return math.sqrt((src.x - dst.x) ** 2 + (src.y - dst.y) ** 2)
+
+    @staticmethod
+    def _validate_weight(weight: Any) -> float:
+        try:
+            value = float(weight)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("Trọng số cạnh phải là một số") from exc
+        if not math.isfinite(value) or value <= 0:
+            raise ValueError("Trọng số cạnh phải là số hữu hạn lớn hơn 0")
+        return value
     
     def _find_edge(self, source: str, target: str) -> Optional[Edge]:
         for edge in self.edges:

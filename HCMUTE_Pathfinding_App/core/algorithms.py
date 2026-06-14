@@ -331,7 +331,7 @@ def astar(graph: Graph, start: str, goal: str,
         if current == goal:
             route = " → ".join(graph.get_node_name(n) for n in path)
             yield _make_step(current, visited_order, [], path, g_cost,
-                            f"✅ Tìm thấy đường đi tối ưu!\n   Lộ trình: {route}\n   "
+                            f"✅ Tìm thấy đường đi!\n   Lộ trình: {route}\n   "
                             f"Tổng chi phí: {g_cost:.1f} m")
             return
         

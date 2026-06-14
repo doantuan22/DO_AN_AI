@@ -414,16 +414,33 @@ class MainWindow(QMainWindow):
                 
     def _on_start_combo_changed(self, index: int):
         node_id = self._control_panel.start_combo.itemData(index)
-        if node_id and node_id != self._start_node:
+        if not node_id:
+            if self._start_node:
+                self._clear_start()
+            return
+        if node_id == self._goal_node:
+            self._control_panel.add_log("⚠️ Điểm bắt đầu không được trùng điểm đích!")
+            self._control_panel.start_combo.blockSignals(True)
+            self._set_combo_to_node(self._control_panel.start_combo, self._start_node)
+            self._control_panel.start_combo.blockSignals(False)
+            return
+        if node_id != self._start_node:
             self._set_start(node_id)
             self._click_count = 2 if self._goal_node else 1
             
     def _on_goal_combo_changed(self, index: int):
         node_id = self._control_panel.goal_combo.itemData(index)
-        if node_id and node_id != self._goal_node:
-            if node_id == self._start_node:
-                self._control_panel.add_log("⚠️ Điểm đích không được trùng điểm bắt đầu!")
-                return
+        if not node_id:
+            if self._goal_node:
+                self._clear_goal()
+            return
+        if node_id == self._start_node:
+            self._control_panel.add_log("⚠️ Điểm đích không được trùng điểm bắt đầu!")
+            self._control_panel.goal_combo.blockSignals(True)
+            self._set_combo_to_node(self._control_panel.goal_combo, self._goal_node)
+            self._control_panel.goal_combo.blockSignals(False)
+            return
+        if node_id != self._goal_node:
             self._set_goal(node_id)
             self._click_count = 2
     
@@ -617,7 +634,7 @@ class MainWindow(QMainWindow):
                 animate=not self._map_widget.is_graph_overlay_hidden(),
             )
             self._map_widget.set_sample_walk_enabled(True)
-            self._show_toast("Đã tìm thấy lộ trình tối ưu")
+            self._show_toast("Đã tìm thấy lộ trình")
             
             # Báo cáo kết quả
             algo_name = self._control_panel.get_selected_algorithm()
