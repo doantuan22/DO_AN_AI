@@ -18,6 +18,7 @@ from core.heuristic import get_heuristic_function
 from core.history_store import HistoryStore
 from core.utils import Timer, get_timestamp
 from ui.map_widget import MapWidget
+from ui.banner_widget import BannerWidget
 from ui.control_panel import ControlPanel
 from ui.graph_editor_dialog import GraphEditorDialog
 from ui.history_dialog import HistoryDialog
@@ -223,8 +224,22 @@ class MainWindow(QMainWindow):
         self._map_widget = MapWidget()
         body_layout.addWidget(self._map_widget, 1)
         
+        right_column = QWidget()
+        right_column.setFixedWidth(470)
+        right_layout = QVBoxLayout(right_column)
+        right_layout.setContentsMargins(0, 14, 0, 0)
+        right_layout.setSpacing(12)
+
+        self._banner_widget = BannerWidget(self._base_dir)
+        right_layout.addWidget(
+            self._banner_widget,
+            0,
+            Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter,
+        )
+
         self._control_panel = ControlPanel()
-        body_layout.addWidget(self._control_panel)
+        right_layout.addWidget(self._control_panel, 1)
+        body_layout.addWidget(right_column)
         
         app_layout.addWidget(body, 1)
 

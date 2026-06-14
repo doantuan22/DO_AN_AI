@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
     QPushButton, QTextEdit, QFrame, QSizePolicy, QGridLayout, QScrollArea, QStyle, QApplication
 )
 from PyQt6.QtCore import Qt, QSize, pyqtSignal, QTimer
-from PyQt6.QtGui import QFont, QTextCursor, QIcon, QPixmap
+from PyQt6.QtGui import QFont, QTextCursor, QIcon
 from typing import Optional
 
 from core.utils import format_time_ms, get_timestamp
@@ -310,55 +310,6 @@ class ControlPanel(QWidget):
         main_layout = QVBoxLayout(content)
         main_layout.setContentsMargins(18, 14, 18, 16)
         main_layout.setSpacing(12)
-        
-        # ── Banner ──
-        banner_frame = QFrame()
-        banner_frame.setObjectName("bannerFrame")
-        banner_frame.setStyleSheet("""
-            QFrame#bannerFrame {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                    stop:0 #0057E7, stop:1 #1A73E8);
-                border-radius: 12px;
-                border: none;
-            }
-        """)
-        banner_layout = QVBoxLayout(banner_frame)
-        banner_layout.setContentsMargins(0, 0, 0, 0)
-        banner_layout.setSpacing(0)
-        
-        self.banner_label = QLabel()
-        self.banner_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.banner_label.setStyleSheet("""
-            border-radius: 12px;
-            background: transparent;
-        """)
-        
-        # Load banner image
-        import os
-        banner_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                                    "assets", "banner.png")
-        if os.path.exists(banner_path):
-            banner_pixmap = QPixmap(banner_path)
-            # Scale to fit panel width (470 - margins)
-            scaled = banner_pixmap.scaledToWidth(
-                434, Qt.TransformationMode.SmoothTransformation)
-            self.banner_label.setPixmap(scaled)
-            self.banner_label.setFixedHeight(scaled.height())
-        else:
-            # Fallback text banner if image not found
-            self.banner_label.setText("🗺️ HCMUTE Pathfinding")
-            self.banner_label.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
-            self.banner_label.setStyleSheet("""
-                color: white;
-                padding: 18px;
-                font-size: 16px;
-                font-weight: bold;
-                background: transparent;
-            """)
-            self.banner_label.setFixedHeight(80)
-        
-        banner_layout.addWidget(self.banner_label)
-        main_layout.addWidget(banner_frame)
         
         # ── 1. Chọn thuật toán ──
         lbl_algo = QLabel("1. Chọn thuật toán")
