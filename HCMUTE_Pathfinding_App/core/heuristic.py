@@ -11,7 +11,7 @@ def euclidean_distance(pos1: Tuple[int, int], pos2: Tuple[int, int]) -> float:
     return math.sqrt(dx * dx + dy * dy)
 
 
-# Khoảng cách theo trục x/y (dạng lưới)
+# Khoảng cách theo trục x/y 
 def manhattan_distance(pos1: Tuple[int, int], pos2: Tuple[int, int]) -> float:
     return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
 

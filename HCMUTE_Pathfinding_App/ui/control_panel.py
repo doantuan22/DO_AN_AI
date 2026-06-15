@@ -15,7 +15,7 @@ from core.utils import format_time_ms, get_timestamp
 
 
 # ──────────────────────────────────────────────────────────────
-# Stylesheet chung - Phong cách Google Material / Glassmorphism tối giản
+# Stylesheet chung - Phong cách Google Material / Glassmorphism 
 # ──────────────────────────────────────────────────────────────
 
 PANEL_STYLESHEET = """
@@ -333,7 +333,7 @@ class ControlPanel(QWidget):
         main_layout.addWidget(lbl_heur)
         main_layout.addWidget(self.heuristic_combo)
         
-        # ── 2.5 Lựa chọn điểm xuất phát & đích (Thiết kế cực kỳ gọn) ──
+        # ── 2.5 Lựa chọn điểm xuất phát & đích ──
         lbl_points = QLabel("Chọn điểm (Nhấn bản đồ hoặc danh sách)")
         lbl_points.setFont(QFont("Segoe UI", 9, QFont.Weight.Bold))
         lbl_points.setStyleSheet("color: #70757A; margin-top: 2px;")
@@ -539,7 +539,7 @@ class ControlPanel(QWidget):
         return {"frame": frame, "title": title_label, "value": value_label, "icon": icon_label}
     
     def _setup_button_icons(self):
-        # Dùng icon native Qt thay vì emoji
+        # Dùng icon native Qt 
         self._icon_play = self._standard_icon("SP_MediaPlay", "SP_ArrowRight")
         self._icon_pause = self._standard_icon("SP_MediaPause", "SP_TitleBarMinButton")
         self._icon_stop = self._standard_icon("SP_MediaStop", "SP_DialogCancelButton")

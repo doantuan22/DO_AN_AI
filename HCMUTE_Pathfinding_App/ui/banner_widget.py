@@ -1,4 +1,4 @@
-# Banner độc lập hiển thị phía trên bảng điều khiển chính
+# Hiện thị bannner độc lập 
 
 import os
 

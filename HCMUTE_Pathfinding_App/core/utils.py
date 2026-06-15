@@ -53,7 +53,7 @@ def format_path_details(path: List[str], node_names: dict,
     return "\n".join(details)
 
 
-# Đo thời gian chạy thuật toán bằng perf_counter (độ chính xác cao)
+# Đo thời gian chạy thuật toán bằng perf_counter 
 class Timer:
     
     def __init__(self):

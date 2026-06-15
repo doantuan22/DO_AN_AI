@@ -25,7 +25,7 @@ from ui.history_dialog import HistoryDialog
 
 
 # ──────────────────────────────────────────────────────────────
-# Stylesheet cho MainWindow - Phong cách Google Maps tối giản hiện đại
+# Stylesheet cho MainWindow - Phong cách Google Maps 
 # ──────────────────────────────────────────────────────────────
 
 MAIN_WINDOW_STYLE = """

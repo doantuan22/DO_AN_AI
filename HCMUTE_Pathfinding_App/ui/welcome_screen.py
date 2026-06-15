@@ -1,4 +1,4 @@
-# Màn hình chờ (splash screen) có loading bar và chuyển cảnh mượt mà
+# Màn hình chờ có loading bar và chuyển cảnh
 
 import os
 import sys
