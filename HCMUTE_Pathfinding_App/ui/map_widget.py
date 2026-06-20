@@ -264,6 +264,7 @@ class MapWidget(QGraphicsView):
     
     node_clicked = pyqtSignal(str)
     graph_edit_clicked = pyqtSignal()
+    sub_map_manager_clicked = pyqtSignal()
     history_clicked = pyqtSignal()
     sample_walk_clicked = pyqtSignal()
     algorithm_speed_changed = pyqtSignal(str)
@@ -540,8 +541,8 @@ class MapWidget(QGraphicsView):
         self._graph_edit_button = QPushButton(self)
         self._graph_edit_button.setObjectName("graphEditButton")
         self._graph_edit_button.setText("⚙")
-        self._graph_edit_button.setToolTip("Chỉnh sửa node / cạnh")
-        self._graph_edit_button.clicked.connect(self.graph_edit_clicked.emit)
+        self._graph_edit_button.setToolTip("Cài đặt bản đồ")
+        self._graph_edit_button.clicked.connect(self._show_settings_menu)
         self._graph_edit_button.setStyleSheet("""
             QPushButton#graphEditButton {
                 background-color: rgba(255, 255, 255, 0.95);
@@ -610,6 +611,42 @@ class MapWidget(QGraphicsView):
             menu.addAction(action)
 
         menu.exec(self._speed_button.mapToGlobal(self._speed_button.rect().bottomLeft()))
+
+    def _show_settings_menu(self):
+        # Menu cài đặt trung tâm cho các công cụ chỉnh sửa và hiển thị bản đồ.
+        if self._graph_edit_button is None:
+            return
+
+        menu = QMenu(self)
+        menu.setStyleSheet("""
+            QMenu {
+                background-color: #FFFFFF;
+                border: 1px solid #DDE6F2;
+                border-radius: 8px;
+                padding: 6px;
+                font-family: 'Segoe UI';
+                font-size: 13px;
+                color: #0F172A;
+            }
+            QMenu::item {
+                padding: 8px 28px 8px 12px;
+                border-radius: 6px;
+            }
+            QMenu::item:selected {
+                background-color: #EEF5FF;
+                color: #0B74FF;
+            }
+        """)
+
+        edit_graph_action = QAction("Chỉnh sửa bản đồ chính", menu)
+        edit_graph_action.triggered.connect(self.graph_edit_clicked.emit)
+        menu.addAction(edit_graph_action)
+
+        sub_map_action = QAction("Chỉnh sửa bản đồ con", menu)
+        sub_map_action.triggered.connect(self.sub_map_manager_clicked.emit)
+        menu.addAction(sub_map_action)
+
+        menu.exec(self._graph_edit_button.mapToGlobal(self._graph_edit_button.rect().bottomLeft()))
 
     def set_algorithm_speed(self, speed_name: str):
         # Cập nhật tốc độ được chọn và phát signal

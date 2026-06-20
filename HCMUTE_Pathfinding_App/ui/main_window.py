@@ -17,11 +17,14 @@ from core.algorithms import get_algorithm, needs_heuristic, ALGORITHM_MAP
 from core.heuristic import get_heuristic_function
 from core.history_store import HistoryStore
 from core.utils import Timer, get_timestamp
+from services.sub_map_store import SubMapStore
 from ui.map_widget import MapWidget
 from ui.banner_widget import BannerWidget
 from ui.control_panel import ControlPanel
 from ui.graph_editor_dialog import GraphEditorDialog
 from ui.history_dialog import HistoryDialog
+from ui.sub_map_manager_dialog import SubMapManagerDialog
+from ui.sub_map_viewer_dialog import SubMapViewerDialog
 
 
 # ──────────────────────────────────────────────────────────────
@@ -105,6 +108,7 @@ class MainWindow(QMainWindow):
         # ── Khởi tạo dữ liệu ──
         self._graph = Graph()
         self._history_store = HistoryStore(self._history_db_path)
+        self._sub_map_store = SubMapStore(self._base_dir)
         self._timer = QTimer()
         self._timer.timeout.connect(self._execute_step)
         
@@ -253,6 +257,7 @@ class MainWindow(QMainWindow):
         # Click chọn trên bản đồ
         self._map_widget.node_clicked.connect(self._on_node_clicked)
         self._map_widget.graph_edit_clicked.connect(self._on_edit_graph)
+        self._map_widget.sub_map_manager_clicked.connect(self._on_manage_sub_maps)
         self._map_widget.history_clicked.connect(self._on_show_history)
         self._map_widget.sample_walk_clicked.connect(self._on_sample_walk)
         self._map_widget.algorithm_speed_changed.connect(self._on_algorithm_speed_changed)
@@ -483,6 +488,12 @@ class MainWindow(QMainWindow):
         # Mở bảng lịch sử đường đi
         dialog = HistoryDialog(self._history_store, self)
         dialog.exec()
+
+    def _on_manage_sub_maps(self):
+        if self._is_running:
+            QMessageBox.information(self, "Đang chạy", "Hãy dừng thuật toán trước khi quản lý bản đồ con.")
+            return
+        SubMapManagerDialog(self._graph, self._sub_map_store, self._map_path, self).exec()
     
     def _on_graph_changed(self):
         # Dựng lại map sau khi graph được chỉnh sửa
@@ -683,6 +694,22 @@ class MainWindow(QMainWindow):
         self._control_panel.set_finished_state()
         self._map_widget.set_graph_edit_enabled(True)
         self._set_app_state("completed" if self._final_path else "error")
+        if self._final_path and self._goal_node:
+            QTimer.singleShot(0, self._offer_sub_map_for_goal)
+
+    def _offer_sub_map_for_goal(self):
+        goal_node_id = self._goal_node
+        if not goal_node_id or not self._sub_map_store.has_sub_maps(goal_node_id):
+            return
+        answer = QMessageBox.question(
+            self,
+            "Bản đồ chi tiết",
+            "Đã đến điểm đích. Xem bản đồ tòa chi tiết?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.Yes,
+        )
+        if answer == QMessageBox.StandardButton.Yes:
+            SubMapViewerDialog(goal_node_id, self._sub_map_store, self).exec()
 
     def _save_history(self, algo_name: str, exec_time: float):
         # Lưu kết quả vào SQLite

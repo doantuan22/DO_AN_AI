@@ -346,6 +346,8 @@ class Graph:
         except (TypeError, ValueError) as exc:
             raise ValueError("Trọng số cạnh phải là một số") from exc
         if not math.isfinite(value) or value <= 0:
+
+            
             raise ValueError("Trọng số cạnh phải là số hữu hạn lớn hơn 0")
         return value
     

@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "nodes": {
+    "N26": [
+      {
+        "id": "n26_khu_a_tang_1",
+        "name": "KHU A",
+        "floor": 1,
+        "image": "assets/sub_maps/n26_khu_a_tang_1.png",
+        "graph_file": "data/sub_maps/n26_khu_a_tang_1.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 1419.89,
+          "y": 912.98
+        }
+      }
+    ],
+    "N03": [
+      {
+        "id": "khu_b_tang_1",
+        "name": "Khu_B",
+        "floor": 1,
+        "image": "assets/sub_maps/khu_b_tang_1.png",
+        "graph_file": "data/sub_maps/khu_b_tang_1.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 1442.2,
+          "y": 534.72
+        }
+      },
+      {
+        "id": "khu_b_tang_2",
+        "name": "Khu_B",
+        "floor": 2,
+        "image": "assets/sub_maps/khu_b_tang_2.png",
+        "graph_file": "data/sub_maps/khu_b_tang_2.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 736.86,
+          "y": 774.17
+        }
+      },
+      {
+        "id": "khu_b_tang_3",
+        "name": "Khu_B",
+        "floor": 3,
+        "image": "assets/sub_maps/khu_b_tang_3.png",
+        "graph_file": "data/sub_maps/khu_b_tang_3.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 730.63,
+          "y": 778.04
+        }
+      }
+    ]
+  }
+}
