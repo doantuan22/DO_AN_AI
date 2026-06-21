@@ -66,17 +66,29 @@ class SubMapWidget(QGraphicsView):
         self._edge_items: list[tuple[str, str, QGraphicsLineItem]] = []
         self._rotation = 0.0
         self._interaction_mode = "select"
+        self._show_edges = True
+        self._start_node: Optional[str] = None
+        self._goal_node: Optional[str] = None
+        self._selected_node_id: Optional[str] = None
+        self._path_nodes: list[str] = []
+        self._path_items: list[QGraphicsLineItem] = []
 
     def load_map(
         self,
         image_path: str | Path,
         graph: Dict[str, Any],
         rotation: float = 0,
+        show_edges: bool = True,
     ) -> None:
         self._scene.clear()
         self._node_items.clear()
         self._edge_items.clear()
         self._graph = graph
+        self._show_edges = bool(show_edges)
+        self._start_node = None
+        self._goal_node = None
+        self._selected_node_id = None
+        self._path_nodes = []
         pixmap = QPixmap(str(image_path))
         image_missing = pixmap.isNull()
         if image_missing:
@@ -125,9 +137,15 @@ class SubMapWidget(QGraphicsView):
         self._apply_interaction_mode()
 
     def _apply_interaction_mode(self) -> None:
+        if not self.editable:
+            # Chế độ xem: luôn cho phép kéo bản đồ
+            self.setDragMode(QGraphicsView.DragMode.ScrollHandDrag)
+            for item in self._node_items.values():
+                item.set_movable(False)
+            return
         pan_mode = self._interaction_mode == "pan"
         self.setDragMode(QGraphicsView.DragMode.ScrollHandDrag if pan_mode else QGraphicsView.DragMode.NoDrag)
-        movable = self.editable and self._interaction_mode == "select"
+        movable = self._interaction_mode == "select"
         for item in self._node_items.values():
             item.set_movable(movable)
 
@@ -152,6 +170,37 @@ class SubMapWidget(QGraphicsView):
                 item.setBrush(QColor("#0B74FF"))
                 item.setPen(QPen(Qt.GlobalColor.white, 2))
                 item.setZValue(20)
+
+    def set_start_node(self, node_id: str) -> None:
+        if node_id in self._node_items:
+            item = self._node_items[node_id]
+            item.setBrush(QColor("#E53935"))
+            item.setPen(QPen(QColor("#FFFFFF"), 3))
+            item.setZValue(30)
+            self._start_node = node_id
+
+    def set_goal_node(self, node_id: str) -> None:
+        # Reset node đích cũ
+        if self._goal_node and self._goal_node in self._node_items and self._goal_node != "__entry__":
+            old = self._node_items[self._goal_node]
+            old.setBrush(QColor("#0B74FF"))
+            old.setPen(QPen(Qt.GlobalColor.white, 2))
+            old.setZValue(20)
+        # Highlight node đích mới
+        if node_id in self._node_items:
+            item = self._node_items[node_id]
+            item.setBrush(QColor("#00C896"))
+            item.setPen(QPen(QColor("#FFFFFF"), 3))
+            item.setZValue(25)
+            self._goal_node = node_id
+
+    def clear_goal_node(self) -> None:
+        if self._goal_node and self._goal_node in self._node_items and self._goal_node != "__entry__":
+            item = self._node_items[self._goal_node]
+            item.setBrush(QColor("#0B74FF"))
+            item.setPen(QPen(Qt.GlobalColor.white, 2))
+            item.setZValue(20)
+        self._goal_node = None
 
     def set_rotation(self, angle: float) -> None:
         self._rotation = float(angle) % 360
@@ -212,7 +261,9 @@ class SubMapWidget(QGraphicsView):
                 continue
             a, b = self._node_items[source].pos(), self._node_items[target].pos()
             line = QGraphicsLineItem(a.x(), a.y(), b.x(), b.y(), self._root)
-            line.setPen(QPen(QColor(28, 100, 242, 180), 3)); line.setZValue(5)
+            line.setPen(QPen(QColor(28, 100, 242, 180), 3))
+            line.setZValue(5)
+            line.setVisible(self._show_edges)
             self._edge_items.append((source, target, line))
 
     def _update_edges_for(self, node_id: str) -> None:
@@ -222,6 +273,62 @@ class SubMapWidget(QGraphicsView):
             a, b = self._node_items[source].pos(), self._node_items[target].pos()
             line.setLine(a.x(), a.y(), b.x(), b.y())
 
+    # ──────────────────────────────────────────────────────────────
+    # Hỗ trợ Vẽ thuật toán tìm đường (Tương thích MapWidget)
+    # ──────────────────────────────────────────────────────────────
+
+    def update_state(self, visited: List[str], frontier: List[str], current: Optional[str] = None) -> None:
+        for nid, item in self._node_items.items():
+            if nid == "__entry__":
+                continue  # Bỏ qua cổng vào, giữ màu gốc
+            if current and nid == current:
+                item.setBrush(QColor("#FF9800")) # Current (Cam)
+            elif nid in visited:
+                item.setBrush(QColor("#BA9AF0")) # Visited (Tím nhạt)
+            elif nid in frontier:
+                item.setBrush(QColor("#FFD54F")) # Frontier (Vàng)
+            else:
+                item.setBrush(QColor("#0B74FF")) # Trạng thái thường (Xanh dương)
+
+    def draw_path(self, path_nodes: List[str]) -> None:
+        self.reset_path()
+        if not self._root or len(path_nodes) < 2:
+            return
+        
+        # Vẽ các đoạn thẳng nối giữa các node trong đường đi
+        for i in range(len(path_nodes) - 1):
+            source = path_nodes[i]
+            target = path_nodes[i + 1]
+            if source in self._node_items and target in self._node_items:
+                p1 = self._node_items[source].pos()
+                p2 = self._node_items[target].pos()
+                line = QGraphicsLineItem(p1.x(), p1.y(), p2.x(), p2.y(), self._root)
+                pen = QPen(QColor(0, 204, 186), 5)  # Đường màu xanh ngọc
+                pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+                pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+                line.setPen(pen)
+                line.setZValue(15)  # Hiển thị trên edge thường, dưới node
+                self._path_items.append(line)
+                
+                # Cập nhật màu node thành màu đích
+                if source != "__entry__":
+                    self._node_items[source].setBrush(QColor("#00AA50"))
+                if target != "__entry__":
+                    self._node_items[target].setBrush(QColor("#00AA50"))
+
+    def reset_path(self) -> None:
+        for item in self._path_items:
+            if self._root and item.scene():
+                self._scene.removeItem(item)
+        self._path_items.clear()
+        
+        # Trả các node về màu cũ
+        for nid, item in self._node_items.items():
+            if nid == "__entry__":
+                item.setBrush(QColor("#E53935"))
+            else:
+                item.setBrush(QColor("#0B74FF"))
+
     def wheelEvent(self, event: QWheelEvent | None) -> None:
         if event is None:
             return
@@ -229,24 +336,29 @@ class SubMapWidget(QGraphicsView):
         self.scale(factor, factor)
 
     def mousePressEvent(self, event) -> None:
-        if self.editable and event is not None and event.button() == Qt.MouseButton.LeftButton:
+        if event is not None and event.button() == Qt.MouseButton.LeftButton:
             local_pos = self._event_to_map_pos(event)
             if local_pos is not None:
                 x, y = local_pos.x(), local_pos.y()
                 clicked_node = self._nearest_node(x, y)
-                if self._interaction_mode in {"add_node", "set_entry"}:
-                    self.map_clicked.emit(x, y)
-                    return
-                if self._interaction_mode == "move_node":
+                if self.editable:
+                    if self._interaction_mode in {"add_node", "set_entry"}:
+                        self.map_clicked.emit(x, y)
+                        return
+                    if self._interaction_mode == "move_node":
+                        if clicked_node:
+                            self.node_clicked.emit(clicked_node)
+                        else:
+                            self.map_clicked.emit(x, y)
+                        return
+                    if clicked_node and self._interaction_mode in {"select", "add_edge", "delete_edge", "delete_node"}:
+                        self.node_clicked.emit(clicked_node)
+                        if self._interaction_mode != "select":
+                            return
+                else:
+                    # Chế độ xem: click node để chọn đích
                     if clicked_node:
                         self.node_clicked.emit(clicked_node)
-                    else:
-                        self.map_clicked.emit(x, y)
-                    return
-                if clicked_node and self._interaction_mode in {"select", "add_edge", "delete_edge", "delete_node"}:
-                    self.node_clicked.emit(clicked_node)
-                    if self._interaction_mode != "select":
-                        return
         super().mousePressEvent(event)
 
     def _event_to_map_pos(self, event) -> Optional[QPointF]:

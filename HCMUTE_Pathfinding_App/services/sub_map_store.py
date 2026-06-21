@@ -80,7 +80,7 @@ class SubMapStore:
         source = Path(source_image)
         if not source.is_file():
             raise FileNotFoundError("Ảnh bản đồ con không tồn tại")
-        self._validate_floor(main_node_id, int(floor))
+        self._validate_unique_name(main_node_id, int(floor), name)
 
         base_slug = self.slugify(f"{name}_tang_{floor}")
         sub_map_id = self._unique_id(base_slug)
@@ -118,7 +118,7 @@ class SubMapStore:
         new_floor = int(changes.get("floor", current.floor))
         if not new_node_id or not new_name:
             raise ValueError("Node chính và tên bản đồ con không được để trống")
-        self._validate_floor(new_node_id, new_floor, excluding_id=sub_map_id)
+        self._validate_unique_name(new_node_id, new_floor, new_name, excluding_id=sub_map_id)
 
         image = current.image
         source_image = changes.get("source_image")
@@ -173,6 +173,60 @@ class SubMapStore:
         self.save_graph(updated, graph)
         return updated
 
+    def copy_to_node(
+        self,
+        source_sub_map_id: str,
+        target_node_id: str,
+        name: Optional[str] = None,
+        floor: Optional[int] = None,
+    ) -> SubMap:
+        source = self.get(source_sub_map_id)
+        target_node_id = target_node_id.strip()
+        new_name = (name or source.name).strip()
+        new_floor = int(source.floor if floor is None else floor)
+        if not target_node_id or not new_name:
+            raise ValueError("Node đích và tên bản đồ con không được để trống")
+        if target_node_id == source.main_node_id:
+            raise ValueError("Node đích phải khác node nguồn")
+        self._validate_unique_name(target_node_id, new_floor, new_name)
+
+        base_slug = self.slugify(f"{new_name}_tang_{new_floor}")
+        sub_map_id = self._unique_id(base_slug)
+        image = source.image
+        source_image_path = self.absolute_path(source.image)
+        if source_image_path.exists():
+            image_target = self._unique_path(
+                self.assets_dir,
+                base_slug,
+                source_image_path.suffix.lower() or ".png",
+            )
+            shutil.copy2(source_image_path, image_target)
+            image = self.relative_path(image_target)
+        graph_target = self._unique_path(self.graphs_dir, base_slug, ".json")
+
+        graph_data = json.loads(json.dumps(self.load_graph(source), ensure_ascii=False))
+        graph_data.update({
+            "map_id": sub_map_id,
+            "name": new_name,
+            "floor": new_floor,
+        })
+        self.write_graph_path(graph_target, graph_data)
+
+        item = SubMap(
+            id=sub_map_id,
+            main_node_id=target_node_id,
+            name=new_name,
+            floor=new_floor,
+            image=image,
+            graph_file=self.relative_path(graph_target),
+            rotation=source.rotation,
+            entry_position=dict(source.entry_position or {"x": 0.0, "y": 0.0}),
+        )
+        index = self._read_index()
+        index.setdefault("nodes", {}).setdefault(target_node_id, []).append(item.to_dict())
+        self._write_index(index)
+        return item
+
     def delete(self, sub_map_id: str, delete_files: bool = False) -> None:
         current = self.get(sub_map_id)
         index = self._read_index()
@@ -212,10 +266,23 @@ class SubMapStore:
     def relative_path(self, path: Path) -> str:
         return path.resolve().relative_to(self.base_dir).as_posix()
 
-    def _validate_floor(self, node_id: str, floor: int, excluding_id: Optional[str] = None) -> None:
+    def _validate_unique_name(
+        self,
+        node_id: str,
+        floor: int,
+        name: str,
+        excluding_id: Optional[str] = None,
+    ) -> None:
+        normalized_name = name.strip().casefold()
         for item in self.list_for_node(node_id):
-            if item.floor == floor and item.id != excluding_id:
-                raise ValueError(f"Node {node_id} đã có bản đồ cho tầng {floor}")
+            if item.id == excluding_id:
+                continue
+            if item.floor != floor:
+                continue
+            if item.name.strip().casefold() == normalized_name:
+                raise ValueError(
+                    f"Node {node_id} đã có bản đồ con tên '{name}' ở tầng {floor}"
+                )
 
     def _unique_id(self, base: str) -> str:
         existing = {item.id for node in self._read_index().get("nodes", {}) for item in self.list_for_node(node)}

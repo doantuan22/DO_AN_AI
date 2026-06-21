@@ -456,11 +456,6 @@ class ControlPanel(QWidget):
         main_layout.addWidget(lbl_ctrl)
         main_layout.addLayout(ctrl_layout)
         
-        self.btn_graph_edit = QPushButton("Chỉnh sửa node / cạnh")
-        self.btn_graph_edit.setObjectName("btnGraphEdit")
-        self.btn_graph_edit.clicked.connect(self.graph_edit_clicked.emit)
-        self.btn_graph_edit.setVisible(False)
-        
         self._setup_button_icons()
         self.btn_start.setEnabled(False)
         
@@ -544,15 +539,15 @@ class ControlPanel(QWidget):
         self._icon_pause = self._standard_icon("SP_MediaPause", "SP_TitleBarMinButton")
         self._icon_stop = self._standard_icon("SP_MediaStop", "SP_DialogCancelButton")
         self._icon_reset = self._standard_icon("SP_BrowserReload", "SP_BrowserReload")
-        self._icon_edit = self._standard_icon("SP_FileDialogDetailedView", "SP_FileDialogListView")
         
-        for button in (self.btn_start, self.btn_pause, self.btn_stop, self.btn_reset, self.btn_graph_edit):
+        for button in (self.btn_start, self.btn_pause, self.btn_stop, self.btn_reset):
+            button.setCursor(Qt.CursorShape.PointingHandCursor)
             button.setIconSize(QSize(18, 18))
         
         self.btn_start.setIcon(self._icon_play)
+        self.btn_pause.setIcon(self._icon_pause)
         self.btn_stop.setIcon(self._icon_stop)
         self.btn_reset.setIcon(self._icon_reset)
-        self.btn_graph_edit.setIcon(self._icon_edit)
         self._set_pause_button(paused=False)
     
     def _standard_icon(self, preferred: str, fallback: str):
@@ -595,7 +590,32 @@ class ControlPanel(QWidget):
             display = f"{display_name} ({node_id})"
             self.start_combo.addItem(display, node_id)
             self.goal_combo.addItem(display, node_id)
-    
+            
+    def set_mode_submap(self, sub_nodes: list, entry_id: str = "__entry__"):
+        """Chuyển panel sang chế độ bản đồ con (khóa Start)."""
+        self.start_combo.clear()
+        self.start_combo.addItem("[Cổng vào] Bạn đang ở đây", entry_id)
+        self.start_combo.setEnabled(False)
+        self.btn_clear_start.setEnabled(False)
+        self.set_start_display("Bạn đang ở đây")
+        
+        # Tạm tắt signal
+        self.start_combo.blockSignals(True)
+        self.start_combo.setCurrentIndex(0)
+        self.start_combo.blockSignals(False)
+        
+        self.goal_combo.clear()
+        self.goal_combo.addItem("", "")
+        for node_id, name in sub_nodes:
+            display_name = name if name else "(khong co ten)"
+            display = f"{display_name} ({node_id})"
+            self.goal_combo.addItem(display, node_id)
+
+    def set_mode_main(self, main_nodes: list):
+        """Khôi phục panel về chế độ bản đồ chính."""
+        self.start_combo.setEnabled(True)
+        self.populate_node_combos(main_nodes)
+        
     def set_start_display(self, name: str):
         # Cập nhật hiển thị điểm bắt đầu
         # Giới hạn độ dài để tránh đè nút
@@ -757,7 +777,6 @@ class ControlPanel(QWidget):
         self.heuristic_combo.setEnabled(not running)
         self.start_combo.setEnabled(not running)
         self.goal_combo.setEnabled(not running)
-        self.btn_graph_edit.setEnabled(not running)
         
         if running:
             self._is_paused = False
@@ -772,7 +791,6 @@ class ControlPanel(QWidget):
         self.heuristic_combo.setEnabled(True)
         self.start_combo.setEnabled(True)
         self.goal_combo.setEnabled(True)
-        self.btn_graph_edit.setEnabled(True)
         self._is_paused = False
         self._set_pause_button(paused=False)
         self._on_algorithm_changed(self.algo_combo.currentText())

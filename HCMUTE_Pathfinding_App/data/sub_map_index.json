@@ -1,20 +1,6 @@
 {
   "version": 1,
   "nodes": {
-    "N26": [
-      {
-        "id": "n26_khu_a_tang_1",
-        "name": "KHU A",
-        "floor": 1,
-        "image": "assets/sub_maps/n26_khu_a_tang_1.png",
-        "graph_file": "data/sub_maps/n26_khu_a_tang_1.json",
-        "rotation": 0.0,
-        "entry_position": {
-          "x": 1419.89,
-          "y": 912.98
-        }
-      }
-    ],
     "N03": [
       {
         "id": "khu_b_tang_1",
@@ -29,6 +15,18 @@
         }
       },
       {
+        "id": "khu_b_tang_3",
+        "name": "Khu_B",
+        "floor": 3,
+        "image": "assets/sub_maps/khu_b_tang_3.png",
+        "graph_file": "data/sub_maps/khu_b_tang_3.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 730.63,
+          "y": 778.04
+        }
+      },
+      {
         "id": "khu_b_tang_2",
         "name": "Khu_B",
         "floor": 2,
@@ -39,17 +37,435 @@
           "x": 736.86,
           "y": 774.17
         }
+      }
+    ],
+    "N08": [
+      {
+        "id": "khu_b_tang_1_2",
+        "name": "Khu_B",
+        "floor": 1,
+        "image": "assets/sub_maps/khu_b_tang_1_2.png",
+        "graph_file": "data/sub_maps/khu_b_tang_1_2.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 818.37,
+          "y": 19.94
+        }
       },
       {
-        "id": "khu_b_tang_3",
+        "id": "khu_b_tang_2_2",
+        "name": "Khu_B",
+        "floor": 2,
+        "image": "assets/sub_maps/khu_b_tang_2_2.png",
+        "graph_file": "data/sub_maps/khu_b_tang_2_2.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 736.86,
+          "y": 774.17
+        }
+      },
+      {
+        "id": "khu_b_tang_3_2",
         "name": "Khu_B",
         "floor": 3,
-        "image": "assets/sub_maps/khu_b_tang_3.png",
-        "graph_file": "data/sub_maps/khu_b_tang_3.json",
+        "image": "assets/sub_maps/khu_b_tang_3_2.png",
+        "graph_file": "data/sub_maps/khu_b_tang_3_2.json",
         "rotation": 0.0,
         "entry_position": {
           "x": 730.63,
           "y": 778.04
+        }
+      }
+    ],
+    "N09": [
+      {
+        "id": "khu_b_tang_1_3",
+        "name": "Khu_B",
+        "floor": 1,
+        "image": "assets/sub_maps/khu_b_tang_1_3.png",
+        "graph_file": "data/sub_maps/khu_b_tang_1_3.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 815.65,
+          "y": 1058.53
+        }
+      },
+      {
+        "id": "khu_b_tang_3_3",
+        "name": "Khu_B",
+        "floor": 3,
+        "image": "assets/sub_maps/khu_b_tang_3_3.png",
+        "graph_file": "data/sub_maps/khu_b_tang_3_3.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 730.63,
+          "y": 778.04
+        }
+      },
+      {
+        "id": "khu_b_tang_2_3",
+        "name": "Khu_B",
+        "floor": 2,
+        "image": "assets/sub_maps/khu_b_tang_2_3.png",
+        "graph_file": "data/sub_maps/khu_b_tang_2_3.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 736.86,
+          "y": 774.17
+        }
+      }
+    ],
+    "N15": [
+      {
+        "id": "khu_b_tang_1_4",
+        "name": "Khu_B",
+        "floor": 1,
+        "image": "assets/sub_maps/khu_b_tang_1_4.png",
+        "graph_file": "data/sub_maps/khu_b_tang_1_4.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 13.71,
+          "y": 557.59
+        }
+      },
+      {
+        "id": "khu_b_tang_2_4",
+        "name": "Khu_B",
+        "floor": 2,
+        "image": "assets/sub_maps/khu_b_tang_2_4.png",
+        "graph_file": "data/sub_maps/khu_b_tang_2_4.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 736.86,
+          "y": 774.17
+        }
+      },
+      {
+        "id": "khu_b_tang_3_4",
+        "name": "Khu_B",
+        "floor": 3,
+        "image": "assets/sub_maps/khu_b_tang_3_4.png",
+        "graph_file": "data/sub_maps/khu_b_tang_3_4.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 730.63,
+          "y": 778.04
+        }
+      }
+    ],
+    "N26": [
+      {
+        "id": "khu_a_tang_1",
+        "name": "Khu_A",
+        "floor": 1,
+        "image": "assets/sub_maps/khu_a_tang_1.jpg",
+        "graph_file": "data/sub_maps/khu_a_tang_1.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 680.48,
+          "y": 122.82
+        }
+      },
+      {
+        "id": "khu_a_tang_2",
+        "name": "Khu_A",
+        "floor": 2,
+        "image": "assets/sub_maps/khu_a_tang_2.jpg",
+        "graph_file": "data/sub_maps/khu_a_tang_2.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 460.37,
+          "y": 100.88
+        }
+      },
+      {
+        "id": "khu_a_tang_3",
+        "name": "Khu_A",
+        "floor": 3,
+        "image": "assets/sub_maps/khu_a_tang_3.jpg",
+        "graph_file": "data/sub_maps/khu_a_tang_3.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 534.19,
+          "y": 152.95
+        }
+      }
+    ],
+    "N38": [
+      {
+        "id": "khu_a_tang_1_2",
+        "name": "Khu_A",
+        "floor": 1,
+        "image": "assets/sub_maps/khu_a_tang_1_2.jpg",
+        "graph_file": "data/sub_maps/khu_a_tang_1_2.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 653.22,
+          "y": 804.38
+        }
+      },
+      {
+        "id": "khu_a_tang_2_2",
+        "name": "Khu_A",
+        "floor": 2,
+        "image": "assets/sub_maps/khu_a_tang_2_2.jpg",
+        "graph_file": "data/sub_maps/khu_a_tang_2_2.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 668.78,
+          "y": 877.92
+        }
+      },
+      {
+        "id": "khu_a_tang_3_2",
+        "name": "Khu_A",
+        "floor": 3,
+        "image": "assets/sub_maps/khu_a_tang_3_2.jpg",
+        "graph_file": "data/sub_maps/khu_a_tang_3_2.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 945.32,
+          "y": 1131.51
+        }
+      }
+    ],
+    "N22": [
+      {
+        "id": "khu_a_tang_1_3",
+        "name": "Khu_A",
+        "floor": 1,
+        "image": "assets/sub_maps/khu_a_tang_1_3.jpg",
+        "graph_file": "data/sub_maps/khu_a_tang_1_3.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 26.19,
+          "y": 122.82
+        }
+      },
+      {
+        "id": "khu_a_tang_2_3",
+        "name": "Khu_A",
+        "floor": 2,
+        "image": "assets/sub_maps/khu_a_tang_2_3.jpg",
+        "graph_file": "data/sub_maps/khu_a_tang_2_3.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 460.37,
+          "y": 103.81
+        }
+      },
+      {
+        "id": "khu_a_tang_3_3",
+        "name": "Khu_A",
+        "floor": 3,
+        "image": "assets/sub_maps/khu_a_tang_3_3.jpg",
+        "graph_file": "data/sub_maps/khu_a_tang_3_3.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 534.19,
+          "y": 152.95
+        }
+      }
+    ],
+    "N35": [
+      {
+        "id": "khu_a_tang_1_4",
+        "name": "Khu_A",
+        "floor": 1,
+        "image": "assets/sub_maps/khu_a_tang_1_4.jpg",
+        "graph_file": "data/sub_maps/khu_a_tang_1_4.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 13.47,
+          "y": 900.71
+        }
+      },
+      {
+        "id": "khu_a_tang_2_4",
+        "name": "Khu_A",
+        "floor": 2,
+        "image": "assets/sub_maps/khu_a_tang_2_4.jpg",
+        "graph_file": "data/sub_maps/khu_a_tang_2_4.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 242.82,
+          "y": 886.61
+        }
+      },
+      {
+        "id": "khu_a_tang_3_4",
+        "name": "Khu_A",
+        "floor": 3,
+        "image": "assets/sub_maps/khu_a_tang_3_4.jpg",
+        "graph_file": "data/sub_maps/khu_a_tang_3_4.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 134.84,
+          "y": 1133.3
+        }
+      }
+    ],
+    "N21": [
+      {
+        "id": "khu_a_tang_1_5",
+        "name": "Khu_A",
+        "floor": 1,
+        "image": "assets/sub_maps/khu_a_tang_1_5.jpg",
+        "graph_file": "data/sub_maps/khu_a_tang_1_5.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 1238.82,
+          "y": 1007.91
+        }
+      },
+      {
+        "id": "khu_a_tang_2_5",
+        "name": "Khu_A",
+        "floor": 2,
+        "image": "assets/sub_maps/khu_a_tang_2_5.jpg",
+        "graph_file": "data/sub_maps/khu_a_tang_2_5.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 1211.41,
+          "y": 976.92
+        }
+      },
+      {
+        "id": "khu_a_tang_3_5",
+        "name": "Khu_A",
+        "floor": 3,
+        "image": "assets/sub_maps/khu_a_tang_3_5.jpg",
+        "graph_file": "data/sub_maps/khu_a_tang_3_5.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 945.04,
+          "y": 1132.36
+        }
+      }
+    ],
+    "N78": [
+      {
+        "id": "a2_3_tang_1",
+        "name": "A2-3",
+        "floor": 1,
+        "image": "assets/sub_maps/a2_3_tang_1.png",
+        "graph_file": "data/sub_maps/a2_3_tang_1.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 1442.44,
+          "y": 536.29
+        }
+      },
+      {
+        "id": "a2_3_tang_2",
+        "name": "A2-3",
+        "floor": 2,
+        "image": "assets/sub_maps/a2_3_tang_2.png",
+        "graph_file": "data/sub_maps/a2_3_tang_2.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 1274.79,
+          "y": 802.21
+        }
+      },
+      {
+        "id": "a2_3_tang_3",
+        "name": "A2-3",
+        "floor": 3,
+        "image": "assets/sub_maps/a2_3_tang_3.png",
+        "graph_file": "data/sub_maps/a2_3_tang_3.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 1285.92,
+          "y": 818.18
+        }
+      },
+      {
+        "id": "a2_3_tang_4",
+        "name": "A2-3",
+        "floor": 4,
+        "image": "assets/sub_maps/a2_3_tang_4.png",
+        "graph_file": "data/sub_maps/a2_3_tang_4.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 1293.56,
+          "y": 817.89
+        }
+      },
+      {
+        "id": "a4_5_tang_1",
+        "name": "A4-5",
+        "floor": 1,
+        "image": "assets/sub_maps/a4_5_tang_1.png",
+        "graph_file": "data/sub_maps/a4_5_tang_1.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 19.33,
+          "y": 542.03
+        }
+      },
+      {
+        "id": "a4_5_tang_2",
+        "name": "A4-5",
+        "floor": 2,
+        "image": "assets/sub_maps/a4_5_tang_2.png",
+        "graph_file": "data/sub_maps/a4_5_tang_2.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 142.45,
+          "y": 814.64
+        }
+      },
+      {
+        "id": "a4_5_tang_3",
+        "name": "A4-5",
+        "floor": 3,
+        "image": "assets/sub_maps/a4_5_tang_3.png",
+        "graph_file": "data/sub_maps/a4_5_tang_3.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 146.96,
+          "y": 801.16
+        }
+      },
+      {
+        "id": "a4_5_tang_4",
+        "name": "A4-5",
+        "floor": 4,
+        "image": "assets/sub_maps/a4_5_tang_4.png",
+        "graph_file": "data/sub_maps/a4_5_tang_4.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 169.53,
+          "y": 756.98
+        }
+      }
+    ],
+    "N07": [
+      {
+        "id": "khu_c_tang_1",
+        "name": "Khu_C",
+        "floor": 1,
+        "image": "assets/sub_maps/khu_c_tang_1.jpg",
+        "graph_file": "data/sub_maps/khu_c_tang_1.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 887.57,
+          "y": 934.18
+        }
+      }
+    ],
+    "N13": [
+      {
+        "id": "khu_c_tang_1_2",
+        "name": "Khu_C",
+        "floor": 1,
+        "image": "assets/sub_maps/khu_c_tang_1_2.jpg",
+        "graph_file": "data/sub_maps/khu_c_tang_1_2.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 107.9,
+          "y": 891.12
         }
       }
     ]

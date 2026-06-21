@@ -210,6 +210,84 @@ class Graph:
         self._image_width = image_width
         self._image_height = image_height
         return True
+
+    def load_from_dict(self, data: Dict[str, Any]) -> bool:
+        if not isinstance(data, dict):
+            raise ValueError("Dữ liệu đồ thị phải là một JSON object")
+
+        image_size = data.get("image_size", {})
+        if not isinstance(image_size, dict):
+            image_size = {}
+        try:
+            image_width = max(0, int(image_size.get("width", 0)))
+            image_height = max(0, int(image_size.get("height", 0)))
+        except (TypeError, ValueError) as exc:
+            raise ValueError("Kích thước ảnh phải là số nguyên") from exc
+
+        new_nodes: Dict[str, Node] = {}
+        new_edges: List[Edge] = []
+        new_adjacency: Dict[str, List[Tuple[str, float]]] = {}
+
+        nodes_data = data.get("nodes", [])
+        if not isinstance(nodes_data, list):
+            raise ValueError("nodes phải là một danh sách")
+        for node_data in nodes_data:
+            if not isinstance(node_data, dict):
+                raise ValueError("Mỗi node phải là một JSON object")
+            node_id = str(node_data.get("id", "")).strip()
+            if not node_id:
+                raise ValueError("Node ID không được để trống")
+            if node_id in new_nodes:
+                raise ValueError(f"Node '{node_id}' bị trùng trong dữ liệu")
+            try:
+                x = int(node_data.get("x", 0))
+                y = int(node_data.get("y", 0))
+            except (TypeError, ValueError) as exc:
+                raise ValueError(f"Tọa độ của node '{node_id}' không hợp lệ") from exc
+            if "name" in node_data:
+                name = str(node_data.get("name", ""))
+            else:
+                name = self.NODE_NAMES.get(node_id, "")
+
+            node = Node(node_id, x, y, name)
+            new_nodes[node_id] = node
+            new_adjacency[node_id] = []
+
+        edges_data = data.get("edges", [])
+        if not isinstance(edges_data, list):
+            raise ValueError("edges phải là một danh sách")
+        seen_edges = set()
+        for edge_data in edges_data:
+            if not isinstance(edge_data, dict):
+                raise ValueError("Mỗi cạnh phải là một JSON object")
+            source = str(edge_data.get("from", edge_data.get("source", ""))).strip()
+            target = str(edge_data.get("to", edge_data.get("target", ""))).strip()
+            if source not in new_nodes or target not in new_nodes:
+                raise ValueError(f"Cạnh {source} - {target} tham chiếu node không tồn tại")
+            if source == target:
+                raise ValueError(f"Cạnh {source} - {target} không được tự nối")
+            edge_key = frozenset((source, target))
+            if edge_key in seen_edges:
+                raise ValueError(f"Cạnh {source} - {target} bị trùng trong dữ liệu")
+            seen_edges.add(edge_key)
+            weight = self._validate_weight(edge_data.get("weight", 1.0))
+            edge = Edge(source, target, weight)
+            new_edges.append(edge)
+            new_adjacency[source].append((target, weight))
+            new_adjacency[target].append((source, weight))
+
+        self.nodes = new_nodes
+        self.edges = new_edges
+        self.adjacency = new_adjacency
+        self._image_width = image_width
+        self._image_height = image_height
+        return True
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "Graph":
+        graph = cls()
+        graph.load_from_dict(data)
+        return graph
     
     # Chuyển đồ thị thành dict để lưu JSON
     def to_dict(self) -> Dict[str, Any]:

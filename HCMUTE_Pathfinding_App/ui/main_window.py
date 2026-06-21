@@ -7,7 +7,7 @@ from typing import Optional, Generator
 
 from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QHBoxLayout, QVBoxLayout,
-    QLabel, QMessageBox, QApplication, QFrame
+    QLabel, QMessageBox, QApplication, QFrame, QStackedWidget, QComboBox, QPushButton
 )
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QFont, QColor, QIcon, QPixmap
@@ -25,6 +25,7 @@ from ui.graph_editor_dialog import GraphEditorDialog
 from ui.history_dialog import HistoryDialog
 from ui.sub_map_manager_dialog import SubMapManagerDialog
 from ui.sub_map_viewer_dialog import SubMapViewerDialog
+from widgets.sub_map_widget import SubMapWidget
 
 
 # ──────────────────────────────────────────────────────────────
@@ -109,6 +110,9 @@ class MainWindow(QMainWindow):
         self._graph = Graph()
         self._history_store = HistoryStore(self._history_db_path)
         self._sub_map_store = SubMapStore(self._base_dir)
+        self._sub_graph = Graph()
+        self._current_map_mode = "main"
+        self._current_submap_node_id: Optional[str] = None
         self._timer = QTimer()
         self._timer.timeout.connect(self._execute_step)
         
@@ -225,8 +229,46 @@ class MainWindow(QMainWindow):
         body_layout.setContentsMargins(18, 16, 18, 18)
         body_layout.setSpacing(16)
         
+        self._map_stack = QStackedWidget()
+        body_layout.addWidget(self._map_stack, 1)
+        
         self._map_widget = MapWidget()
-        body_layout.addWidget(self._map_widget, 1)
+        self._map_stack.addWidget(self._map_widget)
+        
+        # ── Bản đồ chi tiết (SubMap) ──
+        self._sub_map_container = QWidget()
+        sub_map_layout = QVBoxLayout(self._sub_map_container)
+        sub_map_layout.setContentsMargins(0, 0, 0, 0)
+        sub_map_layout.setSpacing(0)
+        
+        sub_toolbar = QFrame()
+        sub_toolbar.setStyleSheet("background-color: #FFFFFF; border-bottom: 1px solid #DDE7F5;")
+        sub_toolbar_layout = QHBoxLayout(sub_toolbar)
+        sub_toolbar_layout.setContentsMargins(10, 5, 10, 5)
+        
+        self._lbl_submap_title = QLabel("Bản đồ chi tiết")
+        self._lbl_submap_title.setStyleSheet("font-weight: bold; font-size: 14px; color: #15346F;")
+        
+        self._combo_submap_floor = QComboBox()
+        self._combo_submap_floor.currentIndexChanged.connect(self._on_submap_floor_changed)
+        
+        self._btn_submap_exit = QPushButton("Quay lại bản đồ chính")
+        self._btn_submap_exit.setStyleSheet("background-color: #F1F3F4; padding: 5px 10px; border-radius: 4px; color: #123D91; font-weight: bold;")
+        self._btn_submap_exit.clicked.connect(self._exit_submap_mode)
+        
+        sub_toolbar_layout.addWidget(self._lbl_submap_title)
+        sub_toolbar_layout.addStretch()
+        sub_toolbar_layout.addWidget(QLabel("Chọn bản đồ:"))
+        sub_toolbar_layout.addWidget(self._combo_submap_floor)
+        sub_toolbar_layout.addWidget(self._btn_submap_exit)
+        
+        self._sub_map_widget = SubMapWidget(editable=False)
+        self._sub_map_widget.node_clicked.connect(self._on_submap_node_clicked)
+        
+        sub_map_layout.addWidget(sub_toolbar)
+        sub_map_layout.addWidget(self._sub_map_widget, 1)
+        
+        self._map_stack.addWidget(self._sub_map_container)
         
         right_column = QWidget()
         right_column.setFixedWidth(470)
@@ -434,6 +476,9 @@ class MainWindow(QMainWindow):
                 
     def _on_start_combo_changed(self, index: int):
         node_id = self._control_panel.start_combo.itemData(index)
+        if self._current_map_mode == "sub":
+            # Ở chế độ bản đồ con, start luôn là __entry__, không xử lý
+            return
         if not node_id:
             if self._start_node:
                 self._clear_start()
@@ -450,6 +495,24 @@ class MainWindow(QMainWindow):
             
     def _on_goal_combo_changed(self, index: int):
         node_id = self._control_panel.goal_combo.itemData(index)
+        if self._current_map_mode == "sub":
+            # Chế độ bản đồ con: chọn đích qua submap flow
+            if not node_id:
+                if self._goal_node:
+                    self._goal_node = None
+                    self._sub_map_widget.clear_goal_node()
+                    self._control_panel.set_goal_display("(Chọn trên bản đồ)")
+                    self._sync_ready_state()
+                return
+            if node_id != self._goal_node:
+                self._start_node = "__entry__"
+                self._goal_node = node_id
+                name = self._sub_graph.get_node_name(node_id)
+                self._sub_map_widget.set_goal_node(node_id)
+                self._control_panel.set_goal_display(name)
+                self._control_panel.add_log(f"⭐ Điểm đích: {name}")
+                self._sync_ready_state()
+            return
         if not node_id:
             if self._goal_node:
                 self._clear_goal()
@@ -541,13 +604,14 @@ class MainWindow(QMainWindow):
             
         algo_name = self._control_panel.get_selected_algorithm()
         heuristic_name = self._control_panel.get_selected_heuristic()
+        active_graph = self._sub_graph if self._current_map_mode == "sub" else self._graph
         
         self._control_panel.add_log("")
         self._control_panel.add_log("="*45)
         self._control_panel.add_log(f"🚀 Chạy thuật toán: {algo_name}")
         self._control_panel.add_log(
-            f"📍 {self._graph.get_node_name(self._start_node)} → "
-            f"{self._graph.get_node_name(self._goal_node)}"
+            f"📍 {active_graph.get_node_name(self._start_node)} → "
+            f"{active_graph.get_node_name(self._goal_node)}"
         )
         
         if needs_heuristic(algo_name):
@@ -555,18 +619,22 @@ class MainWindow(QMainWindow):
             
         self._control_panel.add_log("⏳ Đang tính toán...")
         
-        self._map_widget.reset_all_nodes()
+        if self._current_map_mode == "main":
+            self._map_widget.reset_all_nodes()
+        else:
+            self._sub_map_widget.reset_path()
         self._control_panel.reset_stats()
         
         # Khởi tạo thuật toán và generator
         algo_func = get_algorithm(algo_name)
+        
         if needs_heuristic(algo_name):
             h_func = get_heuristic_function(heuristic_name)
             self._algorithm_gen = algo_func(
-                self._graph, self._start_node, self._goal_node, h_func)
+                active_graph, self._start_node, self._goal_node, h_func)
         else:
             self._algorithm_gen = algo_func(
-                self._graph, self._start_node, self._goal_node)
+                active_graph, self._start_node, self._goal_node)
                 
         self._exec_timer.start()
         
@@ -577,11 +645,12 @@ class MainWindow(QMainWindow):
         self._final_cost = 0.0
         
         self._control_panel.set_running_state(True)
-        self._map_widget.set_graph_edit_enabled(False)
+        if self._current_map_mode == "main":
+            self._map_widget.set_graph_edit_enabled(False)
         self._set_app_state("running")
         
         # Khi ẩn node/cạnh, bản đồ là giao diện chính sạch: chạy xong ngay và chỉ hiện route cuối.
-        if self._map_widget.is_graph_overlay_hidden():
+        if self._current_map_mode == "main" and self._map_widget.is_graph_overlay_hidden():
             self._execute_all_steps_without_animation()
         else:
             # Khởi động Timer bước chạy để mô phỏng từng bước trên node.
@@ -626,7 +695,10 @@ class MainWindow(QMainWindow):
             self._total_visited = len(visited)
             
             # Cập nhật bản đồ (incremental — chỉ đổi node thay đổi trạng thái)
-            self._map_widget.update_step(current, visited, frontier)
+            if self._current_map_mode == "main":
+                self._map_widget.update_step(current, visited, frontier)
+            else:
+                self._sub_map_widget.update_state(visited, frontier, current)
                 
             if log:
                 self._control_panel.add_log(log)
@@ -655,11 +727,14 @@ class MainWindow(QMainWindow):
         self._is_running = False
         
         if self._final_path and len(self._final_path) > 1:
-            self._map_widget.highlight_path(
-                self._final_path,
-                animate=not self._map_widget.is_graph_overlay_hidden(),
-            )
-            self._map_widget.set_sample_walk_enabled(True)
+            if self._current_map_mode == "main":
+                self._map_widget.highlight_path(
+                    self._final_path,
+                    animate=not self._map_widget.is_graph_overlay_hidden(),
+                )
+                self._map_widget.set_sample_walk_enabled(True)
+            else:
+                self._sub_map_widget.draw_path(self._final_path)
             self._show_toast("Đã tìm thấy lộ trình")
             
             # Báo cáo kết quả
@@ -669,14 +744,16 @@ class MainWindow(QMainWindow):
             self._control_panel.add_log(f"📊 KẾT QUẢ THUẬT TOÁN {algo_name}")
             self._control_panel.add_log("─"*45)
             
-            route = " → ".join(self._graph.get_node_name(n) for n in self._final_path)
+            active_graph = self._sub_graph if self._current_map_mode == "sub" else self._graph
+            route = " → ".join(active_graph.get_node_name(n) for n in self._final_path)
             self._control_panel.add_log(f"⭐ Lộ trình: {route}")
             
             self._control_panel.add_log("📋 Chi tiết:")
+            active_graph = self._sub_graph if self._current_map_mode == "sub" else self._graph
             for i in range(len(self._final_path) - 1):
-                src = self._graph.get_node_name(self._final_path[i])
-                dst = self._graph.get_node_name(self._final_path[i + 1])
-                w = self._graph.get_edge_weight(self._final_path[i], self._final_path[i + 1])
+                src = active_graph.get_node_name(self._final_path[i])
+                dst = active_graph.get_node_name(self._final_path[i + 1])
+                w = active_graph.get_edge_weight(self._final_path[i], self._final_path[i + 1])
                 w_str = f"{w:.1f}" if w is not None else "N/A"
                 self._control_panel.add_log(f"   {src} → {dst}: {w_str} m")
                 
@@ -692,24 +769,119 @@ class MainWindow(QMainWindow):
             time_ms=exec_time
         )
         self._control_panel.set_finished_state()
-        self._map_widget.set_graph_edit_enabled(True)
+        if self._current_map_mode == "main":
+            self._map_widget.set_graph_edit_enabled(True)
         self._set_app_state("completed" if self._final_path else "error")
-        if self._final_path and self._goal_node:
+        if self._final_path and self._goal_node and self._current_map_mode == "main":
             QTimer.singleShot(0, self._offer_sub_map_for_goal)
 
     def _offer_sub_map_for_goal(self):
         goal_node_id = self._goal_node
-        if not goal_node_id or not self._sub_map_store.has_sub_maps(goal_node_id):
+        if not goal_node_id or not self._sub_map_store.has_sub_maps(goal_node_id) or self._current_map_mode != "main":
             return
         answer = QMessageBox.question(
             self,
             "Bản đồ chi tiết",
-            "Đã đến điểm đích. Xem bản đồ tòa chi tiết?",
+            "Đã đến điểm đích. Khu vực này có bản đồ tòa nhà/tầng chi tiết, bạn có muốn xem và tìm đường bên trong không?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             QMessageBox.StandardButton.Yes,
         )
         if answer == QMessageBox.StandardButton.Yes:
-            SubMapViewerDialog(goal_node_id, self._sub_map_store, self).exec()
+            self._enter_submap_mode(goal_node_id)
+
+    def _enter_submap_mode(self, main_node_id: str):
+        submaps = self._sub_map_store.list_for_node(main_node_id)
+        if not submaps:
+            return
+        self._current_map_mode = "sub"
+        self._current_submap_node_id = main_node_id
+        main_node_name = self._graph.get_node_name(main_node_id) if main_node_id in self._graph.nodes else main_node_id
+        self._lbl_submap_title.setText(f"Khu vực: {main_node_name}")
+        
+        self._combo_submap_floor.blockSignals(True)
+        self._combo_submap_floor.clear()
+        for item in submaps:
+            self._combo_submap_floor.addItem(f"Tầng {item.floor} — {item.name}", item.id)
+        self._combo_submap_floor.blockSignals(False)
+        
+        self._map_stack.setCurrentIndex(1)
+        
+        # Load bản đồ đầu tiên
+        self._combo_submap_floor.setCurrentIndex(0)
+        self._on_submap_floor_changed(0)
+
+    def _on_submap_floor_changed(self, index: int):
+        sub_map_id = self._combo_submap_floor.currentData()
+        if not sub_map_id:
+            return
+        item = self._sub_map_store.get(str(sub_map_id))
+        if not item:
+            return
+        
+        graph_dict = self._sub_map_store.load_graph(item)
+        self._sub_map_widget.load_map(
+            self._sub_map_store.absolute_path(item.image),
+            graph_dict,
+            rotation=item.rotation,
+            show_edges=True
+        )
+        
+        self._sub_graph = Graph()
+        for node in graph_dict.get("nodes", []):
+            self._sub_graph.add_node(node["id"], x=node.get("x", 0), y=node.get("y", 0), name=node.get("name", ""))
+        for edge in graph_dict.get("edges", []):
+            self._sub_graph.add_edge(edge["from"], edge["to"], edge.get("weight", 1.0))
+            
+        nodes_list = [(nid, n.name) for nid, n in self._sub_graph.nodes.items() if nid != "__entry__"]
+        self._control_panel.set_mode_submap(nodes_list)
+        
+        self._start_node = "__entry__"
+        self._goal_node = None
+        self._final_path = []
+        self._set_app_state("idle")
+
+    def _exit_submap_mode(self):
+        self._current_map_mode = "main"
+        self._map_stack.setCurrentIndex(0)
+        self._sub_map_widget.reset_path()
+        nodes_list = [(nid, n.name) for nid, n in self._graph.nodes.items()]
+        self._control_panel.set_mode_main(nodes_list)
+        self._start_node = None
+        self._goal_node = None
+        self._final_path = []
+        self._set_app_state("idle")
+        self._on_reset()
+
+    def _on_submap_node_clicked(self, node_id: str):
+        if self._is_running:
+            return
+        # Node __entry__ là điểm bắt đầu cố định, không cho chọn làm đích
+        if node_id == "__entry__":
+            return
+        # Click lại node đích hiện tại -> bỏ chọn
+        if node_id == self._goal_node:
+            self._goal_node = None
+            self._sub_map_widget.clear_goal_node()
+            self._control_panel.set_goal_display("(Chọn trên bản đồ)")
+            self._set_combo_to_node(self._control_panel.goal_combo, None)
+            self._control_panel.add_log("↺ Đã xóa điểm đến")
+            self._sync_ready_state()
+            return
+        # Đặt điểm đích mới
+        self._start_node = "__entry__"
+        self._goal_node = node_id
+        name = self._sub_graph.get_node_name(node_id)
+        self._sub_map_widget.set_goal_node(node_id)
+        self._control_panel.set_goal_display(name)
+        self._control_panel.add_log(f"⭐ Điểm đích: {name}")
+        
+        # Đồng bộ Combo Box
+        idx = self._control_panel.goal_combo.findData(node_id)
+        if idx >= 0:
+            self._control_panel.goal_combo.blockSignals(True)
+            self._control_panel.goal_combo.setCurrentIndex(idx)
+            self._control_panel.goal_combo.blockSignals(False)
+        self._sync_ready_state()
 
     def _save_history(self, algo_name: str, exec_time: float):
         # Lưu kết quả vào SQLite
@@ -761,8 +933,12 @@ class MainWindow(QMainWindow):
         self._is_paused = False
         self._algorithm_gen = None
         
-        self._map_widget.full_reset()
-        self._start_node = None
+        if self._current_map_mode == "main":
+            self._map_widget.full_reset()
+        else:
+            self._sub_map_widget.reset_path()
+            
+        self._start_node = None if self._current_map_mode == "main" else "__entry__"
         self._goal_node = None
         self._click_count = 0
         self._final_path = []
@@ -773,8 +949,12 @@ class MainWindow(QMainWindow):
         self._map_widget.set_sample_walk_enabled(False)
         self._control_panel.reset_stats()
         self._control_panel.clear_log()
-        self._control_panel.set_start_display("(Chọn trên bản đồ)")
         self._control_panel.set_goal_display("(Chọn trên bản đồ)")
+        
+        if self._current_map_mode == "sub":
+            self._control_panel.set_start_display("Bạn đang ở đây")
+        else:
+            self._control_panel.set_start_display("(Chọn trên bản đồ)")
         
         # Reset combo boxes
         self._control_panel.start_combo.blockSignals(True)

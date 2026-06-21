@@ -118,6 +118,7 @@ class GraphEditorDialog(QDialog):
         self._modified = False
 
         self.setWindowTitle("Chỉnh sửa bản đồ")
+        self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowMaximizeButtonHint)
         self.setMinimumSize(980, 680)
         self.resize(1180, 760)
 

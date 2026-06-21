@@ -87,6 +87,7 @@ class SubMapEditorDialog(QDialog):
         self._edge_pick_first: Optional[str] = None
 
         self.setWindowTitle(f"Chỉnh sửa — {self.item.name}")
+        self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowMaximizeButtonHint)
         self.resize(1320, 820)
 
         self._setup_ui()

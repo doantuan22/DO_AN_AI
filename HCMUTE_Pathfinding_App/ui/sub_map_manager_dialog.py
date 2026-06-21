@@ -8,6 +8,7 @@ from typing import Optional
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QColor, QPainter, QPen, QPixmap, QWheelEvent
 from PyQt6.QtWidgets import (
+    QComboBox,
     QDialog,
     QDialogButtonBox,
     QFileDialog,
@@ -196,6 +197,94 @@ class _SubMapForm(QDialog):
         self.accept()
 
 
+class _CopySubMapDialog(QDialog):
+    def __init__(self, graph: Graph, store: SubMapStore, target_node_id: str, parent=None):
+        super().__init__(parent)
+        self.graph = graph
+        self.store = store
+        self.target_node_id = target_node_id
+        self.setWindowTitle("Copy bản đồ con")
+        self.resize(560, 260)
+
+        root = QVBoxLayout(self)
+        form = QFormLayout()
+
+        self.source_node_combo = QComboBox()
+        self.source_map_combo = QComboBox()
+        self.name_edit = QLineEdit()
+        self.floor_spin = QSpinBox()
+        self.floor_spin.setRange(-20, 200)
+
+        for node_id in graph.get_all_node_ids():
+            if node_id == target_node_id or not store.has_sub_maps(node_id):
+                continue
+            self.source_node_combo.addItem(f"{graph.get_node_name(node_id)} ({node_id})", node_id)
+
+        self.source_node_combo.currentIndexChanged.connect(self._reload_maps)
+        self.source_map_combo.currentIndexChanged.connect(self._sync_selected_map)
+
+        form.addRow("Node nguồn:", self.source_node_combo)
+        form.addRow("Bản đồ con nguồn:", self.source_map_combo)
+        form.addRow("Tên bản đồ mới:", self.name_edit)
+        form.addRow("Tầng:", self.floor_spin)
+
+        note = QLabel(
+            "Bản copy sẽ thuộc node đang chọn trên bản đồ chính. Ảnh và node/cạnh "
+            "được ghi sang các file riêng để không ảnh hưởng bản gốc."
+        )
+        note.setWordWrap(True)
+        note.setStyleSheet("color:#5F6368")
+
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel)
+        buttons.accepted.connect(self._validate)
+        buttons.rejected.connect(self.reject)
+
+        root.addLayout(form)
+        root.addWidget(note)
+        root.addWidget(buttons)
+        self._reload_maps()
+
+    def source_sub_map_id(self) -> str:
+        return str(self.source_map_combo.currentData() or "")
+
+    def copy_name(self) -> str:
+        return self.name_edit.text().strip()
+
+    def copy_floor(self) -> int:
+        return self.floor_spin.value()
+
+    def _reload_maps(self):
+        node_id = str(self.source_node_combo.currentData() or "")
+        self.source_map_combo.blockSignals(True)
+        self.source_map_combo.clear()
+        for item in self.store.list_for_node(node_id):
+            self.source_map_combo.addItem(f"Tầng {item.floor} - {item.name}", item.id)
+        self.source_map_combo.blockSignals(False)
+        self._sync_selected_map()
+
+    def _sync_selected_map(self):
+        sub_map_id = self.source_sub_map_id()
+        if not sub_map_id:
+            self.name_edit.clear()
+            self.floor_spin.setValue(1)
+            return
+        try:
+            item = self.store.get(sub_map_id)
+        except (KeyError, ValueError):
+            return
+        self.name_edit.setText(item.name)
+        self.floor_spin.setValue(item.floor)
+
+    def _validate(self):
+        if not self.source_sub_map_id():
+            QMessageBox.information(self, "Chưa có dữ liệu nguồn", "Không tìm thấy bản đồ con ở node khác để copy.")
+            return
+        if not self.copy_name():
+            QMessageBox.warning(self, "Thiếu tên", "Hãy nhập tên bản đồ con mới.")
+            return
+        self.accept()
+
+
 class SubMapManagerDialog(QDialog):
     def __init__(self, graph: Graph, store: SubMapStore, map_path: str | Path | None = None, parent=None):
         super().__init__(parent)
@@ -205,6 +294,7 @@ class SubMapManagerDialog(QDialog):
         self._selected_node_id: Optional[str] = None
 
         self.setWindowTitle("Chỉnh sửa bản đồ con")
+        self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowMaximizeButtonHint)
         self.resize(1320, 820)
 
         root = QHBoxLayout(self)
@@ -223,6 +313,9 @@ class SubMapManagerDialog(QDialog):
 
         title = QLabel("Cài đặt bản đồ con")
         title.setStyleSheet("font-size:20px;font-weight:800;color:#0B63E5")
+        scope_note = QLabel("Mỗi node có thể có nhiều bản đồ con trong cùng một tầng, miễn là tên bản đồ khác nhau.")
+        scope_note.setWordWrap(True)
+        scope_note.setStyleSheet("color:#5F6368")
         self.selected_label = QLabel("Chọn một node trên bản đồ chính")
         self.selected_label.setWordWrap(True)
         self.selected_label.setStyleSheet("color:#0F172A;font-weight:700")
@@ -246,6 +339,11 @@ class SubMapManagerDialog(QDialog):
         actions_2.addWidget(open_editor_button)
         actions_2.addWidget(delete_button)
 
+        actions_3 = QHBoxLayout()
+        copy_button = QPushButton("Copy bản đồ con")
+        copy_button.clicked.connect(self._copy_from_other_node)
+        actions_3.addWidget(copy_button)
+
         self.log_text = QTextEdit()
         self.log_text.setReadOnly(True)
         self.log_text.setMinimumHeight(150)
@@ -257,11 +355,13 @@ class SubMapManagerDialog(QDialog):
         close.clicked.connect(self.accept)
 
         side.addWidget(title)
+        side.addWidget(scope_note)
         side.addWidget(self.selected_label)
         side.addWidget(QLabel("Bản đồ con của node đang chọn:"))
         side.addWidget(self.list_widget, 1)
         side.addLayout(actions_1)
         side.addLayout(actions_2)
+        side.addLayout(actions_3)
         side.addWidget(QLabel("Thông báo:"))
         side.addWidget(self.log_text)
         side.addWidget(close)
@@ -351,6 +451,31 @@ class SubMapManagerDialog(QDialog):
         except Exception as exc:
             QMessageBox.warning(self, "Không thể cập nhật", str(exc))
             self._log(f"Lỗi cập nhật bản đồ con: {exc}")
+
+    def _copy_from_other_node(self):
+        target_node_id = self._node_id()
+        if not target_node_id:
+            QMessageBox.information(self, "Chưa chọn node đích", "Hãy chọn node đích trên bản đồ chính trước.")
+            return
+        dialog = _CopySubMapDialog(self.graph, self.store, target_node_id, self)
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return
+        try:
+            copied = self.store.copy_to_node(
+                dialog.source_sub_map_id(),
+                target_node_id,
+                name=dialog.copy_name(),
+                floor=dialog.copy_floor(),
+            )
+            self._reload()
+            self._select(copied.id)
+            self._log(
+                f"Đã copy bản đồ con '{copied.name}' sang node {target_node_id}. "
+                "Hãy mở chỉnh sửa để đặt lại vị trí đứng nếu cần."
+            )
+        except Exception as exc:
+            QMessageBox.warning(self, "Không thể copy", str(exc))
+            self._log(f"Lỗi copy bản đồ con: {exc}")
 
     def _delete(self):
         current = self._selected()
