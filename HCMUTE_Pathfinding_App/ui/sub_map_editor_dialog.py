@@ -12,6 +12,7 @@ from typing import Any, Dict, List, Optional
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import (
+    QCheckBox,
     QComboBox,
     QDialog,
     QDoubleSpinBox,
@@ -154,18 +155,30 @@ class SubMapEditorDialog(QDialog):
         self.visual_id_edit.setPlaceholderText("Tự động nếu để trống")
         self.visual_name_edit = QLineEdit()
         self.visual_name_edit.setPlaceholderText("Tên hiển thị")
+        self.visual_hide_name_cb = QCheckBox("Ẩn tên nút trên bản đồ")
         self.visual_x_label = QLabel("—")
         self.visual_y_label = QLabel("—")
         form.addRow("ID nút mới:", self.visual_id_edit)
         form.addRow("Tên nút:", self.visual_name_edit)
+        form.addRow("", self.visual_hide_name_cb)
         form.addRow("Tọa độ X:", self.visual_x_label)
         form.addRow("Tọa độ Y:", self.visual_y_label)
         visual_layout.addLayout(form)
 
         # Nút đổi tên
-        btn_rename = QPushButton("Đổi tên nút đang chọn")
+        btn_rename = QPushButton("Cập nhật thông tin nút đang chọn")
         btn_rename.clicked.connect(self._rename_selected_node)
         visual_layout.addWidget(btn_rename)
+        
+        # Thao tác hàng loạt
+        bulk_row = QHBoxLayout()
+        btn_hide_all = QPushButton("Ẩn tất cả tên")
+        btn_hide_all.clicked.connect(self._hide_all_names)
+        btn_show_all = QPushButton("Hiện tất cả tên")
+        btn_show_all.clicked.connect(self._show_all_names)
+        bulk_row.addWidget(btn_hide_all)
+        bulk_row.addWidget(btn_show_all)
+        visual_layout.addLayout(bulk_row)
 
         btn_recenter = QPushButton("Căn vừa bản đồ")
         btn_recenter.clicked.connect(self.map_widget.reset_view)
@@ -331,7 +344,7 @@ class SubMapEditorDialog(QDialog):
             for col, value in enumerate(
                 (
                     node.get("id"),
-                    node.get("name", ""),
+                    node.get("name", "") + (" (đã ẩn)" if node.get("hide_name") else ""),
                     node.get("x", 0),
                     node.get("y", 0),
                 )
@@ -458,6 +471,7 @@ class SubMapEditorDialog(QDialog):
         self.selected_label.setText(f"Nút đang chọn: {name} ({node_id})")
         if self._current_mode_key() != "add_node":
             self.visual_name_edit.setText(node.get("name", ""))
+            self.visual_hide_name_cb.setChecked(bool(node.get("hide_name", False)))
         self.visual_x_label.setText(str(node.get("x", 0)))
         self.visual_y_label.setText(str(node.get("y", 0)))
         self.map_widget.highlight_node(node_id)
@@ -476,6 +490,7 @@ class SubMapEditorDialog(QDialog):
         self._selected_node_id = None
         self.selected_label.setText("Nút đang chọn: chưa có")
         self.visual_name_edit.clear()
+        self.visual_hide_name_cb.setChecked(False)
         self.visual_x_label.setText("—")
         self.visual_y_label.setText("—")
 
@@ -487,6 +502,7 @@ class SubMapEditorDialog(QDialog):
         """Thêm node mới tại tọa độ (x, y) từ click bản đồ."""
         node_id = self.visual_id_edit.text().strip() or self._suggest_node_id()
         name = self.visual_name_edit.text().strip() or node_id
+        hide_name = self.visual_hide_name_cb.isChecked()
 
         # Kiểm tra trùng ID
         if any(n.get("id") == node_id for n in self.graph.get("nodes", [])):
@@ -496,10 +512,11 @@ class SubMapEditorDialog(QDialog):
             return
 
         self.graph.setdefault("nodes", []).append(
-            {"id": node_id, "name": name, "x": x, "y": y}
+            {"id": node_id, "name": name, "hide_name": hide_name, "x": x, "y": y}
         )
         self.visual_id_edit.clear()
         self.visual_name_edit.clear()
+        self.visual_hide_name_cb.setChecked(False)
         self.status_label.setText(
             f"Đã thêm nút {node_id} tại ({x}, {y})"
         )
@@ -557,24 +574,42 @@ class SubMapEditorDialog(QDialog):
     def _rename_selected_node(self):
         if not self._selected_node_id:
             QMessageBox.warning(
-                self, "Thiếu lựa chọn", "Hãy chọn nút cần đổi tên."
+                self, "Thiếu lựa chọn", "Hãy chọn nút cần thao tác."
             )
             return
         node = self._find_node(self._selected_node_id)
         if node is None:
             return
         new_name = self.visual_name_edit.text().strip()
-        if not new_name:
+        hide_name = self.visual_hide_name_cb.isChecked()
+        if not hide_name and not new_name:
             QMessageBox.warning(
-                self, "Thiếu tên", "Hãy nhập tên hiển thị mới cho nút."
+                self, "Thiếu tên", "Hãy nhập tên hiển thị mới cho nút hoặc chọn 'Ẩn tên nút trên bản đồ'."
             )
             return
         node["name"] = new_name
+        node["hide_name"] = hide_name
         self.status_label.setText(
-            f"Đã đổi tên nút {self._selected_node_id} → {new_name}"
+            f"Đã cập nhật thông tin nút {self._selected_node_id}"
         )
         self._reload_all()
         self._select_node(self._selected_node_id)
+
+    def _hide_all_names(self):
+        for node in self.graph.get("nodes", []):
+            node["hide_name"] = True
+        self.status_label.setText("Đã ẩn toàn bộ tên nút trên bản đồ.")
+        self._reload_all()
+        if self._selected_node_id:
+            self._select_node(self._selected_node_id)
+
+    def _show_all_names(self):
+        for node in self.graph.get("nodes", []):
+            node["hide_name"] = False
+        self.status_label.setText("Đã hiện toàn bộ tên nút trên bản đồ.")
+        self._reload_all()
+        if self._selected_node_id:
+            self._select_node(self._selected_node_id)
 
     # ──────────────────────────────────────────────────
     # Thao tác xóa node

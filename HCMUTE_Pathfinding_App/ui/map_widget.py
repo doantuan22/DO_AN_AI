@@ -354,6 +354,7 @@ class MapWidget(QGraphicsView):
         
         # Khởi tạo các widget nổi
         self._setup_floating_controls()
+        self._submap_button_proxy = None
 
     def _set_canvas_background(self, color: QColor):
         # Đồng bộ nền canvas với nền map khi zoom out
@@ -566,6 +567,22 @@ class MapWidget(QGraphicsView):
             }
         """)
         self._graph_edit_button.show()
+
+        self._submap_hint_label = QLabel("✨ Nhấn vào điểm đích hoặc nút trên bản đồ để xem chi tiết tòa nhà", self)
+        self._submap_hint_label.setObjectName("submapHintLabel")
+        self._submap_hint_label.setStyleSheet("""
+            QLabel#submapHintLabel {
+                background-color: #E8F0FE;
+                color: #1967D2;
+                border: 1px solid #D2E3FC;
+                border-radius: 8px;
+                padding: 6px 12px;
+                font-family: 'Segoe UI';
+                font-size: 13px;
+                font-weight: bold;
+            }
+        """)
+        self._submap_hint_label.hide()
 
     def set_graph_edit_enabled(self, enabled: bool):
         # Bật/tắt nút chỉnh sửa graph
@@ -972,6 +989,7 @@ class MapWidget(QGraphicsView):
         if self._goal_tooltip:
             self._scene.removeItem(self._goal_tooltip)
             self._goal_tooltip = None
+        self.hide_submap_button()
             
         # 2. Tạo trạng thái & ghim mới
         self._goal_node = node_id
@@ -1005,6 +1023,7 @@ class MapWidget(QGraphicsView):
         if self._goal_tooltip:
             self._scene.removeItem(self._goal_tooltip)
             self._goal_tooltip = None
+        self.hide_submap_button()
         if self._goal_node and self._goal_node in self._node_items:
             self._node_items[self._goal_node].set_state("normal")
         self._goal_node = None
@@ -1455,6 +1474,7 @@ class MapWidget(QGraphicsView):
         self._route_flow_items.clear()
         self._route_segment_items.clear()
         self._clear_avatar()
+        self.hide_submap_button()
         for item in self._path_items:
             self._scene.removeItem(item)
         self._path_items.clear()
@@ -1510,6 +1530,7 @@ class MapWidget(QGraphicsView):
         if self._goal_tooltip:
             self._scene.removeItem(self._goal_tooltip)
             self._goal_tooltip = None
+        self.hide_submap_button()
             
         self._start_node = None
         self._goal_node = None
@@ -1532,6 +1553,13 @@ class MapWidget(QGraphicsView):
         if self._legend_card:
             self._legend_card.move(16, 16)
             self._legend_card.adjustSize()
+            
+        # Cập nhật vị trí Hint label
+        if hasattr(self, '_submap_hint_label') and self._submap_hint_label.isVisible() and self._legend_card:
+            self._submap_hint_label.adjustSize()
+            x = self._legend_card.x() + self._legend_card.width() + 14
+            y = self._legend_card.y() + (self._legend_card.height() - self._submap_hint_label.height()) // 2
+            self._submap_hint_label.move(x, y)
             
         # Cập nhật vị trí Zoom Controls (Top-Right)
         if self._zoom_card:
@@ -1572,3 +1600,89 @@ class MapWidget(QGraphicsView):
                 self._history_button.move(x, bottom_y)
                 x += self._history_button.width() + 10
             self._graph_edit_button.move(x, bottom_y)
+
+    # ──────────────────────────────────────────────────
+    # Sub-map Entry Button Overlay
+    # ──────────────────────────────────────────────────
+    
+    def show_submap_button(self, node_id: str, node_name: str, callback):
+        self.hide_submap_button()
+        node = self._graph.get_node(node_id) if self._graph else None
+        if not node:
+            return
+            
+        if self._goal_tooltip:
+            self._goal_tooltip.setVisible(False)
+            
+        btn = QPushButton("Bản đồ chi tiết")
+        btn.setStyleSheet("""
+            QPushButton {
+                background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #0B74FF, stop:1 #0056D2);
+                color: white;
+                border: 2px solid white;
+                border-radius: 18px;
+                padding: 8px 20px;
+                font-family: 'Segoe UI';
+                font-size: 14px;
+                font-weight: 900;
+            }
+            QPushButton:hover {
+                background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #1A85FF, stop:1 #0066E2);
+                border: 2px solid #E6EDF7;
+            }
+        """)
+        btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn.clicked.connect(callback)
+        
+        proxy = self._scene.addWidget(btn)
+        proxy.setZValue(35) # Hiển thị trên cùng
+        
+        self._submap_arrow = QGraphicsTextItem("⬇")
+        self._submap_arrow.setFont(QFont("Segoe UI", 24, QFont.Weight.Bold))
+        self._submap_arrow.setDefaultTextColor(QColor("#0B74FF"))
+        self._scene.addItem(self._submap_arrow)
+        self._submap_arrow.setZValue(34)
+        
+        w = btn.sizeHint().width()
+        self._submap_btn_base_y = node.y - 45
+        self._submap_arrow_base_y = node.y - 85
+        
+        proxy.setPos(node.x - w / 2, self._submap_btn_base_y)
+        self._submap_arrow.setPos(node.x - self._submap_arrow.boundingRect().width() / 2, self._submap_arrow_base_y)
+        
+        self._submap_button_proxy = proxy
+        
+        if not hasattr(self, '_submap_anim_timer'):
+            self._submap_anim_timer = QTimer(self)
+            self._submap_anim_timer.timeout.connect(self._animate_submap_button)
+        self._submap_anim_step = 0
+        self._submap_anim_timer.start(40)
+        
+        if hasattr(self, '_submap_hint_label'):
+            self._submap_hint_label.show()
+            self.resizeEvent(None)
+            
+    def _animate_submap_button(self):
+        if not hasattr(self, '_submap_button_proxy') or not self._submap_button_proxy:
+            return
+        self._submap_anim_step += 0.25
+        offset = math.sin(self._submap_anim_step) * 6
+        self._submap_button_proxy.setPos(self._submap_button_proxy.x(), self._submap_btn_base_y + offset)
+        if hasattr(self, '_submap_arrow') and self._submap_arrow:
+            self._submap_arrow.setPos(self._submap_arrow.x(), self._submap_arrow_base_y + offset)
+        
+    def hide_submap_button(self):
+        if hasattr(self, '_submap_anim_timer'):
+            self._submap_anim_timer.stop()
+        if hasattr(self, '_submap_button_proxy') and self._submap_button_proxy:
+            self._scene.removeItem(self._submap_button_proxy)
+            self._submap_button_proxy = None
+        if hasattr(self, '_submap_arrow') and self._submap_arrow:
+            self._scene.removeItem(self._submap_arrow)
+            self._submap_arrow = None
+        if hasattr(self, '_submap_hint_label'):
+            self._submap_hint_label.hide()
+            
+        if self._goal_tooltip:
+            self._goal_tooltip.setVisible(True)
+

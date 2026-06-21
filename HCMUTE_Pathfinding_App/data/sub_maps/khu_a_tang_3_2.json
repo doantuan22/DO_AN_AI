@@ -8,121 +8,141 @@
       "id": "__entry__",
       "name": "Bạn đang ở đây",
       "x": 945.32,
-      "y": 1131.51
+      "y": 1131.51,
+      "hide_name": true
     },
     {
       "id": "S01",
       "name": "S01",
       "x": 731.77,
-      "y": 154.81
+      "y": 154.81,
+      "hide_name": true
     },
     {
       "id": "S02",
       "name": "S02",
       "x": 730.82,
-      "y": 223.44
+      "y": 223.44,
+      "hide_name": true
     },
     {
       "id": "S03",
       "name": "S03",
       "x": 730.9,
-      "y": 373.6
+      "y": 373.6,
+      "hide_name": true
     },
     {
       "id": "S04",
       "name": "S04",
       "x": 728.9,
-      "y": 503.5
+      "y": 503.5,
+      "hide_name": true
     },
     {
       "id": "S05",
       "name": "S05",
       "x": 728.9,
-      "y": 641.6
+      "y": 641.6,
+      "hide_name": true
     },
     {
       "id": "S06",
       "name": "S06",
       "x": 730.9,
-      "y": 769.5
+      "y": 769.5,
+      "hide_name": true
     },
     {
       "id": "S07",
       "name": "S07",
       "x": 730.9,
-      "y": 907.5
+      "y": 907.5,
+      "hide_name": true
     },
     {
       "id": "S08",
       "name": "S08",
       "x": 730.9,
-      "y": 1052.28
+      "y": 1052.28,
+      "hide_name": true
     },
     {
       "id": "S09",
       "name": "S09",
       "x": 731.5,
-      "y": 1133.14
+      "y": 1133.14,
+      "hide_name": true
     },
     {
       "id": "S10",
       "name": "S10",
       "x": 540.1,
-      "y": 1131.35
+      "y": 1131.35,
+      "hide_name": true
     },
     {
       "id": "S11",
       "name": "S11",
       "x": 352.56,
-      "y": 1130.69
+      "y": 1130.69,
+      "hide_name": true
     },
     {
       "id": "S12",
       "name": "S12",
       "x": 354.2,
-      "y": 1056.35
+      "y": 1056.35,
+      "hide_name": true
     },
     {
       "id": "S13",
       "name": "S13",
       "x": 351.2,
-      "y": 907.5
+      "y": 907.5,
+      "hide_name": true
     },
     {
       "id": "S14",
       "name": "S14",
       "x": 353.25,
-      "y": 777.0
+      "y": 777.0,
+      "hide_name": true
     },
     {
       "id": "S15",
       "name": "S15",
       "x": 353.06,
-      "y": 642.29
+      "y": 642.29,
+      "hide_name": true
     },
     {
       "id": "S16",
       "name": "S16",
       "x": 353.3,
-      "y": 509.6
+      "y": 509.6,
+      "hide_name": true
     },
     {
       "id": "S17",
       "name": "S17",
       "x": 352.6,
-      "y": 373.6
+      "y": 373.6,
+      "hide_name": true
     },
     {
       "id": "S18",
       "name": "S18",
       "x": 353.3,
-      "y": 223.3
+      "y": 223.3,
+      "hide_name": true
     },
     {
       "id": "S19",
       "name": "S19",
       "x": 353.58,
-      "y": 155.83
+      "y": 155.83,
+      "hide_name": true
     }
   ],
   "edges": [

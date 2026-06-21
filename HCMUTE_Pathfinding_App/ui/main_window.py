@@ -250,16 +250,73 @@ class MainWindow(QMainWindow):
         self._lbl_submap_title.setStyleSheet("font-weight: bold; font-size: 14px; color: #15346F;")
         
         self._combo_submap_floor = QComboBox()
+        self._combo_submap_floor.setMinimumWidth(220)
+        self._combo_submap_floor.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._combo_submap_floor.setStyleSheet("""
+            QComboBox {
+                background-color: #F8FAFC;
+                border: 1px solid #CBD5E1;
+                border-radius: 6px;
+                padding: 6px 14px;
+                font-family: 'Segoe UI';
+                font-size: 13px;
+                font-weight: 600;
+                color: #1E293B;
+            }
+            QComboBox:hover {
+                background-color: #F1F5F9;
+                border-color: #94A3B8;
+            }
+            QComboBox::drop-down {
+                border: none;
+                width: 30px;
+            }
+            QComboBox::down-arrow {
+                image: none;
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-top: 5px solid #64748B;
+                margin-right: 10px;
+            }
+            QComboBox QAbstractItemView {
+                background-color: #FFFFFF;
+                border: 1px solid #CBD5E1;
+                border-radius: 4px;
+                selection-background-color: #EFF6FF;
+                selection-color: #1D4ED8;
+                padding: 4px;
+            }
+        """)
         self._combo_submap_floor.currentIndexChanged.connect(self._on_submap_floor_changed)
         
-        self._btn_submap_exit = QPushButton("Quay lại bản đồ chính")
-        self._btn_submap_exit.setStyleSheet("background-color: #F1F3F4; padding: 5px 10px; border-radius: 4px; color: #123D91; font-weight: bold;")
+        self._btn_submap_exit = QPushButton("⮌ Quay lại bản đồ chính")
+        self._btn_submap_exit.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._btn_submap_exit.setStyleSheet("""
+            QPushButton {
+                background-color: transparent;
+                border: 1px solid #CBD5E1;
+                border-radius: 6px;
+                padding: 6px 14px;
+                font-family: 'Segoe UI';
+                font-size: 13px;
+                font-weight: 600;
+                color: #475569;
+            }
+            QPushButton:hover {
+                background-color: #F1F5F9;
+                color: #0F172A;
+            }
+        """)
         self._btn_submap_exit.clicked.connect(self._exit_submap_mode)
+        
+        lbl_chon = QLabel("Chuyển tầng:")
+        lbl_chon.setStyleSheet("font-weight: 600; color: #64748B; font-size: 13px;")
         
         sub_toolbar_layout.addWidget(self._lbl_submap_title)
         sub_toolbar_layout.addStretch()
-        sub_toolbar_layout.addWidget(QLabel("Chọn bản đồ:"))
+        sub_toolbar_layout.addWidget(lbl_chon)
         sub_toolbar_layout.addWidget(self._combo_submap_floor)
+        sub_toolbar_layout.addSpacing(10)
         sub_toolbar_layout.addWidget(self._btn_submap_exit)
         
         self._sub_map_widget = SubMapWidget(editable=False)
@@ -380,6 +437,9 @@ class MainWindow(QMainWindow):
             self._clear_start()
             return
         if node_id == self._goal_node:
+            if self._app_state == "completed" and self._current_map_mode == "main" and self._sub_map_store.has_sub_maps(node_id):
+                self._enter_submap_mode(node_id)
+                return
             self._clear_goal()
             return
 
@@ -773,21 +833,21 @@ class MainWindow(QMainWindow):
             self._map_widget.set_graph_edit_enabled(True)
         self._set_app_state("completed" if self._final_path else "error")
         if self._final_path and self._goal_node and self._current_map_mode == "main":
-            QTimer.singleShot(0, self._offer_sub_map_for_goal)
+            self._offer_sub_map_for_goal()
 
     def _offer_sub_map_for_goal(self):
         goal_node_id = self._goal_node
         if not goal_node_id or not self._sub_map_store.has_sub_maps(goal_node_id) or self._current_map_mode != "main":
             return
-        answer = QMessageBox.question(
-            self,
-            "Bản đồ chi tiết",
-            "Đã đến điểm đích. Khu vực này có bản đồ tòa nhà/tầng chi tiết, bạn có muốn xem và tìm đường bên trong không?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-            QMessageBox.StandardButton.Yes,
+        
+        main_node_name = self._graph.get_node_name(goal_node_id) if goal_node_id in self._graph.nodes else goal_node_id
+        
+        self._control_panel.add_log(f"🏢 Khu vực này có bản đồ chi tiết của {main_node_name}.")
+        self._map_widget.show_submap_button(
+            goal_node_id, 
+            main_node_name, 
+            lambda: self._enter_submap_mode(goal_node_id)
         )
-        if answer == QMessageBox.StandardButton.Yes:
-            self._enter_submap_mode(goal_node_id)
 
     def _enter_submap_mode(self, main_node_id: str):
         submaps = self._sub_map_store.list_for_node(main_node_id)
@@ -976,7 +1036,12 @@ class MainWindow(QMainWindow):
         if not os.path.exists(self._avatar_path):
             self._control_panel.add_log("⚠️ Không tìm thấy assets/avata01.png")
             return
-        self._map_widget.animate_avatar_along_path(self._final_path, self._avatar_path)
+            
+        if self._current_map_mode == "main":
+            self._map_widget.animate_avatar_along_path(self._final_path, self._avatar_path)
+        else:
+            self._sub_map_widget.animate_avatar_along_path(self._final_path, self._avatar_path)
+            
         self._control_panel.add_log("▶ Đi mẫu theo lộ trình đã tìm được")
 
     def _on_algorithm_speed_changed(self, speed_name: str):

@@ -8,277 +8,323 @@
       "id": "S04",
       "name": "S01",
       "x": 860.1,
-      "y": 741.7
+      "y": 741.7,
+      "hide_name": true
     },
     {
       "id": "S05",
       "name": "S01",
       "x": 859.3,
-      "y": 674.5
+      "y": 674.5,
+      "hide_name": true
     },
     {
       "id": "S06",
       "name": "S01",
       "x": 859.6,
-      "y": 628.0
+      "y": 628.0,
+      "hide_name": true
     },
     {
       "id": "S07",
       "name": "S01",
       "x": 860.0,
-      "y": 444.8
+      "y": 444.8,
+      "hide_name": true
     },
     {
       "id": "S08",
       "name": "S01",
       "x": 861.1,
-      "y": 368.6
+      "y": 368.6,
+      "hide_name": true
     },
     {
       "id": "S09",
       "name": "S01",
       "x": 877.6,
-      "y": 325.65
+      "y": 325.65,
+      "hide_name": true
     },
     {
       "id": "S10",
       "name": "S01",
       "x": 1051.68,
-      "y": 323.0
+      "y": 323.0,
+      "hide_name": true
     },
     {
       "id": "S11",
       "name": "S01",
       "x": 1224.78,
-      "y": 322.81
+      "y": 322.81,
+      "hide_name": true
     },
     {
       "id": "S12",
       "name": "S01",
       "x": 819.26,
-      "y": 324.01
+      "y": 324.01,
+      "hide_name": true
     },
     {
       "id": "S13",
       "name": "S01",
       "x": 629.7,
-      "y": 326.2
+      "y": 326.2,
+      "hide_name": true
     },
     {
       "id": "S14",
       "name": "S01",
       "x": 359.91,
-      "y": 324.64
+      "y": 324.64,
+      "hide_name": true
     },
     {
       "id": "S15",
       "name": "S01",
       "x": 192.16,
-      "y": 324.62
+      "y": 324.62,
+      "hide_name": true
     },
     {
       "id": "S16",
       "name": "S01",
       "x": 647.57,
-      "y": 443.1
+      "y": 443.1,
+      "hide_name": true
     },
     {
       "id": "S17",
       "name": "S01",
       "x": 644.4,
-      "y": 630.3
+      "y": 630.3,
+      "hide_name": true
     },
     {
       "id": "S18",
       "name": "S01",
       "x": 822.51,
-      "y": 905.8
+      "y": 905.8,
+      "hide_name": true
     },
     {
       "id": "S19",
       "name": "S01",
       "x": 823.9,
-      "y": 790.9
+      "y": 790.9,
+      "hide_name": true
     },
     {
       "id": "S20",
       "name": "S01",
       "x": 875.7,
-      "y": 790.9
+      "y": 790.9,
+      "hide_name": true
     },
     {
       "id": "S21",
       "name": "S01",
       "x": 1045.1,
-      "y": 789.8
+      "y": 789.8,
+      "hide_name": true
     },
     {
       "id": "S22",
       "name": "S01",
       "x": 1220.1,
-      "y": 788.8
+      "y": 788.8,
+      "hide_name": true
     },
     {
       "id": "S23",
       "name": "S01",
       "x": 629.4,
-      "y": 788.1
+      "y": 788.1,
+      "hide_name": true
     },
     {
       "id": "S24",
       "name": "S01",
       "x": 361.5,
-      "y": 788.2
+      "y": 788.2,
+      "hide_name": true
     },
     {
       "id": "S25",
       "name": "S01",
       "x": 191.2,
-      "y": 788.2
+      "y": 788.2,
+      "hide_name": true
     },
     {
       "id": "S26",
       "name": "S01",
       "x": 821.53,
-      "y": 1021.3
+      "y": 1021.3,
+      "hide_name": true
     },
     {
       "id": "S27",
       "name": "S01",
       "x": 878.59,
-      "y": 1020.72
+      "y": 1020.72,
+      "hide_name": true
     },
     {
       "id": "S28",
       "name": "S01",
       "x": 1050.8,
-      "y": 1020.2
+      "y": 1020.2,
+      "hide_name": true
     },
     {
       "id": "S29",
       "name": "S01",
       "x": 1223.39,
-      "y": 1020.53
+      "y": 1020.53,
+      "hide_name": true
     },
     {
       "id": "S30",
       "name": "S01",
       "x": 1372.6,
-      "y": 1019.8
+      "y": 1019.8,
+      "hide_name": true
     },
     {
       "id": "S31",
       "name": "S01",
       "x": 1372.7,
-      "y": 789.32
+      "y": 789.32,
+      "hide_name": true
     },
     {
       "id": "S32",
       "name": "S01",
       "x": 628.7,
-      "y": 1019.2
+      "y": 1019.2,
+      "hide_name": true
     },
     {
       "id": "S33",
       "name": "S01",
       "x": 361.49,
-      "y": 1020.46
+      "y": 1020.46,
+      "hide_name": true
     },
     {
       "id": "S34",
       "name": "S01",
       "x": 190.0,
-      "y": 1019.29
+      "y": 1019.29,
+      "hide_name": true
     },
     {
       "id": "S35",
       "name": "S01",
       "x": 1374.0,
-      "y": 321.31
+      "y": 321.31,
+      "hide_name": true
     },
     {
       "id": "S36",
       "name": "S01",
       "x": 1374.2,
-      "y": 91.28
+      "y": 91.28,
+      "hide_name": true
     },
     {
       "id": "S37",
       "name": "S01",
       "x": 1220.6,
-      "y": 89.32
+      "y": 89.32,
+      "hide_name": true
     },
     {
       "id": "S38",
       "name": "S01",
       "x": 1046.98,
-      "y": 89.25
+      "y": 89.25,
+      "hide_name": true
     },
     {
       "id": "S39",
       "name": "S01",
       "x": 875.47,
-      "y": 88.2
+      "y": 88.2,
+      "hide_name": true
     },
     {
       "id": "S40",
       "name": "S01",
       "x": 819.18,
-      "y": 207.7
+      "y": 207.7,
+      "hide_name": true
     },
     {
       "id": "S41",
       "name": "S01",
       "x": 819.41,
-      "y": 88.0
+      "y": 88.0,
+      "hide_name": true
     },
     {
       "id": "S42",
       "name": "S01",
       "x": 629.65,
-      "y": 89.07
+      "y": 89.07,
+      "hide_name": true
     },
     {
       "id": "S43",
       "name": "S01",
       "x": 361.0,
-      "y": 87.33
+      "y": 87.33,
+      "hide_name": true
     },
     {
       "id": "S44",
       "name": "S01",
       "x": 192.47,
-      "y": 88.26
+      "y": 88.26,
+      "hide_name": true
     },
     {
       "id": "S45",
       "name": "S01",
       "x": 127.9,
-      "y": 87.16
+      "y": 87.16,
+      "hide_name": true
     },
     {
       "id": "S46",
       "name": "S01",
       "x": 128.59,
-      "y": 325.2
+      "y": 325.2,
+      "hide_name": true
     },
     {
       "id": "S47",
       "name": "S01",
       "x": 130.82,
-      "y": 788.21
+      "y": 788.21,
+      "hide_name": true
     },
     {
       "id": "S48",
       "name": "S01",
       "x": 126.3,
-      "y": 1020.97
+      "y": 1020.97,
+      "hide_name": true
     },
     {
       "id": "__entry__",
       "name": "Bạn đang ở đây",
       "x": 818.37,
-      "y": 19.94
+      "y": 19.94,
+      "hide_name": true
     }
   ],
   "edges": [

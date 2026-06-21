@@ -8,175 +8,204 @@
       "id": "__entry__",
       "name": "Bạn đang ở đây",
       "x": 460.37,
-      "y": 103.81
+      "y": 103.81,
+      "hide_name": true
     },
     {
       "id": "S01",
       "name": "S01",
       "x": 584.82,
-      "y": 144.2
+      "y": 144.2,
+      "hide_name": true
     },
     {
       "id": "S02",
       "name": "S02",
       "x": 584.8,
-      "y": 255.9
+      "y": 255.9,
+      "hide_name": true
     },
     {
       "id": "S03",
       "name": "S03",
       "x": 585.15,
-      "y": 366.01
+      "y": 366.01,
+      "hide_name": true
     },
     {
       "id": "S04",
       "name": "S04",
       "x": 586.05,
-      "y": 467.35
+      "y": 467.35,
+      "hide_name": true
     },
     {
       "id": "S05",
       "name": "S05",
       "x": 585.63,
-      "y": 568.83
+      "y": 568.83,
+      "hide_name": true
     },
     {
       "id": "S06",
       "name": "S06",
       "x": 586.22,
-      "y": 673.41
+      "y": 673.41,
+      "hide_name": true
     },
     {
       "id": "S07",
       "name": "S07",
       "x": 586.41,
-      "y": 774.9
+      "y": 774.9,
+      "hide_name": true
     },
     {
       "id": "S08",
       "name": "S08",
       "x": 587.1,
-      "y": 850.8
+      "y": 850.8,
+      "hide_name": true
     },
     {
       "id": "S09",
       "name": "S09",
       "x": 451.9,
-      "y": 851.28
+      "y": 851.28,
+      "hide_name": true
     },
     {
       "id": "S10",
       "name": "S10",
       "x": 321.97,
-      "y": 850.23
+      "y": 850.23,
+      "hide_name": true
     },
     {
       "id": "S11",
       "name": "S11",
       "x": 322.03,
-      "y": 752.0
+      "y": 752.0,
+      "hide_name": true
     },
     {
       "id": "S12",
       "name": "S12",
       "x": 324.78,
-      "y": 643.5
+      "y": 643.5,
+      "hide_name": true
     },
     {
       "id": "S13",
       "name": "S13",
       "x": 325.55,
-      "y": 540.42
+      "y": 540.42,
+      "hide_name": true
     },
     {
       "id": "S14",
       "name": "S14",
       "x": 326.7,
-      "y": 443.25
+      "y": 443.25,
+      "hide_name": true
     },
     {
       "id": "S15",
       "name": "S15",
       "x": 327.06,
-      "y": 367.54
+      "y": 367.54,
+      "hide_name": true
     },
     {
       "id": "S16",
       "name": "S16",
       "x": 326.39,
-      "y": 264.2
+      "y": 264.2,
+      "hide_name": true
     },
     {
       "id": "S17",
       "name": "S17",
       "x": 326.7,
-      "y": 146.4
+      "y": 146.4,
+      "hide_name": true
     },
     {
       "id": "S18",
       "name": "S18",
       "x": 326.7,
-      "y": 105.3
+      "y": 105.3,
+      "hide_name": true
     },
     {
       "id": "S19",
       "name": "S19",
       "x": 583.8,
-      "y": 104.0
+      "y": 104.0,
+      "hide_name": true
     },
     {
       "id": "S20",
       "name": "S20",
       "x": 317.64,
-      "y": 933.26
+      "y": 933.26,
+      "hide_name": true
     },
     {
       "id": "S21",
       "name": "S21",
       "x": 250.84,
-      "y": 945.19
+      "y": 945.19,
+      "hide_name": true
     },
     {
       "id": "S22",
       "name": "S22",
       "x": 248.2,
-      "y": 1073.0
+      "y": 1073.0,
+      "hide_name": true
     },
     {
       "id": "S23",
       "name": "S23",
       "x": 645.33,
-      "y": 922.56
+      "y": 922.56,
+      "hide_name": true
     },
     {
       "id": "S24",
       "name": "S24",
       "x": 769.7,
-      "y": 924.8
+      "y": 924.8,
+      "hide_name": true
     },
     {
       "id": "S25",
       "name": "S25",
       "x": 860.5,
-      "y": 923.42
+      "y": 923.42,
+      "hide_name": true
     },
     {
       "id": "S26",
       "name": "S26",
       "x": 955.97,
-      "y": 923.43
+      "y": 923.43,
+      "hide_name": true
     },
     {
       "id": "S27",
       "name": "S27",
       "x": 1040.9,
-      "y": 923.0
+      "y": 923.0,
+      "hide_name": true
     },
     {
       "id": "S28",
       "name": "S28",
       "x": 1137.3,
-      "y": 923.0
+      "y": 923.0,
+      "hide_name": true
     }
   ],
   "edges": [
