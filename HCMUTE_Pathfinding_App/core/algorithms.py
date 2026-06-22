@@ -98,6 +98,7 @@ def dfs(graph: Graph, start: str, goal: str) -> Generator:
     # Ngăn xếp: (node_id, path_to_node)
     stack = [(start, [start])]
     visited = set()
+    discovered = {start}
     visited_order = []
     
     yield _make_step(start, visited_order, [start], [start], 0,
@@ -127,7 +128,8 @@ def dfs(graph: Graph, start: str, goal: str) -> Generator:
         # Đảo thứ tự để duyệt node đầu tiên trước khi pop
         neighbors = graph.get_neighbors(current)
         for neighbor, weight in reversed(neighbors):
-            if neighbor not in visited:
+            if neighbor not in visited and neighbor not in discovered:
+                discovered.add(neighbor)
                 stack.append((neighbor, path + [neighbor]))
                 
                 yield _make_step(current, visited_order,
@@ -158,6 +160,7 @@ def ucs(graph: Graph, start: str, goal: str) -> Generator:
     # counter phá vỡ tie-breaking khi cost bằng nhau
     counter = 0
     pq: list[tuple[float, int, str, list[str]]] = [(0.0, counter, start, [start])]
+    best_g: Dict[str, float] = {start: 0.0}
     visited = set()
     visited_order = []
     
@@ -167,7 +170,7 @@ def ucs(graph: Graph, start: str, goal: str) -> Generator:
     while pq:
         cost, _, current, path = heapq.heappop(pq)
         
-        if current in visited:
+        if current in visited or cost > best_g.get(current, float("inf")):
             continue
         
         visited.add(current)
@@ -186,8 +189,9 @@ def ucs(graph: Graph, start: str, goal: str) -> Generator:
             return
         
         for neighbor, weight in graph.get_neighbors(current):
-            if neighbor not in visited:
-                new_cost = cost + weight
+            new_cost = cost + weight
+            if neighbor not in visited and new_cost < best_g.get(neighbor, float("inf")):
+                best_g[neighbor] = new_cost
                 counter += 1
                 heapq.heappush(pq, (new_cost, counter, neighbor, path + [neighbor]))
                 

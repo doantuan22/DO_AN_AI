@@ -1592,6 +1592,18 @@ class MapWidget(QGraphicsView):
             self._zoom_card.move(self.width() - self._zoom_card.width() - 16, 16)
             self._zoom_card.adjustSize()
             
+        # Cập nhật vị trí nút Hướng dẫn sử dụng dưới Zoom Controls
+        if hasattr(self, '_help_button') and self._help_button:
+            self._help_button.adjustSize()
+            help_y = 16
+            if self._zoom_card:
+                help_y += self._zoom_card.height() + 10
+            if self._zoom_card:
+                help_x = self._zoom_card.x() + (self._zoom_card.width() - self._help_button.width()) // 2
+            else:
+                help_x = self.width() - self._help_button.width() - 16
+            self._help_button.move(help_x, help_y)
+            
         # Cập nhật vị trí nút ẩn/hiện graph và chỉnh sửa graph (Bottom-Left)
         bottom_y = self.height() - 64
         if self._graph_toggle_button:
@@ -1621,10 +1633,6 @@ class MapWidget(QGraphicsView):
                 x += self._sample_walk_button.width() + 10
             if self._speed_button:
                 x += self._speed_button.width() + 10
-            if hasattr(self, '_help_button') and self._help_button:
-                self._help_button.adjustSize()
-                self._help_button.move(x, bottom_y)
-                x += self._help_button.width() + 10
             if self._history_button:
                 self._history_button.adjustSize()
                 self._history_button.move(x, bottom_y)
