@@ -300,7 +300,7 @@ class MapWidget(QGraphicsView):
         self._map_pixmap: Optional[QGraphicsPixmapItem] = None
         self._node_items: Dict[str, NodeItem] = {}
         self._edge_items: List[QGraphicsLineItem] = []
-        self._path_items: List[QGraphicsLineItem] = []
+        self._path_items: List[QGraphicsItem] = []
         self._label_items: List[Any] = []
         self._pulse_items: List[PulseRing] = []
         self._edge_visible = True
@@ -361,7 +361,7 @@ class MapWidget(QGraphicsView):
         # Đồng bộ nền canvas với nền map khi zoom out
         self.setBackgroundBrush(QBrush(color))
         self._scene.setBackgroundBrush(QBrush(color))
-        self.viewport().setStyleSheet(f"background-color: {color.name()};")
+        if self.viewport(): self.viewport().setStyleSheet(f"background-color: {color.name()};")
     
     def _setup_floating_controls(self):
         # Khởi tạo các widget nổi cố định
@@ -715,7 +715,7 @@ class MapWidget(QGraphicsView):
             item.setVisible(True)
         for item in self._label_items:
             item.setVisible(visible)
-        for item in self._pulse_items:
+        for pulse_item in self._pulse_items:
             item.setVisible(visible)
         if self._avatar_item:
             self._avatar_item.setVisible(True)
@@ -1057,7 +1057,8 @@ class MapWidget(QGraphicsView):
             self._node_items[self._start_node].set_state("start")
         self._sync_graph_overlay_visibility()
 
-    def pulse_node(self, node_id: str, color: Optional[QColor] = None):
+    def pulse_node(self, node_id: Optional[str], color: Optional[QColor] = None):
+        if not node_id: return
         # Tạo ripple/pulse 300ms quanh node được chọn/đang duyệt
         if self._graph_overlay_hidden:
             return

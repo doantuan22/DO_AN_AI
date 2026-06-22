@@ -6,8 +6,8 @@ import math
 from pathlib import Path
 from typing import Any, Dict, Optional, List
 
-from PyQt6.QtCore import QPointF, QRectF, Qt, pyqtSignal
-from PyQt6.QtGui import QColor, QPainter, QPen, QPixmap, QTransform, QWheelEvent
+from PyQt6.QtCore import QPointF, QRectF, Qt, pyqtSignal, QTimer
+from PyQt6.QtGui import QColor, QPainter, QPen, QPixmap, QTransform, QWheelEvent, QBrush
 from PyQt6.QtWidgets import (
     QGraphicsEllipseItem,
     QGraphicsItem,
@@ -77,7 +77,6 @@ class SubMapWidget(QGraphicsView):
         self._path_items: list[QGraphicsItem] = []
         
         # --- Animation variables ---
-        from PyQt6.QtCore import QTimer
         self._route_timer = QTimer(self)
         self._route_timer.timeout.connect(self._animate_route_step)
         self._route_flow_timer = QTimer(self)
@@ -89,26 +88,26 @@ class SubMapWidget(QGraphicsView):
         self._pulse_timer = QTimer(self)
         self._pulse_timer.timeout.connect(self._tick_pulses)
         
-        self._route_segments = []
-        self._route_segment_items = []
-        self._route_flow_items = []
-        self._route_active_line = None
-        self._route_active_glow = None
-        self._route_dot = None
+        self._route_segments: list[tuple[float, float, float, float]] = []
+        self._route_segment_items: list[list[QGraphicsLineItem]] = []
+        self._route_flow_items: list[QGraphicsLineItem] = []
+        self._route_active_line: Optional[QGraphicsLineItem] = None
+        self._route_active_glow: Optional[QGraphicsLineItem] = None
+        self._route_dot: Optional[QGraphicsEllipseItem] = None
         self._route_flow_phase = 0.0
         self._route_segment_index = 0
         self._route_segment_progress = 0
         
-        self._avatar_item = None
-        self._firework_particles = []
-        self._pulse_items = []
-        self._avatar_segments = []
+        self._avatar_item: Optional[QGraphicsPixmapItem] = None
+        self._firework_particles: list[dict] = []
+        self._pulse_items: list[PulseRing] = []
+        self._avatar_segments: list[tuple[float, float, float, float]] = []
         self._avatar_segment_index = 0
         self._avatar_segment_progress = 0
         self._avatar_step_count = 22
         self._avatar_hiding_route = False
         
-        self._entry_tooltip = None
+        self._entry_tooltip: Optional[MapPinTooltip] = None
 
     def load_map(
         self,
@@ -359,7 +358,6 @@ class SubMapWidget(QGraphicsView):
             return
 
         first_x, first_y, _, _ = self._route_segments[0]
-        from PyQt6.QtGui import QBrush
         self._route_dot = self._scene.addEllipse(
             -6, -6, 12, 12,
             QPen(QColor("#FFFFFF"), 2),
@@ -489,7 +487,8 @@ class SubMapWidget(QGraphicsView):
             else:
                 item.setBrush(QColor("#0B74FF"))
 
-    def pulse_node(self, node_id: str, color: Optional[QColor] = None):
+    def pulse_node(self, node_id: Optional[str], color: Optional[QColor] = None):
+        if not node_id: return
         item = self._node_items.get(node_id)
         if item is None:
             return

@@ -6,7 +6,7 @@
         "id": "khu_b_tang_1",
         "name": "Khu_B",
         "floor": 1,
-        "image": "assets/sub_maps/khu_b_tang_1.png",
+        "image": "assets/sub_maps/khu_b_tang_1.webp",
         "graph_file": "data/sub_maps/khu_b_tang_1.json",
         "rotation": 0.0,
         "entry_position": {
@@ -18,7 +18,7 @@
         "id": "khu_b_tang_2",
         "name": "Khu_B",
         "floor": 2,
-        "image": "assets/sub_maps/khu_b_tang_2.png",
+        "image": "assets/sub_maps/khu_b_tang_2.webp",
         "graph_file": "data/sub_maps/khu_b_tang_2.json",
         "rotation": 0.0,
         "entry_position": {
@@ -30,7 +30,7 @@
         "id": "khu_b_tang_3",
         "name": "Khu_B",
         "floor": 3,
-        "image": "assets/sub_maps/khu_b_tang_3.png",
+        "image": "assets/sub_maps/khu_b_tang_3.webp",
         "graph_file": "data/sub_maps/khu_b_tang_3.json",
         "rotation": 0.0,
         "entry_position": {
@@ -44,7 +44,7 @@
         "id": "khu_b_tang_1_2",
         "name": "Khu_B",
         "floor": 1,
-        "image": "assets/sub_maps/khu_b_tang_1_2.png",
+        "image": "assets/sub_maps/khu_b_tang_1_2.webp",
         "graph_file": "data/sub_maps/khu_b_tang_1_2.json",
         "rotation": 0.0,
         "entry_position": {
@@ -56,7 +56,7 @@
         "id": "khu_b_tang_2_2",
         "name": "Khu_B",
         "floor": 2,
-        "image": "assets/sub_maps/khu_b_tang_2_2.png",
+        "image": "assets/sub_maps/khu_b_tang_2_2.webp",
         "graph_file": "data/sub_maps/khu_b_tang_2_2.json",
         "rotation": 0.0,
         "entry_position": {
@@ -68,7 +68,7 @@
         "id": "khu_b_tang_3_2",
         "name": "Khu_B",
         "floor": 3,
-        "image": "assets/sub_maps/khu_b_tang_3_2.png",
+        "image": "assets/sub_maps/khu_b_tang_3_2.webp",
         "graph_file": "data/sub_maps/khu_b_tang_3_2.json",
         "rotation": 0.0,
         "entry_position": {
@@ -82,7 +82,7 @@
         "id": "khu_b_tang_1_3",
         "name": "Khu_B",
         "floor": 1,
-        "image": "assets/sub_maps/khu_b_tang_1_3.png",
+        "image": "assets/sub_maps/khu_b_tang_1_3.webp",
         "graph_file": "data/sub_maps/khu_b_tang_1_3.json",
         "rotation": 0.0,
         "entry_position": {
@@ -94,7 +94,7 @@
         "id": "khu_b_tang_2_3",
         "name": "Khu_B",
         "floor": 2,
-        "image": "assets/sub_maps/khu_b_tang_2_3.png",
+        "image": "assets/sub_maps/khu_b_tang_2_3.webp",
         "graph_file": "data/sub_maps/khu_b_tang_2_3.json",
         "rotation": 0.0,
         "entry_position": {
@@ -106,7 +106,7 @@
         "id": "khu_b_tang_3_3",
         "name": "Khu_B",
         "floor": 3,
-        "image": "assets/sub_maps/khu_b_tang_3_3.png",
+        "image": "assets/sub_maps/khu_b_tang_3_3.webp",
         "graph_file": "data/sub_maps/khu_b_tang_3_3.json",
         "rotation": 0.0,
         "entry_position": {
@@ -120,7 +120,7 @@
         "id": "khu_b_tang_1_4",
         "name": "Khu_B",
         "floor": 1,
-        "image": "assets/sub_maps/khu_b_tang_1_4.png",
+        "image": "assets/sub_maps/khu_b_tang_1_4.webp",
         "graph_file": "data/sub_maps/khu_b_tang_1_4.json",
         "rotation": 0.0,
         "entry_position": {
@@ -132,7 +132,7 @@
         "id": "khu_b_tang_2_4",
         "name": "Khu_B",
         "floor": 2,
-        "image": "assets/sub_maps/khu_b_tang_2_4.png",
+        "image": "assets/sub_maps/khu_b_tang_2_4.webp",
         "graph_file": "data/sub_maps/khu_b_tang_2_4.json",
         "rotation": 0.0,
         "entry_position": {
@@ -144,7 +144,7 @@
         "id": "khu_b_tang_3_4",
         "name": "Khu_B",
         "floor": 3,
-        "image": "assets/sub_maps/khu_b_tang_3_4.png",
+        "image": "assets/sub_maps/khu_b_tang_3_4.webp",
         "graph_file": "data/sub_maps/khu_b_tang_3_4.json",
         "rotation": 0.0,
         "entry_position": {
@@ -158,7 +158,7 @@
         "id": "khu_a_tang_1",
         "name": "Khu_A",
         "floor": 1,
-        "image": "assets/sub_maps/khu_a_tang_1.jpg",
+        "image": "assets/sub_maps/khu_a_tang_1.webp",
         "graph_file": "data/sub_maps/khu_a_tang_1.json",
         "rotation": 0.0,
         "entry_position": {
@@ -170,7 +170,7 @@
         "id": "khu_a_tang_2",
         "name": "Khu_A",
         "floor": 2,
-        "image": "assets/sub_maps/khu_a_tang_2.jpg",
+        "image": "assets/sub_maps/khu_a_tang_2.webp",
         "graph_file": "data/sub_maps/khu_a_tang_2.json",
         "rotation": 0.0,
         "entry_position": {
@@ -182,7 +182,7 @@
         "id": "khu_a_tang_3",
         "name": "Khu_A",
         "floor": 3,
-        "image": "assets/sub_maps/khu_a_tang_3.jpg",
+        "image": "assets/sub_maps/khu_a_tang_3.webp",
         "graph_file": "data/sub_maps/khu_a_tang_3.json",
         "rotation": 0.0,
         "entry_position": {
@@ -196,7 +196,7 @@
         "id": "khu_a_tang_1_2",
         "name": "Khu_A",
         "floor": 1,
-        "image": "assets/sub_maps/khu_a_tang_1_2.jpg",
+        "image": "assets/sub_maps/khu_a_tang_1_2.webp",
         "graph_file": "data/sub_maps/khu_a_tang_1_2.json",
         "rotation": 0.0,
         "entry_position": {
@@ -208,7 +208,7 @@
         "id": "khu_a_tang_2_2",
         "name": "Khu_A",
         "floor": 2,
-        "image": "assets/sub_maps/khu_a_tang_2_2.jpg",
+        "image": "assets/sub_maps/khu_a_tang_2_2.webp",
         "graph_file": "data/sub_maps/khu_a_tang_2_2.json",
         "rotation": 0.0,
         "entry_position": {
@@ -220,7 +220,7 @@
         "id": "khu_a_tang_3_2",
         "name": "Khu_A",
         "floor": 3,
-        "image": "assets/sub_maps/khu_a_tang_3_2.jpg",
+        "image": "assets/sub_maps/khu_a_tang_3_2.webp",
         "graph_file": "data/sub_maps/khu_a_tang_3_2.json",
         "rotation": 0.0,
         "entry_position": {
@@ -234,7 +234,7 @@
         "id": "khu_a_tang_1_3",
         "name": "Khu_A",
         "floor": 1,
-        "image": "assets/sub_maps/khu_a_tang_1_3.jpg",
+        "image": "assets/sub_maps/khu_a_tang_1_3.webp",
         "graph_file": "data/sub_maps/khu_a_tang_1_3.json",
         "rotation": 0.0,
         "entry_position": {
@@ -246,7 +246,7 @@
         "id": "khu_a_tang_2_3",
         "name": "Khu_A",
         "floor": 2,
-        "image": "assets/sub_maps/khu_a_tang_2_3.jpg",
+        "image": "assets/sub_maps/khu_a_tang_2_3.webp",
         "graph_file": "data/sub_maps/khu_a_tang_2_3.json",
         "rotation": 0.0,
         "entry_position": {
@@ -258,7 +258,7 @@
         "id": "khu_a_tang_3_3",
         "name": "Khu_A",
         "floor": 3,
-        "image": "assets/sub_maps/khu_a_tang_3_3.jpg",
+        "image": "assets/sub_maps/khu_a_tang_3_3.webp",
         "graph_file": "data/sub_maps/khu_a_tang_3_3.json",
         "rotation": 0.0,
         "entry_position": {
@@ -272,7 +272,7 @@
         "id": "khu_a_tang_1_4",
         "name": "Khu_A",
         "floor": 1,
-        "image": "assets/sub_maps/khu_a_tang_1_4.jpg",
+        "image": "assets/sub_maps/khu_a_tang_1_4.webp",
         "graph_file": "data/sub_maps/khu_a_tang_1_4.json",
         "rotation": 0.0,
         "entry_position": {
@@ -284,7 +284,7 @@
         "id": "khu_a_tang_2_4",
         "name": "Khu_A",
         "floor": 2,
-        "image": "assets/sub_maps/khu_a_tang_2_4.jpg",
+        "image": "assets/sub_maps/khu_a_tang_2_4.webp",
         "graph_file": "data/sub_maps/khu_a_tang_2_4.json",
         "rotation": 0.0,
         "entry_position": {
@@ -296,7 +296,7 @@
         "id": "khu_a_tang_3_4",
         "name": "Khu_A",
         "floor": 3,
-        "image": "assets/sub_maps/khu_a_tang_3_4.jpg",
+        "image": "assets/sub_maps/khu_a_tang_3_4.webp",
         "graph_file": "data/sub_maps/khu_a_tang_3_4.json",
         "rotation": 0.0,
         "entry_position": {
@@ -310,7 +310,7 @@
         "id": "khu_a_tang_1_5",
         "name": "Khu_A",
         "floor": 1,
-        "image": "assets/sub_maps/khu_a_tang_1_5.jpg",
+        "image": "assets/sub_maps/khu_a_tang_1_5.webp",
         "graph_file": "data/sub_maps/khu_a_tang_1_5.json",
         "rotation": 0.0,
         "entry_position": {
@@ -322,7 +322,7 @@
         "id": "khu_a_tang_2_5",
         "name": "Khu_A",
         "floor": 2,
-        "image": "assets/sub_maps/khu_a_tang_2_5.jpg",
+        "image": "assets/sub_maps/khu_a_tang_2_5.webp",
         "graph_file": "data/sub_maps/khu_a_tang_2_5.json",
         "rotation": 0.0,
         "entry_position": {
@@ -334,7 +334,7 @@
         "id": "khu_a_tang_3_5",
         "name": "Khu_A",
         "floor": 3,
-        "image": "assets/sub_maps/khu_a_tang_3_5.jpg",
+        "image": "assets/sub_maps/khu_a_tang_3_5.webp",
         "graph_file": "data/sub_maps/khu_a_tang_3_5.json",
         "rotation": 0.0,
         "entry_position": {
@@ -348,7 +348,7 @@
         "id": "a2_3_tang_1",
         "name": "A2-3",
         "floor": 1,
-        "image": "assets/sub_maps/a2_3_tang_1.png",
+        "image": "assets/sub_maps/a2_3_tang_1.webp",
         "graph_file": "data/sub_maps/a2_3_tang_1.json",
         "rotation": 0.0,
         "entry_position": {
@@ -360,7 +360,7 @@
         "id": "a4_5_tang_1",
         "name": "A4-5",
         "floor": 1,
-        "image": "assets/sub_maps/a4_5_tang_1.png",
+        "image": "assets/sub_maps/a4_5_tang_1.webp",
         "graph_file": "data/sub_maps/a4_5_tang_1.json",
         "rotation": 0.0,
         "entry_position": {
@@ -372,7 +372,7 @@
         "id": "a2_3_tang_2",
         "name": "A2-3",
         "floor": 2,
-        "image": "assets/sub_maps/a2_3_tang_2.png",
+        "image": "assets/sub_maps/a2_3_tang_2.webp",
         "graph_file": "data/sub_maps/a2_3_tang_2.json",
         "rotation": 0.0,
         "entry_position": {
@@ -384,7 +384,7 @@
         "id": "a4_5_tang_2",
         "name": "A4-5",
         "floor": 2,
-        "image": "assets/sub_maps/a4_5_tang_2.png",
+        "image": "assets/sub_maps/a4_5_tang_2.webp",
         "graph_file": "data/sub_maps/a4_5_tang_2.json",
         "rotation": 0.0,
         "entry_position": {
@@ -396,7 +396,7 @@
         "id": "a2_3_tang_3",
         "name": "A2-3",
         "floor": 3,
-        "image": "assets/sub_maps/a2_3_tang_3.png",
+        "image": "assets/sub_maps/a2_3_tang_3.webp",
         "graph_file": "data/sub_maps/a2_3_tang_3.json",
         "rotation": 0.0,
         "entry_position": {
@@ -408,7 +408,7 @@
         "id": "a4_5_tang_3",
         "name": "A4-5",
         "floor": 3,
-        "image": "assets/sub_maps/a4_5_tang_3.png",
+        "image": "assets/sub_maps/a4_5_tang_3.webp",
         "graph_file": "data/sub_maps/a4_5_tang_3.json",
         "rotation": 0.0,
         "entry_position": {
@@ -420,7 +420,7 @@
         "id": "a2_3_tang_4",
         "name": "A2-3",
         "floor": 4,
-        "image": "assets/sub_maps/a2_3_tang_4.png",
+        "image": "assets/sub_maps/a2_3_tang_4.webp",
         "graph_file": "data/sub_maps/a2_3_tang_4.json",
         "rotation": 0.0,
         "entry_position": {
@@ -432,7 +432,7 @@
         "id": "a4_5_tang_4",
         "name": "A4-5",
         "floor": 4,
-        "image": "assets/sub_maps/a4_5_tang_4.png",
+        "image": "assets/sub_maps/a4_5_tang_4.webp",
         "graph_file": "data/sub_maps/a4_5_tang_4.json",
         "rotation": 0.0,
         "entry_position": {
@@ -446,7 +446,7 @@
         "id": "khu_c_tang_1",
         "name": "Khu_C",
         "floor": 1,
-        "image": "assets/sub_maps/khu_c_tang_1.jpg",
+        "image": "assets/sub_maps/khu_c_tang_1.webp",
         "graph_file": "data/sub_maps/khu_c_tang_1.json",
         "rotation": 0.0,
         "entry_position": {
@@ -460,7 +460,7 @@
         "id": "khu_d_tang_1",
         "name": "Khu_D",
         "floor": 1,
-        "image": "assets/sub_maps/khu_d_tang_1.png",
+        "image": "assets/sub_maps/khu_d_tang_1.webp",
         "graph_file": "data/sub_maps/khu_d_tang_1.json",
         "rotation": 0.0,
         "entry_position": {
@@ -472,7 +472,7 @@
         "id": "khu_d_tang_2",
         "name": "Khu_D",
         "floor": 2,
-        "image": "assets/sub_maps/khu_d_tang_2.png",
+        "image": "assets/sub_maps/khu_d_tang_2.webp",
         "graph_file": "data/sub_maps/khu_d_tang_2.json",
         "rotation": 0.0,
         "entry_position": {
@@ -484,7 +484,7 @@
         "id": "khu_d_tang_3",
         "name": "Khu_D",
         "floor": 3,
-        "image": "assets/sub_maps/khu_d_tang_3.png",
+        "image": "assets/sub_maps/khu_d_tang_3.webp",
         "graph_file": "data/sub_maps/khu_d_tang_3.json",
         "rotation": 0.0,
         "entry_position": {
@@ -496,7 +496,7 @@
         "id": "khu_d_tang_4",
         "name": "Khu_D",
         "floor": 4,
-        "image": "assets/sub_maps/khu_d_tang_4.png",
+        "image": "assets/sub_maps/khu_d_tang_4.webp",
         "graph_file": "data/sub_maps/khu_d_tang_4.json",
         "rotation": 0.0,
         "entry_position": {
@@ -508,7 +508,7 @@
         "id": "khu_d_tang_5",
         "name": "Khu_D",
         "floor": 5,
-        "image": "assets/sub_maps/khu_d_tang_5.png",
+        "image": "assets/sub_maps/khu_d_tang_5.webp",
         "graph_file": "data/sub_maps/khu_d_tang_5.json",
         "rotation": 0.0,
         "entry_position": {
@@ -522,7 +522,7 @@
         "id": "khu_e1_tang_1",
         "name": "Khu_E1",
         "floor": 1,
-        "image": "assets/sub_maps/khu_e1_tang_1.png",
+        "image": "assets/sub_maps/khu_e1_tang_1.webp",
         "graph_file": "data/sub_maps/khu_e1_tang_1.json",
         "rotation": 0.0,
         "entry_position": {
@@ -534,7 +534,7 @@
         "id": "khu_e1_tang_2",
         "name": "Khu_E1",
         "floor": 2,
-        "image": "assets/sub_maps/khu_e1_tang_2.png",
+        "image": "assets/sub_maps/khu_e1_tang_2.webp",
         "graph_file": "data/sub_maps/khu_e1_tang_2.json",
         "rotation": 0.0,
         "entry_position": {
@@ -546,7 +546,7 @@
         "id": "khu_e1_tang_3",
         "name": "Khu_E1",
         "floor": 3,
-        "image": "assets/sub_maps/khu_e1_tang_3.png",
+        "image": "assets/sub_maps/khu_e1_tang_3.webp",
         "graph_file": "data/sub_maps/khu_e1_tang_3.json",
         "rotation": 0.0,
         "entry_position": {
@@ -558,7 +558,7 @@
         "id": "khu_e1_tang_4",
         "name": "Khu_E1",
         "floor": 4,
-        "image": "assets/sub_maps/khu_e1_tang_4.png",
+        "image": "assets/sub_maps/khu_e1_tang_4.webp",
         "graph_file": "data/sub_maps/khu_e1_tang_4.json",
         "rotation": 0.0,
         "entry_position": {
@@ -570,7 +570,7 @@
         "id": "khu_e5_tang_5",
         "name": "Khu_E5",
         "floor": 5,
-        "image": "assets/sub_maps/khu_e5_tang_5.png",
+        "image": "assets/sub_maps/khu_e5_tang_5.webp",
         "graph_file": "data/sub_maps/khu_e5_tang_5.json",
         "rotation": 0.0,
         "entry_position": {
@@ -584,7 +584,7 @@
         "id": "khu_e4_tang_1",
         "name": "Khu_E4",
         "floor": 1,
-        "image": "assets/sub_maps/khu_e4_tang_1.png",
+        "image": "assets/sub_maps/khu_e4_tang_1.webp",
         "graph_file": "data/sub_maps/khu_e4_tang_1.json",
         "rotation": 0.0,
         "entry_position": {
@@ -598,7 +598,7 @@
         "id": "khu_d_tang_3_2",
         "name": "Khu_D",
         "floor": 3,
-        "image": "assets/sub_maps/khu_d_tang_3_2.png",
+        "image": "assets/sub_maps/khu_d_tang_3_2.webp",
         "graph_file": "data/sub_maps/khu_d_tang_3_2.json",
         "rotation": 0.0,
         "entry_position": {
@@ -610,7 +610,7 @@
         "id": "khu_d_tang_4_2",
         "name": "Khu_D",
         "floor": 4,
-        "image": "assets/sub_maps/khu_d_tang_4_2.png",
+        "image": "assets/sub_maps/khu_d_tang_4_2.webp",
         "graph_file": "data/sub_maps/khu_d_tang_4_2.json",
         "rotation": 0.0,
         "entry_position": {
@@ -622,7 +622,7 @@
         "id": "khu_d_tang_5_2",
         "name": "Khu_D",
         "floor": 5,
-        "image": "assets/sub_maps/khu_d_tang_5_2.png",
+        "image": "assets/sub_maps/khu_d_tang_5_2.webp",
         "graph_file": "data/sub_maps/khu_d_tang_5_2.json",
         "rotation": 0.0,
         "entry_position": {
@@ -634,7 +634,7 @@
         "id": "khu_d_tang_1_2",
         "name": "Khu_D",
         "floor": 1,
-        "image": "assets/sub_maps/khu_d_tang_1_2.png",
+        "image": "assets/sub_maps/khu_d_tang_1_2.webp",
         "graph_file": "data/sub_maps/khu_d_tang_1_2.json",
         "rotation": 0.0,
         "entry_position": {
@@ -646,7 +646,7 @@
         "id": "khu_d_tang_2_2",
         "name": "Khu_D",
         "floor": 2,
-        "image": "assets/sub_maps/khu_d_tang_2_2.png",
+        "image": "assets/sub_maps/khu_d_tang_2_2.webp",
         "graph_file": "data/sub_maps/khu_d_tang_2_2.json",
         "rotation": 0.0,
         "entry_position": {
@@ -660,7 +660,7 @@
         "id": "khu_d_tang_3_3",
         "name": "Khu_D",
         "floor": 3,
-        "image": "assets/sub_maps/khu_d_tang_3_3.png",
+        "image": "assets/sub_maps/khu_d_tang_3_3.webp",
         "graph_file": "data/sub_maps/khu_d_tang_3_3.json",
         "rotation": 0.0,
         "entry_position": {
@@ -672,7 +672,7 @@
         "id": "khu_d_tang_4_3",
         "name": "Khu_D",
         "floor": 4,
-        "image": "assets/sub_maps/khu_d_tang_4_3.png",
+        "image": "assets/sub_maps/khu_d_tang_4_3.webp",
         "graph_file": "data/sub_maps/khu_d_tang_4_3.json",
         "rotation": 0.0,
         "entry_position": {
@@ -684,7 +684,7 @@
         "id": "khu_d_tang_5_3",
         "name": "Khu_D",
         "floor": 5,
-        "image": "assets/sub_maps/khu_d_tang_5_3.png",
+        "image": "assets/sub_maps/khu_d_tang_5_3.webp",
         "graph_file": "data/sub_maps/khu_d_tang_5_3.json",
         "rotation": 0.0,
         "entry_position": {
@@ -696,7 +696,7 @@
         "id": "khu_d_tang_1_3",
         "name": "Khu_D",
         "floor": 1,
-        "image": "assets/sub_maps/khu_d_tang_1_3.png",
+        "image": "assets/sub_maps/khu_d_tang_1_3.webp",
         "graph_file": "data/sub_maps/khu_d_tang_1_3.json",
         "rotation": 0.0,
         "entry_position": {
@@ -708,7 +708,7 @@
         "id": "khu_d_tang_2_3",
         "name": "Khu_D",
         "floor": 2,
-        "image": "assets/sub_maps/khu_d_tang_2_3.png",
+        "image": "assets/sub_maps/khu_d_tang_2_3.webp",
         "graph_file": "data/sub_maps/khu_d_tang_2_3.json",
         "rotation": 0.0,
         "entry_position": {
@@ -722,7 +722,7 @@
         "id": "khu_c_tang_1_2",
         "name": "Khu_C",
         "floor": 1,
-        "image": "assets/sub_maps/khu_c_tang_1_2.jpg",
+        "image": "assets/sub_maps/khu_c_tang_1_2.webp",
         "graph_file": "data/sub_maps/khu_c_tang_1_2.json",
         "rotation": 0.0,
         "entry_position": {

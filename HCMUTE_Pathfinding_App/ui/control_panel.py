@@ -561,7 +561,7 @@ class ControlPanel(QWidget):
                 style = app.style()
                 
         if style is not None:
-            return style.standardIcon(pixmap)
+            return style.standardIcon(pixmap) # type: ignore
             
         return QIcon()
     

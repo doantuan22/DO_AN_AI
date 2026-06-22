@@ -99,7 +99,7 @@ def dfs(graph: Graph, start: str, goal: str) -> Generator:
     stack = [(start, [start])]
     visited = set()
     discovered = {start}
-    visited_order = []
+    visited_order: list[str] = []
     
     yield _make_step(start, visited_order, [start], [start], 0,
                     f"🟣 DFS: Khởi tạo - Thêm {graph.get_node_name(start)} vào stack")
@@ -162,7 +162,7 @@ def ucs(graph: Graph, start: str, goal: str) -> Generator:
     pq: list[tuple[float, int, str, list[str]]] = [(0.0, counter, start, [start])]
     best_g: Dict[str, float] = {start: 0.0}
     visited = set()
-    visited_order = []
+    visited_order: list[str] = []
     
     yield _make_step(start, visited_order, [start], [start], 0,
                     f"🟠 UCS: Khởi tạo - g({graph.get_node_name(start)}) = 0")
@@ -232,7 +232,7 @@ def greedy_search(graph: Graph, start: str, goal: str,
     h_start = heuristic_func(start_pos, goal_pos)
     pq: list[tuple[float, int, str, list[str], float]] = [(h_start, counter, start, [start], 0.0)]
     visited = set()
-    visited_order = []
+    visited_order: list[str] = []
     
     yield _make_step(start, visited_order, [start], [start], 0,
                     f"🟢 Greedy: Khởi tạo - h({graph.get_node_name(start)}) = {h_start:.1f}")
@@ -308,7 +308,7 @@ def astar(graph: Graph, start: str, goal: str,
     best_g: Dict[str, float] = {start: 0.0}
     
     visited = set()
-    visited_order = []
+    visited_order: list[str] = []
     
     yield _make_step(start, visited_order, [start], [start], 0,
                     f"⭐ A*: Khởi tạo - f({graph.get_node_name(start)}) = "

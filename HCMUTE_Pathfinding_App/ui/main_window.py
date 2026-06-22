@@ -716,6 +716,7 @@ class MainWindow(QMainWindow):
                 active_graph, self._start_node, self._goal_node)
                 
         self._exec_timer.start()
+        self._exec_timer.pause() # Dừng timer, chỉ cộng dồn khi thực sự chạy next()
         
         self._is_running = True
         self._is_paused = False
@@ -740,18 +741,22 @@ class MainWindow(QMainWindow):
         if not self._algorithm_gen or not self._is_running:
             return
 
-        for step in self._algorithm_gen:
-            visited = step.get("visited", [])
-            path = step.get("path", [])
-            cost = step.get("cost", 0)
-            log = step.get("log", "")
+        self._exec_timer.resume()
+        try:
+            for step in self._algorithm_gen:
+                visited = step.get("visited", [])
+                path = step.get("path", [])
+                cost = step.get("cost", 0)
+                log = step.get("log", "")
 
-            self._total_visited = len(visited)
-            if log:
-                self._control_panel.add_log(log)
-            if log and ("✅" in log or "❌" in log):
-                self._final_path = path
-                self._final_cost = cost
+                self._total_visited = len(visited)
+                if log:
+                    self._control_panel.add_log(log)
+                if log and ("✅" in log or "❌" in log):
+                    self._final_path = path
+                    self._final_cost = cost
+        finally:
+            self._exec_timer.pause()
 
         self._algorithm_gen = None
         self._on_algorithm_finished()
@@ -761,8 +766,10 @@ class MainWindow(QMainWindow):
         if not self._algorithm_gen or not self._is_running or self._is_paused:
             return
             
+        self._exec_timer.resume()
         try:
             step = next(self._algorithm_gen)
+            self._exec_timer.pause()
             
             current = step.get("current", "")
             visited = step.get("visited", [])
@@ -797,6 +804,7 @@ class MainWindow(QMainWindow):
                 self._on_algorithm_finished()
                 
         except StopIteration:
+            self._exec_timer.pause()
             self._on_algorithm_finished()
             
     def _on_algorithm_finished(self):

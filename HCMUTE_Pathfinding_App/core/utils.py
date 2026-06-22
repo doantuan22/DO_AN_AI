@@ -53,30 +53,40 @@ def format_path_details(path: List[str], node_names: dict,
     return "\n".join(details)
 
 
-# Đo thời gian chạy thuật toán bằng perf_counter 
+# Đo thời gian chạy thuật toán bằng perf_counter (hỗ trợ tích lũy thời gian)
 class Timer:
     
     def __init__(self):
         self._start_time: Optional[float] = None
         self._elapsed_ms: float = 0.0
     
-    # Bắt đầu đo
+    # Bắt đầu đo lại từ đầu
     def start(self):
         self._start_time = time.perf_counter()
-    
-    # Dừng timer, trả về ms
-    def stop(self) -> float:
+        self._elapsed_ms = 0.0
+        
+    # Tiếp tục đo thời gian
+    def resume(self):
+        if self._start_time is None:
+            self._start_time = time.perf_counter()
+            
+    # Tạm dừng đo và cộng dồn thời gian
+    def pause(self):
         if self._start_time is not None:
-            self._elapsed_ms = (time.perf_counter() - self._start_time) * 1000
+            self._elapsed_ms += (time.perf_counter() - self._start_time) * 1000
             self._start_time = None
+    
+    # Dừng hẳn timer, trả về tổng ms
+    def stop(self) -> float:
+        self.pause()
         return self._elapsed_ms
     
     @property
     def elapsed_ms(self) -> float:
         return self._elapsed_ms
 
-    # Lấy thời gian đang chạy mà không dừng timer
+    # Lấy tổng thời gian tích lũy hiện tại (live)
     def elapsed_live(self) -> float:
         if self._start_time is not None:
-            return (time.perf_counter() - self._start_time) * 1000
+            return self._elapsed_ms + (time.perf_counter() - self._start_time) * 1000
         return self._elapsed_ms
