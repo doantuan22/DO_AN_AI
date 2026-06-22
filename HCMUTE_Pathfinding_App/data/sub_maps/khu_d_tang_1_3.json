@@ -1,0 +1,202 @@
+{
+  "map_id": "khu_d_tang_1_3",
+  "name": "Khu_D",
+  "floor": 1,
+  "coordinate_system": "pixel coordinates, origin at top-left",
+  "nodes": [
+    {
+      "id": "__entry__",
+      "name": "Bạn đang ở đây",
+      "x": 53.58,
+      "y": 471.63,
+      "hide_name": true
+    },
+    {
+      "id": "S01",
+      "name": "S01",
+      "hide_name": true,
+      "x": 220.19,
+      "y": 221.39
+    },
+    {
+      "id": "S02",
+      "name": "S02",
+      "hide_name": true,
+      "x": 220.23,
+      "y": 401.47
+    },
+    {
+      "id": "S03",
+      "name": "S03",
+      "hide_name": true,
+      "x": 218.94,
+      "y": 457.55
+    },
+    {
+      "id": "S04",
+      "name": "S04",
+      "hide_name": true,
+      "x": 449.8,
+      "y": 456.77
+    },
+    {
+      "id": "S05",
+      "name": "S05",
+      "hide_name": true,
+      "x": 645.1,
+      "y": 455.3
+    },
+    {
+      "id": "S06",
+      "name": "S06",
+      "hide_name": true,
+      "x": 798.74,
+      "y": 455.64
+    },
+    {
+      "id": "S07",
+      "name": "S07",
+      "hide_name": true,
+      "x": 957.1,
+      "y": 456.36
+    },
+    {
+      "id": "S08",
+      "name": "S08",
+      "hide_name": true,
+      "x": 1196.81,
+      "y": 458.16
+    },
+    {
+      "id": "S09",
+      "name": "S09",
+      "hide_name": true,
+      "x": 1196.55,
+      "y": 398.88
+    },
+    {
+      "id": "S10",
+      "name": "S10",
+      "hide_name": true,
+      "x": 1195.1,
+      "y": 303.25
+    },
+    {
+      "id": "S11",
+      "name": "S11",
+      "hide_name": true,
+      "x": 1194.95,
+      "y": 255.26
+    },
+    {
+      "id": "S12",
+      "name": "S12",
+      "hide_name": true,
+      "x": 958.55,
+      "y": 253.19
+    },
+    {
+      "id": "S13",
+      "name": "S13",
+      "hide_name": true,
+      "x": 745.36,
+      "y": 251.1
+    },
+    {
+      "id": "S14",
+      "name": "S14",
+      "hide_name": true,
+      "x": 576.18,
+      "y": 251.1
+    },
+    {
+      "id": "S15",
+      "name": "S15",
+      "hide_name": true,
+      "x": 450.45,
+      "y": 251.27
+    }
+  ],
+  "edges": [
+    {
+      "from": "S14",
+      "to": "S13",
+      "weight": 172.0
+    },
+    {
+      "from": "S13",
+      "to": "S12",
+      "weight": 211.56
+    },
+    {
+      "from": "S12",
+      "to": "S11",
+      "weight": 239.61
+    },
+    {
+      "from": "S11",
+      "to": "S10",
+      "weight": 43.71
+    },
+    {
+      "from": "S10",
+      "to": "S09",
+      "weight": 96.13
+    },
+    {
+      "from": "S09",
+      "to": "S08",
+      "weight": 50.73
+    },
+    {
+      "from": "S08",
+      "to": "S07",
+      "weight": 242.14
+    },
+    {
+      "from": "S07",
+      "to": "S06",
+      "weight": 158.71
+    },
+    {
+      "from": "S06",
+      "to": "S05",
+      "weight": 153.32
+    },
+    {
+      "from": "S05",
+      "to": "S04",
+      "weight": 195.32
+    },
+    {
+      "from": "S04",
+      "to": "S03",
+      "weight": 234.23
+    },
+    {
+      "from": "S03",
+      "to": "S02",
+      "weight": 49.03
+    },
+    {
+      "from": "S02",
+      "to": "S01",
+      "weight": 182.94
+    },
+    {
+      "from": "S01",
+      "to": "S15",
+      "weight": 226.75
+    },
+    {
+      "from": "S15",
+      "to": "S14",
+      "weight": 124.7
+    },
+    {
+      "from": "S03",
+      "to": "__entry__",
+      "weight": 165.96
+    }
+  ]
+}

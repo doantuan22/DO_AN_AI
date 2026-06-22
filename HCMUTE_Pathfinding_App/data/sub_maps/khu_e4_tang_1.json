@@ -1,0 +1,16 @@
+{
+  "map_id": "khu_e4_tang_1",
+  "name": "Khu_E4",
+  "floor": 1,
+  "coordinate_system": "pixel coordinates, origin at top-left",
+  "nodes": [
+    {
+      "id": "__entry__",
+      "name": "Bạn đang ở đây",
+      "x": 1420.41,
+      "y": 525.14,
+      "hide_name": false
+    }
+  ],
+  "edges": []
+}

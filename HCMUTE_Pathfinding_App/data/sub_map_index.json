@@ -441,20 +441,6 @@
         }
       }
     ],
-    "N13": [
-      {
-        "id": "khu_c_tang_1_2",
-        "name": "Khu_C",
-        "floor": 1,
-        "image": "assets/sub_maps/khu_c_tang_1_2.jpg",
-        "graph_file": "data/sub_maps/khu_c_tang_1_2.json",
-        "rotation": 0.0,
-        "entry_position": {
-          "x": 107.9,
-          "y": 891.12
-        }
-      }
-    ],
     "N07": [
       {
         "id": "khu_c_tang_1",
@@ -466,6 +452,282 @@
         "entry_position": {
           "x": 887.57,
           "y": 934.18
+        }
+      }
+    ],
+    "N31": [
+      {
+        "id": "khu_d_tang_1",
+        "name": "Khu_D",
+        "floor": 1,
+        "image": "assets/sub_maps/khu_d_tang_1.png",
+        "graph_file": "data/sub_maps/khu_d_tang_1.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 742.56,
+          "y": 167.38
+        }
+      },
+      {
+        "id": "khu_d_tang_2",
+        "name": "Khu_D",
+        "floor": 2,
+        "image": "assets/sub_maps/khu_d_tang_2.png",
+        "graph_file": "data/sub_maps/khu_d_tang_2.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 231.53,
+          "y": 490.06
+        }
+      },
+      {
+        "id": "khu_d_tang_3",
+        "name": "Khu_D",
+        "floor": 3,
+        "image": "assets/sub_maps/khu_d_tang_3.png",
+        "graph_file": "data/sub_maps/khu_d_tang_3.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 215.6,
+          "y": 497.5
+        }
+      },
+      {
+        "id": "khu_d_tang_4",
+        "name": "Khu_D",
+        "floor": 4,
+        "image": "assets/sub_maps/khu_d_tang_4.png",
+        "graph_file": "data/sub_maps/khu_d_tang_4.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 221.99,
+          "y": 516.04
+        }
+      },
+      {
+        "id": "khu_d_tang_5",
+        "name": "Khu_D",
+        "floor": 5,
+        "image": "assets/sub_maps/khu_d_tang_5.png",
+        "graph_file": "data/sub_maps/khu_d_tang_5.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 213.59,
+          "y": 512.35
+        }
+      }
+    ],
+    "N71": [
+      {
+        "id": "khu_e1_tang_1",
+        "name": "Khu_E1",
+        "floor": 1,
+        "image": "assets/sub_maps/khu_e1_tang_1.png",
+        "graph_file": "data/sub_maps/khu_e1_tang_1.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 2254.3,
+          "y": 358.46
+        }
+      },
+      {
+        "id": "khu_e1_tang_2",
+        "name": "Khu_E1",
+        "floor": 2,
+        "image": "assets/sub_maps/khu_e1_tang_2.png",
+        "graph_file": "data/sub_maps/khu_e1_tang_2.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 1685.81,
+          "y": 431.1
+        }
+      },
+      {
+        "id": "khu_e1_tang_3",
+        "name": "Khu_E1",
+        "floor": 3,
+        "image": "assets/sub_maps/khu_e1_tang_3.png",
+        "graph_file": "data/sub_maps/khu_e1_tang_3.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 2067.89,
+          "y": 366.1
+        }
+      },
+      {
+        "id": "khu_e1_tang_4",
+        "name": "Khu_E1",
+        "floor": 4,
+        "image": "assets/sub_maps/khu_e1_tang_4.png",
+        "graph_file": "data/sub_maps/khu_e1_tang_4.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 1566.77,
+          "y": 447.37
+        }
+      },
+      {
+        "id": "khu_e5_tang_5",
+        "name": "Khu_E5",
+        "floor": 5,
+        "image": "assets/sub_maps/khu_e5_tang_5.png",
+        "graph_file": "data/sub_maps/khu_e5_tang_5.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 1636.91,
+          "y": 423.65
+        }
+      }
+    ],
+    "N86": [
+      {
+        "id": "khu_e4_tang_1",
+        "name": "Khu_E4",
+        "floor": 1,
+        "image": "assets/sub_maps/khu_e4_tang_1.png",
+        "graph_file": "data/sub_maps/khu_e4_tang_1.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 1420.41,
+          "y": 525.14
+        }
+      }
+    ],
+    "N33": [
+      {
+        "id": "khu_d_tang_3_2",
+        "name": "Khu_D",
+        "floor": 3,
+        "image": "assets/sub_maps/khu_d_tang_3_2.png",
+        "graph_file": "data/sub_maps/khu_d_tang_3_2.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 215.6,
+          "y": 497.5
+        }
+      },
+      {
+        "id": "khu_d_tang_4_2",
+        "name": "Khu_D",
+        "floor": 4,
+        "image": "assets/sub_maps/khu_d_tang_4_2.png",
+        "graph_file": "data/sub_maps/khu_d_tang_4_2.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 221.99,
+          "y": 516.04
+        }
+      },
+      {
+        "id": "khu_d_tang_5_2",
+        "name": "Khu_D",
+        "floor": 5,
+        "image": "assets/sub_maps/khu_d_tang_5_2.png",
+        "graph_file": "data/sub_maps/khu_d_tang_5_2.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 213.59,
+          "y": 512.35
+        }
+      },
+      {
+        "id": "khu_d_tang_1_2",
+        "name": "Khu_D",
+        "floor": 1,
+        "image": "assets/sub_maps/khu_d_tang_1_2.png",
+        "graph_file": "data/sub_maps/khu_d_tang_1_2.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 726.03,
+          "y": 559.82
+        }
+      },
+      {
+        "id": "khu_d_tang_2_2",
+        "name": "Khu_D",
+        "floor": 2,
+        "image": "assets/sub_maps/khu_d_tang_2_2.png",
+        "graph_file": "data/sub_maps/khu_d_tang_2_2.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 231.53,
+          "y": 490.06
+        }
+      }
+    ],
+    "N41": [
+      {
+        "id": "khu_d_tang_3_3",
+        "name": "Khu_D",
+        "floor": 3,
+        "image": "assets/sub_maps/khu_d_tang_3_3.png",
+        "graph_file": "data/sub_maps/khu_d_tang_3_3.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 215.6,
+          "y": 497.5
+        }
+      },
+      {
+        "id": "khu_d_tang_4_3",
+        "name": "Khu_D",
+        "floor": 4,
+        "image": "assets/sub_maps/khu_d_tang_4_3.png",
+        "graph_file": "data/sub_maps/khu_d_tang_4_3.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 221.99,
+          "y": 516.04
+        }
+      },
+      {
+        "id": "khu_d_tang_5_3",
+        "name": "Khu_D",
+        "floor": 5,
+        "image": "assets/sub_maps/khu_d_tang_5_3.png",
+        "graph_file": "data/sub_maps/khu_d_tang_5_3.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 213.59,
+          "y": 512.35
+        }
+      },
+      {
+        "id": "khu_d_tang_1_3",
+        "name": "Khu_D",
+        "floor": 1,
+        "image": "assets/sub_maps/khu_d_tang_1_3.png",
+        "graph_file": "data/sub_maps/khu_d_tang_1_3.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 53.58,
+          "y": 471.63
+        }
+      },
+      {
+        "id": "khu_d_tang_2_3",
+        "name": "Khu_D",
+        "floor": 2,
+        "image": "assets/sub_maps/khu_d_tang_2_3.png",
+        "graph_file": "data/sub_maps/khu_d_tang_2_3.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 231.53,
+          "y": 490.06
+        }
+      }
+    ],
+    "N13": [
+      {
+        "id": "khu_c_tang_1_2",
+        "name": "Khu_C",
+        "floor": 1,
+        "image": "assets/sub_maps/khu_c_tang_1_2.jpg",
+        "graph_file": "data/sub_maps/khu_c_tang_1_2.json",
+        "rotation": 0.0,
+        "entry_position": {
+          "x": 107.9,
+          "y": 891.12
         }
       }
     ]
