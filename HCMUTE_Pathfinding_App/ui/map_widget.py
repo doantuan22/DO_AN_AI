@@ -268,6 +268,7 @@ class MapWidget(QGraphicsView):
     history_clicked = pyqtSignal()
     sample_walk_clicked = pyqtSignal()
     algorithm_speed_changed = pyqtSignal(str)
+    help_clicked = pyqtSignal()
     
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -350,7 +351,7 @@ class MapWidget(QGraphicsView):
         self._graph_toggle_button: Optional[QPushButton] = None
         self._sample_walk_button: Optional[QPushButton] = None
         self._speed_button: Optional[QPushButton] = None
-        self._speed_name = "Trung bình"
+        self._speed_name = "Nhanh"
         
         # Khởi tạo các widget nổi
         self._setup_floating_controls()
@@ -494,7 +495,7 @@ class MapWidget(QGraphicsView):
         self._speed_button = QPushButton(self)
         self._speed_button.setObjectName("speedButton")
         self._speed_button.setText("⏱")
-        self._speed_button.setToolTip("Tốc độ xử lý: Trung bình")
+        self._speed_button.setToolTip("Tốc độ xử lý: Nhanh")
         self._speed_button.clicked.connect(self._show_speed_menu)
         self._speed_button.setStyleSheet("""
             QPushButton#speedButton {
@@ -568,7 +569,31 @@ class MapWidget(QGraphicsView):
         """)
         self._graph_edit_button.show()
 
-        self._submap_hint_label = QLabel("✨ Nhấn vào điểm đích hoặc nút trên bản đồ để xem chi tiết tòa nhà", self)
+        self._help_button = QPushButton(self)
+        self._help_button.setObjectName("helpButton")
+        self._help_button.setText("?")
+        self._help_button.setToolTip("Hướng dẫn sử dụng")
+        self._help_button.clicked.connect(self.help_clicked.emit)
+        self._help_button.setStyleSheet("""
+            QPushButton#helpButton {
+                background-color: rgba(255, 255, 255, 0.95);
+                border: 1px solid rgba(215, 227, 244, 0.95);
+                border-radius: 12px;
+                color: #0B74FF;
+                font-family: 'Segoe UI';
+                font-size: 22px;
+                font-weight: 900;
+                min-height: 48px;
+                min-width: 48px;
+            }
+            QPushButton#helpButton:hover {
+                background-color: #EEF5FF;
+                border-color: #0B74FF;
+            }
+        """)
+        self._help_button.show()
+
+        self._submap_hint_label = QLabel("Nhấn vào nút 'Bản đồ chi tiết' để xem bản đồ chi tiết của tòa nhà", self)
         self._submap_hint_label.setObjectName("submapHintLabel")
         self._submap_hint_label.setStyleSheet("""
             QLabel#submapHintLabel {
@@ -844,8 +869,8 @@ class MapWidget(QGraphicsView):
             text_width = text.boundingRect().width()
             text_height = text.boundingRect().height()
             
-            tx = node.x + 12
-            ty = node.y - text_height / 2
+            tx = node.x - text_width / 2
+            ty = node.y - text_height - 10
             text.setPos(tx, ty)
             
             # Vẽ nền nhãn bo góc
@@ -878,6 +903,7 @@ class MapWidget(QGraphicsView):
         self.resetTransform()
         if not self._scene.sceneRect().isEmpty():
             self.fitInView(self._scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
+            self.scale(1.2, 1.2)
     
     def set_edge_display(self, visible: bool, width: float, opacity: int):
         # Cập nhật cách hiển thị cạnh trên bản đồ
@@ -1595,6 +1621,10 @@ class MapWidget(QGraphicsView):
                 x += self._sample_walk_button.width() + 10
             if self._speed_button:
                 x += self._speed_button.width() + 10
+            if hasattr(self, '_help_button') and self._help_button:
+                self._help_button.adjustSize()
+                self._help_button.move(x, bottom_y)
+                x += self._help_button.width() + 10
             if self._history_button:
                 self._history_button.adjustSize()
                 self._history_button.move(x, bottom_y)
@@ -1632,6 +1662,7 @@ class MapWidget(QGraphicsView):
             }
         """)
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         btn.clicked.connect(callback)
         
         proxy = self._scene.addWidget(btn)

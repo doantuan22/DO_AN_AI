@@ -25,6 +25,7 @@ from ui.graph_editor_dialog import GraphEditorDialog
 from ui.history_dialog import HistoryDialog
 from ui.sub_map_manager_dialog import SubMapManagerDialog
 from ui.sub_map_viewer_dialog import SubMapViewerDialog
+from ui.help_dialog import HelpDialog
 from widgets.sub_map_widget import SubMapWidget
 
 
@@ -78,6 +79,13 @@ MAIN_WINDOW_STYLE = """
         font-size: 13px;
         padding-right: 18px;
     }
+    QLabel#headerCredit {
+        color: #475569;
+        font-family: 'Segoe UI';
+        font-size: 13px;
+        font-weight: 700;
+        padding-right: 24px;
+    }
     QLabel#toast {
         background-color: #0F172A;
         color: #FFFFFF;
@@ -125,7 +133,7 @@ class MainWindow(QMainWindow):
         self._goal_node: Optional[str] = None
         self._click_count = 0  # Đếm click để chọn start/goal
         
-        self._step_delay = 400  # ms giữa các bước mô phỏng
+        self._step_delay = 140  # ms giữa các bước mô phỏng
         self._total_visited = 0
         self._final_path = []
         self._final_cost = 0.0
@@ -216,9 +224,14 @@ class MainWindow(QMainWindow):
         self._status_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         self._update_status("Sẵn sàng", "#34A853")
         
+        self._credit_label = QLabel("NGÔ MINH KHÁNH-24110248 | ĐOÀN ANH TUẤN-24110368 | LÊ VĂN LÂN-24110269")
+        self._credit_label.setObjectName("headerCredit")
+        self._credit_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+
         header_layout.addWidget(menu_btn)
         header_layout.addWidget(title_label)
         header_layout.addStretch()
+        header_layout.addWidget(self._credit_label)
         header_layout.addWidget(self._status_label)
         
         app_layout.addWidget(header)
@@ -360,6 +373,7 @@ class MainWindow(QMainWindow):
         self._map_widget.history_clicked.connect(self._on_show_history)
         self._map_widget.sample_walk_clicked.connect(self._on_sample_walk)
         self._map_widget.algorithm_speed_changed.connect(self._on_algorithm_speed_changed)
+        self._map_widget.help_clicked.connect(self._on_show_help)
         
         # Nút điều khiển Panel
         self._control_panel.start_clicked.connect(self._on_start)
@@ -610,6 +624,11 @@ class MainWindow(QMainWindow):
     def _on_show_history(self):
         # Mở bảng lịch sử đường đi
         dialog = HistoryDialog(self._history_store, self)
+        dialog.exec()
+
+    def _on_show_help(self):
+        # Mở hướng dẫn sử dụng
+        dialog = HelpDialog(self)
         dialog.exec()
 
     def _on_manage_sub_maps(self):
