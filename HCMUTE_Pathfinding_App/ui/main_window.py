@@ -741,9 +741,16 @@ class MainWindow(QMainWindow):
         if not self._algorithm_gen or not self._is_running:
             return
 
-        self._exec_timer.resume()
         try:
-            for step in self._algorithm_gen:
+            while True:
+                self._exec_timer.resume()
+                try:
+                    step = next(self._algorithm_gen)
+                except StopIteration:
+                    self._exec_timer.pause()
+                    break
+                self._exec_timer.pause()
+
                 visited = step.get("visited", [])
                 path = step.get("path", [])
                 cost = step.get("cost", 0)
@@ -757,6 +764,7 @@ class MainWindow(QMainWindow):
                     self._final_cost = cost
         finally:
             self._exec_timer.pause()
+
 
         self._algorithm_gen = None
         self._on_algorithm_finished()

@@ -132,6 +132,10 @@ class HistoryDialog(QDialog):
         self.setWindowTitle("Lịch sử đường đi")
         self.setMinimumSize(980, 640)
         self.resize(1120, 720)
+        
+        # Thêm nút phóng to (Maximize) và thu nhỏ (Minimize) cho cửa sổ
+        self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowMaximizeButtonHint | Qt.WindowType.WindowMinimizeButtonHint)
+        
         self.setStyleSheet(HISTORY_DIALOG_STYLE)
 
         self._setup_ui()

@@ -60,7 +60,7 @@ class HelpDialog(QDialog):
         
         <h3 style='color: #15346F;'>1. Trạng thái hiển thị bản đồ</h3>
         <ul>
-            <li><b>Chế độ ẩn đồ thị (Mặc định):</b> Bản đồ hiển thị gọn gàng, không bị rối bởi các điểm và đường nối. Chỉ các điểm <i>Bắt đầu</i> và <i>Đích</i> đang được chọn mới được ghim lên bản đồ. Đây là chế độ thích hợp để xem tổng quan.</li>
+            <li><b>Chế độ ẩn đồ thị:</b> Bản đồ hiển thị gọn gàng, không bị rối bởi các điểm và đường nối. Chỉ các điểm <i>Bắt đầu</i> và <i>Đích</i> đang được chọn mới được ghim lên bản đồ. Đây là chế độ thích hợp để xem tổng quan.</li>
             <li><b>Chế độ hiện đồ thị:</b> Nhấn nút <b>◉</b> ở góc dưới bên trái màn hình bản đồ để hiện toàn bộ các điểm (node) và đường đi (edge). Ở chế độ này, bạn có thể thấy rõ cấu trúc các con đường nội bộ trong trường.</li>
         </ul>
 
@@ -96,5 +96,11 @@ class HelpDialog(QDialog):
             <li>Sử dụng nút <b>⏱</b> (góc dưới bên trái) để tùy chỉnh tốc độ chạy thuật toán (Chậm/Trung bình/Nhanh).</li>
             <li>Sau khi tìm thấy đường đi tối ưu, bạn có thể nhấn nút <b>▶</b> (Đi mẫu) để xem nhân vật (avatar) di chuyển dọc theo lộ trình.</li>
             <li>Bạn có thể xem lại lịch sử các lần tìm đường đã lưu bằng cách nhấn nút <b>H</b> (Lịch sử).</li>
+        </ul>
+
+        <h3 style='color: #15346F;'>5. Lưu ý về thời gian xử lý</h3>
+        <ul>
+            <li><b>Ở chế độ không hiển thị đồ thị:</b> Vòng lặp thuật toán chạy liên tục không ngắt quãng. Dữ liệu luôn sẵn sàng trong CPU Cache giúp thuật toán chạy với tốc độ tối đa.</li>
+            <li><b>Ở chế độ hiển thị đồ thị:</b> Lệnh thuật toán chạy ngắt quãng theo nhịp của QTimer. Sự hao hụt thời gian do chuyển đổi ngữ cảnh Hệ điều hành (Context Switching) và trễ bộ nhớ đệm (Cache Miss) sau mỗi nhịp nghỉ sẽ khiến thời gian đo đạc CPU bị độn lên thêm một chút.</li>
         </ul>
         """

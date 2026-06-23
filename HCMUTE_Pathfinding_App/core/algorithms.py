@@ -1,6 +1,8 @@
 # Cài đặt 5 thuật toán tìm kiếm: BFS, DFS, UCS, Greedy, A*
-# Mỗi thuật toán là generator yield từng bước để mô phỏng trực quan
-# Mỗi bước yield dict chứa: current, visited, frontier, path, cost, log
+# Mỗi thuật toán là generator yield từng bước để mô phỏng trực quan.
+# Mỗi bước yield dict chứa: current, visited, frontier, path, cost, log.
+
+
 
 import heapq
 import time
@@ -25,7 +27,6 @@ def _make_step(current: str, visited: list, frontier: list,
 
 
 def _reconstruct_path(parent: Dict[str, str], start: str, goal: str) -> List[str]:
-    #Truy ngược đường đi từ goal về start sử dụng mảng parent
     path = []
     current = goal
     while current is not None:
@@ -36,9 +37,7 @@ def _reconstruct_path(parent: Dict[str, str], start: str, goal: str) -> List[str
     return path[::-1]
 
 
-# ──────────────────────────────────────────────────────────────
-# 1. BFS - Tìm kiếm theo chiều rộng (hàng đợi FIFO)
-# ──────────────────────────────────────────────────────────────
+
 
 def bfs(graph: Graph, start: str, goal: str) -> Generator:
     if not graph.node_exists(start) or not graph.node_exists(goal):
@@ -95,9 +94,7 @@ def bfs(graph: Graph, start: str, goal: str) -> Generator:
                     f"đến {graph.get_node_name(goal)}")
 
 
-# ──────────────────────────────────────────────────────────────
-# 2. DFS - Tìm kiếm theo chiều sâu (ngăn xếp LIFO)
-# ──────────────────────────────────────────────────────────────
+
 
 def dfs(graph: Graph, start: str, goal: str) -> Generator:
     if not graph.node_exists(start) or not graph.node_exists(goal):
@@ -159,9 +156,7 @@ def dfs(graph: Graph, start: str, goal: str) -> Generator:
                     f"đến {graph.get_node_name(goal)}")
 
 
-# ──────────────────────────────────────────────────────────────
-# 3. UCS - Tìm kiếm chi phí đồng nhất (priority queue theo g(n))
-# ──────────────────────────────────────────────────────────────
+
 
 def ucs(graph: Graph, start: str, goal: str) -> Generator:
     if not graph.node_exists(start) or not graph.node_exists(goal):
@@ -226,9 +221,7 @@ def ucs(graph: Graph, start: str, goal: str) -> Generator:
                     f"đến {graph.get_node_name(goal)}")
 
 
-# ──────────────────────────────────────────────────────────────
-# 4. Greedy - Tìm kiếm tham lam (priority queue theo h(n))
-# ──────────────────────────────────────────────────────────────
+
 
 def greedy_search(graph: Graph, start: str, goal: str,
                   heuristic_func: Optional[Callable[..., Any]] = None) -> Generator:
@@ -300,9 +293,7 @@ def greedy_search(graph: Graph, start: str, goal: str,
                     f"đến {graph.get_node_name(goal)}")
 
 
-# ──────────────────────────────────────────────────────────────
-# 5. A* - Kết hợp g(n) + h(n), đảm bảo tối ưu khi h admissible
-# ──────────────────────────────────────────────────────────────
+
 
 def astar(graph: Graph, start: str, goal: str,
           heuristic_func: Optional[Callable[..., Any]] = None) -> Generator:
