@@ -1,4 +1,4 @@
-"""Canvas hiển thị/chỉnh sửa ảnh, graph và marker của bản đồ con."""
+# Canvas hiển thị/chỉnh sửa ảnh, graph và marker của bản đồ con
 
 from __future__ import annotations
 
@@ -323,9 +323,7 @@ class SubMapWidget(QGraphicsView):
             a, b = self._node_items[source].pos(), self._node_items[target].pos()
             line.setLine(a.x(), a.y(), b.x(), b.y())
 
-    # ──────────────────────────────────────────────────────────────
-    # Hỗ trợ Vẽ thuật toán tìm đường (Tương thích MapWidget)
-    # ──────────────────────────────────────────────────────────────
+
 
     def update_state(self, visited: List[str], frontier: List[str], current: Optional[str] = None) -> None:
         for nid, item in self._node_items.items():

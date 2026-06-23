@@ -30,7 +30,6 @@ from ui.map_widget import MapWidget
 
 
 class EditableMapWidget(MapWidget):
-    # MapWidget có click vùng trống để chỉnh sửa trực quan
 
     map_clicked = pyqtSignal(float, float)
 

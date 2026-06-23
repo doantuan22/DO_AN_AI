@@ -29,9 +29,6 @@ from ui.help_dialog import HelpDialog
 from widgets.sub_map_widget import SubMapWidget
 
 
-# ──────────────────────────────────────────────────────────────
-# Stylesheet cho MainWindow - Phong cách Google Maps 
-# ──────────────────────────────────────────────────────────────
 
 MAIN_WINDOW_STYLE = """
     QMainWindow {
@@ -173,7 +170,6 @@ class MainWindow(QMainWindow):
         root_layout.setContentsMargins(0, 0, 0, 0)
         root_layout.setSpacing(0)
         
-        # ── Rail trái giống UI demo ──
         side_rail = QFrame()
         side_rail.setObjectName("sideRail")
         side_rail.setFixedWidth(82)

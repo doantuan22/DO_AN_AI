@@ -1,8 +1,4 @@
-"""Trình chỉnh sửa graph, marker và góc xoay của một bản đồ con.
-
-Hỗ trợ thao tác trực quan trên bản đồ (click thêm node, click 2 node để
-thêm/xóa cạnh, ...) giống GraphEditorDialog của bản đồ chính.
-"""
+# Trình chỉnh sửa graph, marker và góc xoay của một bản đồ con
 
 from __future__ import annotations
 
@@ -34,9 +30,6 @@ from services.sub_map_store import SubMapStore
 from widgets.sub_map_widget import SubMapWidget
 
 
-# ──────────────────────────────────────────────────────────────
-# Mapping chế độ hiển thị → interaction mode nội bộ
-# ──────────────────────────────────────────────────────────────
 
 _MODE_LABELS = [
     "Di chuyển bản đồ",
@@ -60,7 +53,7 @@ _MODE_KEYS = [
 
 
 class SubMapEditorDialog(QDialog):
-    """Dialog chỉnh sửa bản đồ con với thao tác trực quan trên bản đồ."""
+    # Dialog chỉnh sửa bản đồ con với thao tác trực quan trên bản đồ
 
     def __init__(self, sub_map_id: str, store: SubMapStore, parent=None):
         super().__init__(parent)
@@ -94,9 +87,6 @@ class SubMapEditorDialog(QDialog):
         self._setup_ui()
         self._reload_all()
 
-    # ──────────────────────────────────────────────────
-    # Setup UI
-    # ──────────────────────────────────────────────────
 
     def _setup_ui(self):
         root = QHBoxLayout(self)
@@ -319,9 +309,6 @@ class SubMapEditorDialog(QDialog):
 
         return box
 
-    # ──────────────────────────────────────────────────
-    # Reload dữ liệu
-    # ──────────────────────────────────────────────────
 
     def _reload_all(self):
         """Tải lại table, bản đồ và đồng bộ trạng thái."""
@@ -367,9 +354,7 @@ class SubMapEditorDialog(QDialog):
                 )
         self.edge_table.blockSignals(False)
 
-    # ──────────────────────────────────────────────────
-    # Chế độ thao tác
-    # ──────────────────────────────────────────────────
+
 
     def _on_mode_changed(self, index: int):
         self._edge_pick_first = None
@@ -387,9 +372,7 @@ class SubMapEditorDialog(QDialog):
             return _MODE_KEYS[index]
         return "select"
 
-    # ──────────────────────────────────────────────────
-    # Click trên bản đồ — xử lý theo mode
-    # ──────────────────────────────────────────────────
+
 
     def _on_visual_node_clicked(self, node_id: str):
         """Xử lý click vào node trên bản đồ theo chế độ hiện tại."""
@@ -432,9 +415,7 @@ class SubMapEditorDialog(QDialog):
         else:
             self.status_label.setText(f"Vị trí nhấp: x={x_r}, y={y_r}")
 
-    # ──────────────────────────────────────────────────
-    # Node kéo (drag) trên bản đồ
-    # ──────────────────────────────────────────────────
+
 
     def _on_node_dragged(self, node_id: str, x: float, y: float):
         """Cập nhật tọa độ node khi kéo (mode select)."""
@@ -457,9 +438,7 @@ class SubMapEditorDialog(QDialog):
             self.visual_x_label.setText(str(round(x, 1)))
             self.visual_y_label.setText(str(round(y, 1)))
 
-    # ──────────────────────────────────────────────────
-    # Chọn node
-    # ──────────────────────────────────────────────────
+
 
     def _select_node(self, node_id: str):
         """Chọn một node và cập nhật tất cả UI liên quan."""
@@ -494,9 +473,7 @@ class SubMapEditorDialog(QDialog):
         self.visual_x_label.setText("—")
         self.visual_y_label.setText("—")
 
-    # ──────────────────────────────────────────────────
-    # Thao tác thêm node
-    # ──────────────────────────────────────────────────
+
 
     def _add_node_at(self, x: float, y: float):
         """Thêm node mới tại tọa độ (x, y) từ click bản đồ."""
@@ -533,9 +510,7 @@ class SubMapEditorDialog(QDialog):
                 return candidate
             index += 1
 
-    # ──────────────────────────────────────────────────
-    # Thao tác di chuyển node
-    # ──────────────────────────────────────────────────
+
 
     def _move_selected_node_to(self, x: float, y: float):
         """Di chuyển node đã chọn đến vị trí mới."""
@@ -567,9 +542,7 @@ class SubMapEditorDialog(QDialog):
         self._reload_all()
         self._select_node(self._selected_node_id)
 
-    # ──────────────────────────────────────────────────
-    # Thao tác đổi tên node
-    # ──────────────────────────────────────────────────
+
 
     def _rename_selected_node(self):
         if not self._selected_node_id:
@@ -611,9 +584,6 @@ class SubMapEditorDialog(QDialog):
         if self._selected_node_id:
             self._select_node(self._selected_node_id)
 
-    # ──────────────────────────────────────────────────
-    # Thao tác xóa node
-    # ──────────────────────────────────────────────────
 
     def _delete_node_by_id(self, node_id: str):
         """Xóa node và tất cả cạnh liên quan."""
@@ -641,9 +611,6 @@ class SubMapEditorDialog(QDialog):
         self.status_label.setText(f"Đã xóa nút {node_id}")
         self._reload_all()
 
-    # ──────────────────────────────────────────────────
-    # Thao tác thêm/xóa cạnh bằng 2 lần nhấp
-    # ──────────────────────────────────────────────────
 
     def _pick_edge_node(self, node_id: str, create: bool):
         """Chọn lần lượt 2 node để thêm hoặc xóa cạnh."""
@@ -692,9 +659,6 @@ class SubMapEditorDialog(QDialog):
 
         self._reload_all()
 
-    # ──────────────────────────────────────────────────
-    # Table selection → đồng bộ
-    # ──────────────────────────────────────────────────
 
     def _on_node_table_selected(self):
         row = self.node_table.currentRow()
@@ -716,9 +680,7 @@ class SubMapEditorDialog(QDialog):
                 f"(trọng số: {edge.get('weight', '?')})"
             )
 
-    # ──────────────────────────────────────────────────
-    # Transform (xoay, entry position)
-    # ──────────────────────────────────────────────────
+
 
     def _quick_rotate(self, delta):
         self.rotation_spin.setValue(
@@ -733,9 +695,7 @@ class SubMapEditorDialog(QDialog):
             entry_node["y"] = self.entry["y"]
             self.map_widget.refresh_graph(self.graph)
 
-    # ──────────────────────────────────────────────────
-    # Lưu
-    # ──────────────────────────────────────────────────
+
 
     def _save(self):
         try:
@@ -752,9 +712,6 @@ class SubMapEditorDialog(QDialog):
         except Exception as exc:
             QMessageBox.warning(self, "Không thể lưu", str(exc))
 
-    # ──────────────────────────────────────────────────
-    # Helpers
-    # ──────────────────────────────────────────────────
 
     def _find_node(self, node_id: str) -> Optional[Dict[str, Any]]:
         for node in self.graph.get("nodes", []):

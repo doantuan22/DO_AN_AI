@@ -9,7 +9,7 @@ from PyQt6.QtGui import QFont
 from ui.welcome_screen import WelcomeScreen
 
 
-# Hàm main: cấu hình app và khởi động giao diện
+# cấu hình app và khởi động giao diện
 def main():
     app = QApplication(sys.argv)
     

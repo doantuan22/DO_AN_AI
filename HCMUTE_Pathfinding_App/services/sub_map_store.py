@@ -1,4 +1,4 @@
-"""Kho dữ liệu metadata, ảnh và graph dành riêng cho bản đồ con."""
+# Kho dữ liệu metadata, ảnh và graph dành riêng cho bản đồ con
 
 from __future__ import annotations
 
@@ -31,7 +31,7 @@ class SubMap:
 
 
 class SubMapStore:
-    """Quản lý index và tài nguyên của các bản đồ con trong project."""
+    # Quản lý index và tài nguyên của các bản đồ con trong project
 
     def __init__(self, base_dir: str):
         self.base_dir = Path(base_dir).resolve()

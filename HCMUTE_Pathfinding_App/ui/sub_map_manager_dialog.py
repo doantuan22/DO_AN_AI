@@ -1,4 +1,4 @@
-"""Dialog quản lý bản đồ con bằng cách chọn node trực tiếp trên bản đồ chính."""
+# Dialog quản lý bản đồ con bằng cách chọn node trực tiếp trên bản đồ chính
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Dialog xem bản đồ chi tiết và chọn tầng."""
+# Dialog xem bản đồ chi tiết và chọn tầng
 
 from PyQt6.QtWidgets import QComboBox, QDialog, QHBoxLayout, QLabel, QMessageBox, QPushButton, QVBoxLayout
 

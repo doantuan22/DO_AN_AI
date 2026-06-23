@@ -1,4 +1,4 @@
-# Hiện thị bannner độc lập 
+# Hiện thị bannner 
 
 import os
 

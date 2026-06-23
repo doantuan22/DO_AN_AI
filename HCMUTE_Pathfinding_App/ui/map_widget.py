@@ -22,9 +22,7 @@ from PyQt6.QtGui import (
 from core.graph import Graph
 
 
-# ──────────────────────────────────────────────────────────────
-# Bảng màu hiển thị
-# ──────────────────────────────────────────────────────────────
+
 
 class MapColors:
     # Định nghĩa hệ màu cho bản đồ
@@ -75,9 +73,6 @@ def get_node_icon(name: str) -> str:
     return "🏫"
 
 
-# ──────────────────────────────────────────────────────────────
-# MapPinTooltip - Bong bóng ghim mốc Start/Goal cực đẹp
-# ──────────────────────────────────────────────────────────────
 
 class MapPinTooltip(QGraphicsPathItem):
     # Bong bóng hiển thị thông tin BẮT ĐẦU / ĐÍCH trên bản đồ
@@ -144,9 +139,6 @@ class MapPinTooltip(QGraphicsPathItem):
         self.text_item.setPos(-w / 2, -h - 8 + 5)
 
 
-# ──────────────────────────────────────────────────────────────
-# Node Item - Đại diện cho một node trên bản đồ
-# ──────────────────────────────────────────────────────────────
 
 class NodeItem(QGraphicsEllipseItem):
     # Node Item: đại diện cho 1 node trên bản đồ
@@ -255,9 +247,6 @@ class PulseRing(QGraphicsEllipseItem):
         return self.frame >= self.max_frames
 
 
-# ──────────────────────────────────────────────────────────────
-# Map Widget chính
-# ──────────────────────────────────────────────────────────────
 
 class MapWidget(QGraphicsView):
     # Widget hiển thị bản đồ HCMUTE với các control nổi cố định
@@ -889,9 +878,6 @@ class MapWidget(QGraphicsView):
             text.setVisible(not self._graph_overlay_hidden)
             self._label_items.append(text)
             
-    # ──────────────────────────────────────────────────
-    # Các hàm Zoom thủ công & Reset
-    # ──────────────────────────────────────────────────
     
     def zoom_in(self):
         self.scale(1.2, 1.2)
@@ -924,9 +910,6 @@ class MapWidget(QGraphicsView):
         # Trả về cấu hình hiển thị cạnh hiện tại
         return self._edge_visible, self._edge_width, self._edge_opacity
 
-    # ──────────────────────────────────────────────────
-    # Xử lý Click chọn địa điểm
-    # ──────────────────────────────────────────────────
     
     def mousePressEvent(self, event: QMouseEvent | None):
         if event is None:
@@ -1566,9 +1549,7 @@ class MapWidget(QGraphicsView):
         self.clear_path()
         self._sync_graph_overlay_visibility()
 
-    # ──────────────────────────────────────────────────
-    # Định vị các widget nổi khi resize
-    # ──────────────────────────────────────────────────
+
     
     def resizeEvent(self, event: QResizeEvent | None):
         # Tự động giữ tỷ lệ fit view bản đồ và cố định góc các widget điều khiển nổi
@@ -1640,9 +1621,6 @@ class MapWidget(QGraphicsView):
                 x += self._history_button.width() + 10
             self._graph_edit_button.move(x, bottom_y)
 
-    # ──────────────────────────────────────────────────
-    # Sub-map Entry Button Overlay
-    # ──────────────────────────────────────────────────
     
     def show_submap_button(self, node_id: str, node_name: str, callback):
         self.hide_submap_button()

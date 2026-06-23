@@ -2,7 +2,7 @@ import sys
 import os
 import time
 
-# Add current directory to path so we can import core
+
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from core.graph import Graph
@@ -22,8 +22,6 @@ def run():
     for name, func in ALGORITHM_MAP.items():
         print(f"--- Running {name} ---")
         
-        # We need to measure how long it takes to process all steps
-        # Using time.perf_counter for higher precision
         start_time = time.perf_counter()
         
         generator = func(graph, start_node, goal_node)
@@ -33,7 +31,6 @@ def run():
         
         duration_ms = (end_time - start_time) * 1000
         
-        # The last step has the final result
         last_step = steps[-1]
         
         if "✅" in last_step["log"]:

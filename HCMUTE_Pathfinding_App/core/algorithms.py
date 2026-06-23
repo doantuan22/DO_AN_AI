@@ -2,8 +2,6 @@
 # Mỗi thuật toán là generator yield từng bước để mô phỏng trực quan.
 # Mỗi bước yield dict chứa: current, visited, frontier, path, cost, log.
 
-
-
 import heapq
 import time
 from collections import deque
@@ -168,7 +166,7 @@ def ucs(graph: Graph, start: str, goal: str) -> Generator:
                         f"✅ Điểm bắt đầu trùng điểm đích: {graph.get_node_name(start)}")
         return
     
-    # Priority queue: (cost, counter, node_id)
+    # Priority queue: cost, counter, node_id
     # counter phá vỡ tie-breaking khi cost bằng nhau
     counter = 0
     pq: list[tuple[float, int, str]] = [(0.0, counter, start)]

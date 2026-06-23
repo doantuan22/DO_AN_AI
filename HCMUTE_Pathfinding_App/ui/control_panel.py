@@ -14,9 +14,6 @@ from typing import Optional
 from core.utils import format_time_ms, get_timestamp
 
 
-# ──────────────────────────────────────────────────────────────
-# Stylesheet chung - Phong cách Google Material / Glassmorphism 
-# ──────────────────────────────────────────────────────────────
 
 PANEL_STYLESHEET = """
     QWidget#controlPanel {
@@ -333,7 +330,7 @@ class ControlPanel(QWidget):
         main_layout.addWidget(lbl_heur)
         main_layout.addWidget(self.heuristic_combo)
         
-        # ── 2.5 Lựa chọn điểm xuất phát & đích ──
+        # ── 2.5 Lựa chọn điểm xuất phát và đích ──
         lbl_points = QLabel("Chọn điểm (Nhấn bản đồ hoặc danh sách)")
         lbl_points.setFont(QFont("Segoe UI", 9, QFont.Weight.Bold))
         lbl_points.setStyleSheet("color: #70757A; margin-top: 2px;")
@@ -423,7 +420,7 @@ class ControlPanel(QWidget):
         main_layout.addWidget(lbl_points)
         main_layout.addWidget(points_widget)
         
-        # ── 3. Điều khiển ── (1 hàng 4 nút theo UI Demo)
+        # ── 3. Điều khiển ── (1 hàng 4 nút)
         lbl_ctrl = QLabel("3. Điều khiển")
         lbl_ctrl.setProperty("class", "sectionHeader")
         
@@ -464,7 +461,6 @@ class ControlPanel(QWidget):
         lbl_log.setProperty("class", "sectionHeader")
         self.log_text = QTextEdit()
         self.log_text.setReadOnly(True)
-        # Để log chiếm toàn bộ không gian co giãn linh hoạt
         self.log_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.log_text.setMinimumHeight(190)
         
@@ -534,7 +530,6 @@ class ControlPanel(QWidget):
         return {"frame": frame, "title": title_label, "value": value_label, "icon": icon_label}
     
     def _setup_button_icons(self):
-        # Dùng icon native Qt 
         self._icon_play = self._standard_icon("SP_MediaPlay", "SP_ArrowRight")
         self._icon_pause = self._standard_icon("SP_MediaPause", "SP_TitleBarMinButton")
         self._icon_stop = self._standard_icon("SP_MediaStop", "SP_DialogCancelButton")
@@ -573,9 +568,6 @@ class ControlPanel(QWidget):
             self.btn_pause.setText("Tạm dừng")
             self.btn_pause.setIcon(self._icon_pause)
     
-    # ──────────────────────────────────────────────────
-    # Các phương thức cập nhật giao diện
-    # ──────────────────────────────────────────────────
     
     def populate_node_combos(self, nodes: list):
         # Điền danh sách node vào combo box
@@ -592,7 +584,7 @@ class ControlPanel(QWidget):
             self.goal_combo.addItem(display, node_id)
             
     def set_mode_submap(self, sub_nodes: list, entry_id: str = "__entry__"):
-        """Chuyển panel sang chế độ bản đồ con (khóa Start)."""
+        # Chuyển panel sang chế độ bản đồ con
         self.start_combo.clear()
         self.start_combo.addItem("[Cổng vào] Bạn đang ở đây", entry_id)
         self.start_combo.setEnabled(False)
@@ -764,9 +756,6 @@ class ControlPanel(QWidget):
         # Trả về tên heuristic đang chọn
         return self.heuristic_combo.currentText()
     
-    # ──────────────────────────────────────────────────
-    # Trạng thái các nút điều khiển
-    # ──────────────────────────────────────────────────
     
     def set_running_state(self, running: bool):
         # Vô hiệu hóa/bật các widget khi thuật toán đang chạy
